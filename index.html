@@ -4,394 +4,1184 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Motodo — Marketplace Motor Custom</title>
+
+  <title>Motodo — Marketplace Motor Custom Indonesia</title>
 
   <style>
+
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #1769e0;
+      --blue-dark: #0b3b82;
+      --blue-light: #eaf2ff;
+
+      --navy: #0f172a;
+
+      --background: #f5f8fc;
+      --white: #ffffff;
+
+      --gray: #64748b;
+      --gray-light: #94a3b8;
+
+      --border: #e2e8f0;
     }
 
     body {
       font-family: Arial, Helvetica, sans-serif;
-      background: #f5f5f5;
-      color: #222;
+      background: var(--background);
+      color: var(--navy);
     }
 
-    /* NAVBAR */
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+
+    /* =========================
+       NAVBAR
+    ========================= */
+
     nav {
-      height: 64px;
-      background: #111;
-      color: white;
+      height: 72px;
+
+      background: white;
+
+      border-bottom: 1px solid var(--border);
+
       display: flex;
+
       align-items: center;
+
       justify-content: space-between;
-      padding: 0 6%;
+
+      padding: 0 5%;
+
       position: sticky;
+
       top: 0;
-      z-index: 10;
+
+      z-index: 100;
     }
 
     .logo {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -1px;
+      font-size: 28px;
+
+      font-weight: 900;
+
+      letter-spacing: -1.5px;
+
+      color: var(--blue-dark);
     }
 
     .logo span {
-      color: #ff5a1f;
+      color: var(--blue);
     }
 
-    nav ul {
+    .nav-center {
       display: flex;
-      list-style: none;
-      gap: 25px;
+
+      gap: 30px;
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+      color: #334155;
     }
 
-    nav a {
-      color: white;
-      text-decoration: none;
+    .nav-center a:hover {
+      color: var(--blue);
+    }
+
+    .nav-right {
+      display: flex;
+
+      align-items: center;
+
+      gap: 12px;
+    }
+
+    .signin {
+      padding: 10px 15px;
+
       font-size: 14px;
+
+      font-weight: 700;
+
+      color: #334155;
+    }
+
+    .signin:hover {
+      color: var(--blue);
     }
 
     .sell-btn {
-      background: #ff5a1f;
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-weight: bold;
+      background: var(--blue);
+
+      color: white;
+
+      padding: 11px 18px;
+
+      border-radius: 7px;
+
+      font-size: 14px;
+
+      font-weight: 800;
+
+      transition: 0.2s;
     }
 
-    /* HERO */
+    .sell-btn:hover {
+      background: var(--blue-dark);
+    }
+
+
+    /* =========================
+       HERO
+    ========================= */
+
     .hero {
-      background: #171717;
+
+      background:
+        linear-gradient(
+          100deg,
+          rgba(7,31,69,0.95),
+          rgba(15,65,135,0.78)
+        ),
+        url("https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1800&q=85");
+
+      background-size: cover;
+
+      background-position: center;
+
+      min-height: 570px;
+
+      display: flex;
+
+      align-items: center;
+
       color: white;
-      padding: 70px 6%;
     }
 
     .hero-content {
-      max-width: 700px;
+
+      width: 90%;
+
+      max-width: 1200px;
+
+      margin: auto;
     }
 
-    .hero h1 {
-      font-size: 48px;
-      line-height: 1.05;
+    .hero-label {
+
+      color: #8fc2ff;
+
+      font-size: 13px;
+
+      font-weight: 800;
+
+      letter-spacing: 2px;
+
       margin-bottom: 18px;
     }
 
+    .hero h1 {
+
+      font-size: clamp(44px, 6vw, 76px);
+
+      line-height: 0.98;
+
+      letter-spacing: -3px;
+
+      max-width: 750px;
+
+      margin-bottom: 25px;
+    }
+
     .hero h1 span {
-      color: #ff5a1f;
+      color: #66aaff;
     }
 
     .hero p {
-      color: #bbb;
+
+      color: #dbeafe;
+
+      max-width: 600px;
+
       font-size: 17px;
+
       line-height: 1.6;
-      margin-bottom: 30px;
+
+      margin-bottom: 32px;
     }
 
-    .search {
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    .search-box {
+
+      background: white;
+
+      width: 100%;
+
+      max-width: 720px;
+
+      padding: 7px;
+
+      border-radius: 9px;
+
       display: flex;
-      max-width: 650px;
+
+      box-shadow:
+        0 15px 40px rgba(0,0,0,0.2);
     }
 
-    .search input {
+    .search-box input {
+
       flex: 1;
-      padding: 17px;
+
       border: none;
-      border-radius: 7px 0 0 7px;
+
+      outline: none;
+
+      padding: 16px;
+
       font-size: 15px;
+
+      color: var(--navy);
     }
 
-    .search button {
-      padding: 0 25px;
+    .search-box button {
+
       border: none;
-      background: #ff5a1f;
+
+      background: var(--blue);
+
       color: white;
-      font-weight: bold;
-      border-radius: 0 7px 7px 0;
+
+      padding: 0 27px;
+
+      border-radius: 6px;
+
+      font-weight: 800;
+
       cursor: pointer;
     }
 
-    /* CATEGORY */
+    .search-box button:hover {
+      background: var(--blue-dark);
+    }
+
+
+    /* =========================
+       GENERAL
+    ========================= */
+
     .container {
-      width: 88%;
+
+      width: 90%;
+
       max-width: 1200px;
+
       margin: auto;
     }
 
     .section {
-      padding: 45px 0;
+
+      padding: 60px 0;
     }
 
-    .section-title {
+    .section-header {
+
       display: flex;
+
       justify-content: space-between;
+
       align-items: center;
+
       margin-bottom: 25px;
     }
 
-    .section-title h2 {
-      font-size: 25px;
+    .section-header h2 {
+
+      font-size: 27px;
+
+      letter-spacing: -0.5px;
     }
 
-    .section-title a {
-      color: #ff5a1f;
-      text-decoration: none;
+    .see-all {
+
+      color: var(--blue);
+
       font-size: 14px;
-      font-weight: bold;
+
+      font-weight: 800;
     }
+
+
+    /* =========================
+       CATEGORIES
+    ========================= */
 
     .categories {
+
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+
+      grid-template-columns:
+        repeat(4, 1fr);
+
       gap: 15px;
     }
 
     .category {
+
       background: white;
-      padding: 25px 15px;
-      text-align: center;
+
       border-radius: 10px;
+
+      padding: 28px 20px;
+
+      border: 1px solid var(--border);
+
+      transition: 0.25s;
+
       cursor: pointer;
-      transition: 0.2s;
     }
 
     .category:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+
+      transform: translateY(-4px);
+
+      border-color: #9bc3ff;
+
+      box-shadow:
+        0 10px 25px rgba(23,105,224,0.08);
     }
 
     .category-icon {
-      font-size: 35px;
-      margin-bottom: 10px;
+
+      width: 52px;
+
+      height: 52px;
+
+      background: var(--blue-light);
+
+      border-radius: 50%;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      font-size: 25px;
+
+      margin-bottom: 15px;
     }
 
     .category h3 {
-      font-size: 15px;
+
+      font-size: 16px;
+
+      margin-bottom: 5px;
     }
 
-    /* PRODUCTS */
+    .category p {
+
+      font-size: 12px;
+
+      color: var(--gray);
+    }
+
+
+    /* =========================
+       PRODUCTS
+    ========================= */
+
     .products {
+
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+
+      grid-template-columns:
+        repeat(4, 1fr);
+
       gap: 20px;
     }
 
     .card {
+
       background: white;
+
       border-radius: 10px;
+
       overflow: hidden;
-      transition: 0.2s;
+
+      border: 1px solid var(--border);
+
+      transition: 0.25s;
+
+      position: relative;
     }
 
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 7px 25px rgba(0,0,0,0.1);
+
+      transform: translateY(-5px);
+
+      box-shadow:
+        0 15px 35px rgba(15,23,42,0.08);
     }
 
-    .bike-image {
-      height: 190px;
-      background: #ddd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 65px;
+    .bike-photo {
+
+      height: 220px;
+
+      background-size: cover;
+
+      background-position: center;
+
+      position: relative;
+    }
+
+    .favorite {
+
+      position: absolute;
+
+      right: 12px;
+
+      top: 12px;
+
+      width: 36px;
+
+      height: 36px;
+
+      border-radius: 50%;
+
+      border: none;
+
+      background: rgba(255,255,255,0.95);
+
+      cursor: pointer;
+
+      font-size: 18px;
+
+      color: #475569;
+    }
+
+    .favorite:hover {
+      color: var(--blue);
+    }
+
+    .verified {
+
+      position: absolute;
+
+      left: 12px;
+
+      bottom: 12px;
+
+      background: white;
+
+      color: var(--blue-dark);
+
+      padding: 6px 9px;
+
+      border-radius: 5px;
+
+      font-size: 10px;
+
+      font-weight: 900;
     }
 
     .card-body {
-      padding: 17px;
+
+      padding: 18px;
     }
 
     .card-body h3 {
-      font-size: 17px;
-      margin-bottom: 8px;
+
+      font-size: 16px;
+
+      line-height: 1.3;
+
+      margin-bottom: 9px;
     }
 
     .price {
+
       font-size: 18px;
-      font-weight: bold;
-      color: #111;
-      margin-bottom: 10px;
+
+      font-weight: 900;
+
+      margin-bottom: 9px;
+
+      color: var(--navy);
     }
 
     .location {
-      font-size: 13px;
-      color: #777;
-      margin-bottom: 12px;
+
+      font-size: 12px;
+
+      color: var(--gray);
+
+      margin-bottom: 15px;
     }
 
     .seller {
-      border-top: 1px solid #eee;
+
+      border-top: 1px solid var(--border);
+
       padding-top: 12px;
+
       font-size: 12px;
-      color: #666;
+
+      font-weight: 600;
+
+      color: #475569;
     }
 
-    /* CTA */
-    .cta {
-      background: #ff5a1f;
+    .seller span {
+
+      color: #16803c;
+
+      font-weight: 900;
+    }
+
+
+    /* =========================
+       WHY MOTODO
+    ========================= */
+
+    .why {
+
+      background: var(--blue-dark);
+
       color: white;
-      padding: 45px;
-      border-radius: 12px;
-      margin: 20px 0 60px;
-      text-align: center;
+
+      padding: 75px 0;
     }
 
-    .cta h2 {
-      font-size: 30px;
+    .why .section-header h2 {
+      color: white;
+    }
+
+    .why-grid {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(3, 1fr);
+
+      gap: 40px;
+    }
+
+    .why-card {
+
+      padding: 20px 0;
+    }
+
+    .why-number {
+
+      font-size: 13px;
+
+      color: #8fc2ff;
+
+      font-weight: 900;
+
+      margin-bottom: 15px;
+    }
+
+    .why-card h3 {
+
+      font-size: 20px;
+
       margin-bottom: 10px;
     }
 
-    .cta p {
-      margin-bottom: 20px;
+    .why-card p {
+
+      color: #cbd5e1;
+
+      font-size: 14px;
+
+      line-height: 1.6;
     }
 
-    .cta button {
+
+    /* =========================
+       SELLER CTA
+    ========================= */
+
+    .seller-cta {
+
+      margin: 70px 0;
+
       background: white;
-      border: none;
-      padding: 13px 25px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
+
+      border: 1px solid var(--border);
+
+      color: var(--navy);
+
+      padding: 50px;
+
+      border-radius: 12px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 30px;
+
+      box-shadow:
+        0 10px 30px rgba(15,23,42,0.04);
     }
 
-    /* FOOTER */
+    .seller-cta h2 {
+
+      font-size: 31px;
+
+      margin-bottom: 10px;
+    }
+
+    .seller-cta p {
+
+      color: var(--gray);
+
+      font-size: 15px;
+    }
+
+    .seller-cta button {
+
+      background: var(--blue);
+
+      color: white;
+
+      border: none;
+
+      padding: 14px 23px;
+
+      border-radius: 7px;
+
+      font-weight: 900;
+
+      cursor: pointer;
+
+      white-space: nowrap;
+    }
+
+    .seller-cta button:hover {
+      background: var(--blue-dark);
+    }
+
+
+    /* =========================
+       FOOTER
+    ========================= */
+
     footer {
-      background: #111;
-      color: #aaa;
-      padding: 40px 6%;
-      text-align: center;
+
+      background: #071a36;
+
+      color: #94a3b8;
+
+      padding: 55px 5% 30px;
+
       font-size: 13px;
     }
 
-    /* MOBILE */
-    @media (max-width: 800px) {
-      nav ul {
+    .footer-top {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      gap: 40px;
+
+      margin-bottom: 40px;
+    }
+
+    .footer-logo {
+
+      color: white;
+
+      font-size: 24px;
+
+      font-weight: 900;
+    }
+
+    .footer-logo span {
+      color: #66aaff;
+    }
+
+    .footer-links {
+
+      display: flex;
+
+      gap: 60px;
+    }
+
+    .footer-links div {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 10px;
+    }
+
+    .footer-links strong {
+      color: white;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .copyright {
+
+      border-top: 1px solid rgba(255,255,255,0.1);
+
+      padding-top: 25px;
+    }
+
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+      .nav-center {
         display: none;
       }
 
-      .hero h1 {
-        font-size: 36px;
-      }
-
       .categories {
-        grid-template-columns: repeat(2, 1fr);
+
+        grid-template-columns:
+          repeat(2, 1fr);
       }
 
       .products {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
 
-    @media (max-width: 500px) {
-      .products {
+        grid-template-columns:
+          repeat(2, 1fr);
+      }
+
+      .why-grid {
+
         grid-template-columns: 1fr;
       }
 
-      .search input {
-        width: 100%;
+      .seller-cta {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+      }
+
+      .footer-top {
+
+        flex-direction: column;
       }
     }
+
+
+    @media (max-width: 550px) {
+
+      nav {
+
+        padding: 0 4%;
+      }
+
+      .logo {
+
+        font-size: 23px;
+      }
+
+      .sell-btn {
+
+        display: none;
+      }
+
+      .signin {
+
+        font-size: 13px;
+      }
+
+      .hero {
+
+        min-height: 540px;
+      }
+
+      .hero h1 {
+
+        font-size: 46px;
+
+        letter-spacing: -2px;
+      }
+
+      .hero p {
+
+        font-size: 15px;
+      }
+
+      .search-box {
+
+        flex-direction: column;
+
+        background: transparent;
+
+        box-shadow: none;
+
+        gap: 8px;
+      }
+
+      .search-box input {
+
+        border-radius: 7px;
+
+        padding: 16px;
+      }
+
+      .search-box button {
+
+        padding: 15px;
+
+        border-radius: 7px;
+      }
+
+      .categories {
+
+        grid-template-columns:
+          1fr 1fr;
+
+        gap: 10px;
+      }
+
+      .category {
+
+        padding: 20px 15px;
+      }
+
+      .products {
+
+        grid-template-columns: 1fr;
+      }
+
+      .bike-photo {
+
+        height: 250px;
+      }
+
+      .section {
+
+        padding: 45px 0;
+      }
+
+      .section-header h2 {
+
+        font-size: 22px;
+      }
+
+      .seller-cta {
+
+        padding: 35px 25px;
+      }
+
+      .seller-cta h2 {
+
+        font-size: 25px;
+      }
+
+      .footer-links {
+
+        flex-direction: column;
+
+        gap: 25px;
+      }
+
+    }
+
   </style>
 </head>
 
+
 <body>
 
-  <!-- NAVBAR -->
+
+  <!-- =========================
+       NAVBAR
+  ========================= -->
+
   <nav>
-    <div class="logo">Moto<span>do</span></div>
 
-    <ul>
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Motor Custom</a></li>
-      <li><a href="#">Dealer</a></li>
-      <li><a href="#">Tentang</a></li>
-    </ul>
+    <a href="#" class="logo">
+      Moto<span>do</span>
+    </a>
 
-    <a href="#" class="sell-btn">Jual Motor</a>
+
+    <div class="nav-center">
+
+      <a href="#">
+        Explore
+      </a>
+
+      <a href="#">
+        Motor Custom
+      </a>
+
+      <a href="#">
+        Builder
+      </a>
+
+      <a href="#">
+        Tentang Motodo
+      </a>
+
+    </div>
+
+
+    <div class="nav-right">
+
+      <a href="#" class="signin">
+        Sign In
+      </a>
+
+      <a href="#" class="sell-btn">
+        + Jual Motor
+      </a>
+
+    </div>
+
   </nav>
 
-  <!-- HERO -->
+
+
+  <!-- =========================
+       HERO
+  ========================= -->
+
   <section class="hero">
+
     <div class="hero-content">
+
+      <div class="hero-label">
+
+        CUSTOM MOTORCYCLE MARKETPLACE
+
+      </div>
+
+
       <h1>
-        Temukan Motor Custom<br>
-        <span>Impianmu.</span>
+
+        Find Your<br>
+
+        <span>Dream Bike.</span>
+
       </h1>
 
+
       <p>
-        Marketplace khusus motor custom Indonesia.
-        Temukan motor unik dari builder dan dealer terpercaya.
+
+        Temukan motor custom dari builder dan
+        seller terpercaya di seluruh Indonesia.
+
       </p>
 
-      <div class="search">
+
+      <div class="search-box">
+
         <input
           type="text"
-          placeholder="Cari motor, brand, atau builder..."
+          placeholder="Cari motor, model, builder..."
         >
-        <button>Cari</button>
+
+
+        <button>
+
+          Search
+
+        </button>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- CATEGORY -->
+
+
+  <!-- =========================
+       CATEGORIES
+  ========================= -->
+
   <section class="section">
+
     <div class="container">
 
-      <div class="section-title">
-        <h2>Kategori</h2>
-        <a href="#">Lihat semua</a>
+
+      <div class="section-header">
+
+        <h2>
+          Explore by Style
+        </h2>
+
+        <a href="#" class="see-all">
+          Lihat semua →
+        </a>
+
       </div>
+
 
       <div class="categories">
 
-        <div class="category">
-          <div class="category-icon">🏍️</div>
-          <h3>Bobber</h3>
-        </div>
 
         <div class="category">
-          <div class="category-icon">🏍️</div>
-          <h3>Cafe Racer</h3>
+
+          <div class="category-icon">
+            🏍️
+          </div>
+
+          <h3>
+            Cafe Racer
+          </h3>
+
+          <p>
+            24 motorcycles
+          </p>
+
         </div>
 
-        <div class="category">
-          <div class="category-icon">🏍️</div>
-          <h3>Scrambler</h3>
-        </div>
 
         <div class="category">
-          <div class="category-icon">🏍️</div>
-          <h3>Chopper</h3>
+
+          <div class="category-icon">
+            🏍️
+          </div>
+
+          <h3>
+            Scrambler
+          </h3>
+
+          <p>
+            18 motorcycles
+          </p>
+
         </div>
+
+
+        <div class="category">
+
+          <div class="category-icon">
+            🏍️
+          </div>
+
+          <h3>
+            Bobber
+          </h3>
+
+          <p>
+            15 motorcycles
+          </p>
+
+        </div>
+
+
+        <div class="category">
+
+          <div class="category-icon">
+            🏍️
+          </div>
+
+          <h3>
+            Chopper
+          </h3>
+
+          <p>
+            11 motorcycles
+          </p>
+
+        </div>
+
 
       </div>
 
     </div>
+
   </section>
 
-  <!-- PRODUCTS -->
-  <section class="section">
+
+
+  <!-- =========================
+       PRODUCTS
+  ========================= -->
+
+  <section
+    class="section"
+    style="padding-top: 0;"
+  >
 
     <div class="container">
 
-      <div class="section-title">
-        <h2>Motor Custom Terbaru</h2>
-        <a href="#">Lihat semua →</a>
+
+      <div class="section-header">
+
+        <h2>
+          Featured Motorcycles
+        </h2>
+
+        <a href="#" class="see-all">
+          Explore all →
+        </a>
+
       </div>
+
 
       <div class="products">
 
+
+        <!-- PRODUCT 1 -->
+
         <div class="card">
 
-          <div class="bike-image">
-            🏍️
+          <div
+            class="bike-photo"
+            style="
+              background-image:
+              url('https://images.unsplash.com/photo-1558981359-219d6364c9c8?auto=format&fit=crop&w=900&q=85');
+            "
+          >
+
+            <button class="favorite">
+              ♡
+            </button>
+
+            <div class="verified">
+              ✓ VERIFIED SELLER
+            </div>
+
           </div>
+
 
           <div class="card-body">
 
-            <h3>Royal Enfield Classic Custom</h3>
+            <h3>
+              Royal Enfield Classic Custom
+            </h3>
 
             <div class="price">
               Rp 85.000.000
@@ -402,7 +1192,8 @@
             </div>
 
             <div class="seller">
-              Builder: Custom Works Jakarta
+              Custom Works Jakarta
+              <span>✓</span>
             </div>
 
           </div>
@@ -410,15 +1201,35 @@
         </div>
 
 
+
+        <!-- PRODUCT 2 -->
+
         <div class="card">
 
-          <div class="bike-image">
-            🏍️
+          <div
+            class="bike-photo"
+            style="
+              background-image:
+              url('https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=900&q=85');
+            "
+          >
+
+            <button class="favorite">
+              ♡
+            </button>
+
+            <div class="verified">
+              ✓ VERIFIED SELLER
+            </div>
+
           </div>
+
 
           <div class="card-body">
 
-            <h3>Kawasaki W175 Scrambler</h3>
+            <h3>
+              Kawasaki W175 Scrambler
+            </h3>
 
             <div class="price">
               Rp 72.500.000
@@ -429,7 +1240,8 @@
             </div>
 
             <div class="seller">
-              Builder: Moto Garage
+              Moto Garage
+              <span>✓</span>
             </div>
 
           </div>
@@ -437,15 +1249,35 @@
         </div>
 
 
+
+        <!-- PRODUCT 3 -->
+
         <div class="card">
 
-          <div class="bike-image">
-            🏍️
+          <div
+            class="bike-photo"
+            style="
+              background-image:
+              url('https://images.unsplash.com/photo-1558980394-0c7f2c9c6f3f?auto=format&fit=crop&w=900&q=85');
+            "
+          >
+
+            <button class="favorite">
+              ♡
+            </button>
+
+            <div class="verified">
+              ✓ VERIFIED SELLER
+            </div>
+
           </div>
+
 
           <div class="card-body">
 
-            <h3>Honda CB Custom Cafe Racer</h3>
+            <h3>
+              Honda CB Cafe Racer
+            </h3>
 
             <div class="price">
               Rp 65.000.000
@@ -456,7 +1288,8 @@
             </div>
 
             <div class="seller">
-              Builder: Bandung Custom
+              Bandung Custom
+              <span>✓</span>
             </div>
 
           </div>
@@ -464,15 +1297,35 @@
         </div>
 
 
+
+        <!-- PRODUCT 4 -->
+
         <div class="card">
 
-          <div class="bike-image">
-            🏍️
+          <div
+            class="bike-photo"
+            style="
+              background-image:
+              url('https://images.unsplash.com/photo-1558980664-10ea7b5b2a2f?auto=format&fit=crop&w=900&q=85');
+            "
+          >
+
+            <button class="favorite">
+              ♡
+            </button>
+
+            <div class="verified">
+              ✓ VERIFIED SELLER
+            </div>
+
           </div>
+
 
           <div class="card-body">
 
-            <h3>Yamaha XSR Custom</h3>
+            <h3>
+              Yamaha XSR Custom
+            </h3>
 
             <div class="price">
               Rp 78.000.000
@@ -483,12 +1336,14 @@
             </div>
 
             <div class="seller">
-              Builder: XSR Garage
+              XSR Garage
+              <span>✓</span>
             </div>
 
           </div>
 
         </div>
+
 
       </div>
 
@@ -497,31 +1352,217 @@
   </section>
 
 
-  <!-- SELLER CTA -->
 
-  <section class="container">
+  <!-- =========================
+       WHY MOTODO
+  ========================= -->
 
-    <div class="cta">
+  <section class="why">
 
-      <h2>Punya Motor Custom?</h2>
+    <div class="container">
 
-      <p>
-        Jual motor custom kamu kepada calon pembeli
-        di seluruh Indonesia.
-      </p>
 
-      <button>Mulai Jual Motor</button>
+      <div class="section-header">
+
+        <h2>
+          Why Motodo?
+        </h2>
+
+      </div>
+
+
+      <div class="why-grid">
+
+
+        <div class="why-card">
+
+          <div class="why-number">
+            01
+          </div>
+
+          <h3>
+            Verified Sellers
+          </h3>
+
+          <p>
+
+            Setiap seller akan melalui proses
+            verifikasi sebelum dapat menjual
+            motor di Motodo.
+
+          </p>
+
+        </div>
+
+
+
+        <div class="why-card">
+
+          <div class="why-number">
+            02
+          </div>
+
+          <h3>
+            Built for Custom
+          </h3>
+
+          <p>
+
+            Fokus pada motor custom sehingga
+            buyer dapat menemukan motor yang
+            benar-benar sesuai karakter mereka.
+
+          </p>
+
+        </div>
+
+
+
+        <div class="why-card">
+
+          <div class="why-number">
+            03
+          </div>
+
+          <h3>
+            Transparent Marketplace
+          </h3>
+
+          <p>
+
+            Informasi motor, seller, harga,
+            lokasi dan detail kendaraan
+            ditampilkan secara transparan.
+
+          </p>
+
+        </div>
+
+
+      </div>
 
     </div>
 
   </section>
 
 
-  <!-- FOOTER -->
+
+  <!-- =========================
+       SELLER CTA
+  ========================= -->
+
+  <section class="container">
+
+    <div class="seller-cta">
+
+
+      <div>
+
+        <h2>
+          Punya Motor Custom?
+        </h2>
+
+        <p>
+
+          Bergabung sebagai seller dan
+          tampilkan motor kamu kepada
+          calon buyer di Indonesia.
+
+        </p>
+
+      </div>
+
+
+      <button>
+        Daftar sebagai Seller →
+      </button>
+
+
+    </div>
+
+  </section>
+
+
+
+  <!-- =========================
+       FOOTER
+  ========================= -->
 
   <footer>
 
-    © 2026 Motodo. Marketplace Motor Custom Indonesia.
+
+    <div class="footer-top">
+
+
+      <div>
+
+        <div class="footer-logo">
+          Moto<span>do</span>
+        </div>
+
+        <p style="margin-top: 12px;">
+          Marketplace motor custom Indonesia.
+        </p>
+
+      </div>
+
+
+      <div class="footer-links">
+
+
+        <div>
+
+          <strong>
+            Marketplace
+          </strong>
+
+          <a href="#">
+            Explore Motor
+          </a>
+
+          <a href="#">
+            Builder
+          </a>
+
+          <a href="#">
+            Jual Motor
+          </a>
+
+        </div>
+
+
+        <div>
+
+          <strong>
+            Motodo
+          </strong>
+
+          <a href="#">
+            Tentang Kami
+          </a>
+
+          <a href="#">
+            Contact
+          </a>
+
+          <a href="#">
+            Terms
+          </a>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+
+    <div class="copyright">
+
+      © 2026 Motodo. All rights reserved.
+
+    </div>
+
 
   </footer>
 
