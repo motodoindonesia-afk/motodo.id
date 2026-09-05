@@ -3,7 +3,7 @@ import { cn } from "../../lib/cn"
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode
-  variant?: "primary" | "text"
+  variant?: "primary" | "text" | "secondary"
 }
 
 export function Button({
@@ -21,6 +21,8 @@ export function Button({
         variant === "primary" &&
           "bg-brand px-4 py-2.5 text-white hover:bg-brand-hover",
         variant === "text" && "text-navy hover:text-brand",
+        variant === "secondary" &&
+          "border border-line bg-white px-4 py-2.5 text-navy hover:bg-surface",
         className,
       )}
       {...props}

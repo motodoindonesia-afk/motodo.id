@@ -9,7 +9,7 @@ export function FeaturedListings() {
       <Container>
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-navy sm:text-2xl">Featured Motorcycles</h2>
-          <ViewAllLink href="#browse">View all</ViewAllLink>
+          <ViewAllLink href="/browse">View all</ViewAllLink>
         </div>
         <div className="-mx-5 flex gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3 xl:grid-cols-5">
           {featuredListings.map((listing) => (

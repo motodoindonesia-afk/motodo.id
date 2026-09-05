@@ -1,9 +1,12 @@
 import { ArrowRight } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { heroImage } from "../../data/site"
 import { Button } from "../ui/Button"
 import { Container } from "../layout/Container"
 
 export function Hero() {
+  const navigate = useNavigate()
+
   return (
     <section className="bg-white py-10 sm:py-14 lg:py-16">
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
@@ -14,12 +17,7 @@ export function Hero() {
           <p className="mt-4 text-base leading-relaxed text-navy-muted sm:text-lg">
             Buy and sell custom & premium motorcycles in Indonesia.
           </p>
-          <Button
-            className="mt-7 px-5 py-3"
-            onClick={() => {
-              document.getElementById("browse")?.scrollIntoView({ behavior: "smooth" })
-            }}
-          >
+          <Button className="mt-7 px-5 py-3" onClick={() => navigate("/browse")}>
             Browse Motorcycles
             <ArrowRight className="size-4" aria-hidden="true" />
           </Button>

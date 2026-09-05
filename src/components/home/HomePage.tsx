@@ -1,5 +1,3 @@
-import { Header } from "../layout/Header"
-import { Footer } from "../layout/Footer"
 import { Hero } from "./Hero"
 import { CategoryGrid } from "./CategoryGrid"
 import { FeaturedListings } from "./FeaturedListings"
@@ -14,7 +12,6 @@ export function HomePage() {
       >
         Skip to listings
       </a>
-      <Header />
       <main id="top">
         <Hero />
         <CategoryGrid />
@@ -27,7 +24,6 @@ export function HomePage() {
           Login will be available in a later version.
         </section>
       </main>
-      <Footer />
     </>
   )
 }
