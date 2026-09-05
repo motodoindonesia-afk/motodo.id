@@ -6,5 +6,5 @@ type Props = {
 }
 
 export function ListingCard({ listing }: Props) {
-  return <MotorcycleCard listing={listing} />
+  return <MotorcycleCard listing={listing} href={`/motorcycles/${listing.id}`} />
 }

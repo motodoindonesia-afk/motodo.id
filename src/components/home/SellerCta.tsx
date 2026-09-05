@@ -1,8 +1,11 @@
 import { ArrowRight } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { Button } from "../ui/Button"
 import { Container } from "../layout/Container"
 
 export function SellerCta() {
+  const navigate = useNavigate()
+
   return (
     <section id="sell" className="pb-16 sm:pb-20">
       <Container>
@@ -15,7 +18,7 @@ export function SellerCta() {
               Reach thousands of riders across Indonesia.
             </p>
           </div>
-          <Button className="px-5 py-3">
+          <Button className="px-5 py-3" onClick={() => navigate("/sell")}>
             Start Selling
             <ArrowRight className="size-4" aria-hidden="true" />
           </Button>

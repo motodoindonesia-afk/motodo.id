@@ -29,16 +29,41 @@ export const SORT_OPTIONS = [
 
 export type SortOption = (typeof SORT_OPTIONS)[number]["value"]
 
+export type MotorcycleSeller = {
+  name: string
+  location: string
+  memberSince: string
+  verified: boolean
+}
+
+export const LISTING_STATUSES = ["active", "draft", "sold"] as const
+
+export type ListingStatus = (typeof LISTING_STATUSES)[number]
+
 export type MotorcycleListing = {
   id: string
+  sellerId: string
   name: string
   price: string
   priceValue: number
+  quantity?: number
   year: number
   location: string
   category: MotorcycleCategory
   image: string
+  images: string[]
+  mileage: string
+  engine: string
+  transmission: string
+  fuel: string
+  color: string
+  description: string
+  seller: MotorcycleSeller
   listedAt: string
+  status?: ListingStatus
+  condition?: string
+  brand?: string
+  model?: string
 }
 
 export type Category = {

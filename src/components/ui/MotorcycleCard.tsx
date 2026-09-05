@@ -2,6 +2,7 @@ import { Calendar, Heart, MapPin, Tag } from "lucide-react"
 import { useState, type MouseEvent } from "react"
 import { Link } from "react-router-dom"
 import type { MotorcycleListing } from "../../types/marketplace"
+import { formatAvailableQuantity } from "../../lib/listingForm"
 
 type Props = {
   listing: MotorcycleListing
@@ -34,6 +35,9 @@ export function MotorcycleCard({ listing, href, showCategory = false }: Props) {
         {listing.name}
       </h3>
       <p className="mt-1 text-base font-semibold text-brand">{listing.price}</p>
+      {listing.status === "sold" ? null : (
+        <p className="mt-1 text-xs text-navy-muted">{formatAvailableQuantity(listing.quantity)}</p>
+      )}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-navy-muted">
         <span className="inline-flex items-center gap-1.5">
           <Calendar className="size-3.5" aria-hidden="true" />
@@ -58,7 +62,8 @@ export function MotorcycleCard({ listing, href, showCategory = false }: Props) {
       {href ? (
         <Link
           to={href}
-          className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          aria-label={`View ${listing.name}`}
+          className="block cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {media}
           {body}

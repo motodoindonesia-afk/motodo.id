@@ -1,6 +1,14 @@
-import { Menu, X } from "lucide-react"
-import { useState } from "react"
+import { ChevronDown, Menu, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../../context/AuthContext"
+import { displayName } from "../../lib/auth"
+import { isAdmin } from "../../lib/admin"
+import { getSellerProfile } from "../../lib/seller"
+import { getUnreadCount } from "../../lib/chat"
+import { useSellerLive } from "../../lib/useSellerLive"
+import { useChatLive } from "../../lib/useChatLive"
+import { UnreadBadge } from "../chat/UnreadBadge"
 import { navLinks } from "../../data/site"
 import { Button } from "../ui/Button"
 import { SearchBar } from "../ui/SearchBar"
@@ -10,11 +18,26 @@ import { Container } from "./Container"
 export function Header() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
+  const { user, isAuthenticated, logout } = useAuth()
+  useSellerLive()
+  useChatLive()
+  const sellerProfile = user ? getSellerProfile(user.id) : null
+  const sellerRegistered = Boolean(sellerProfile)
+  const sellerApproved = sellerProfile?.status === "approved"
+  const showAdmin = isAdmin(user)
+  const buyerUnread = user ? getUnreadCount(user.id, "buyer") : 0
+  const sellerUnread = user && sellerRegistered ? getUnreadCount(user.id, "seller") : 0
 
   function goToBrowse(query: string) {
     const trimmed = query.trim()
     navigate(trimmed ? `/browse?q=${encodeURIComponent(trimmed)}` : "/browse")
     setOpen(false)
+  }
+
+  function handleLogout() {
+    setOpen(false)
+    navigate("/", { replace: true })
+    logout()
   }
 
   return (
@@ -39,8 +62,31 @@ export function Header() {
         />
 
         <div className="ml-auto hidden items-center gap-4 lg:flex">
-          <TextLink href="/#login">Login</TextLink>
-          <Button>Sign Up</Button>
+          {isAuthenticated && user ? (
+            <>
+              <Link
+                to="/messages"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-navy hover:text-brand"
+              >
+                Messages
+                <UnreadBadge count={buyerUnread} />
+              </Link>
+              <AccountMenu
+                name={displayName(user)}
+                sellerRegistered={sellerRegistered}
+                sellerApproved={sellerApproved}
+                showAdmin={showAdmin}
+                buyerUnread={buyerUnread}
+                sellerUnread={sellerUnread}
+                onLogout={handleLogout}
+              />
+            </>
+          ) : (
+            <>
+              <TextLink href="/login">Login</TextLink>
+              <Button onClick={() => navigate("/signup")}>Sign Up</Button>
+            </>
+          )}
         </div>
 
         <button
@@ -70,12 +116,190 @@ export function Header() {
               </TextLink>
             ))}
           </nav>
-          <div className="mt-4 flex items-center gap-3">
-            <TextLink href="/#login">Login</TextLink>
-            <Button className="flex-1">Sign Up</Button>
+          <div className="mt-4 grid gap-3">
+            {isAuthenticated && user ? (
+              <>
+                <p className="text-sm font-semibold text-navy">{user.fullName}</p>
+                <TextLink href="/profile" className="py-1" onClick={() => setOpen(false)}>
+                  My Profile
+                </TextLink>
+                <TextLink href="/messages" className="inline-flex items-center gap-2 py-1" onClick={() => setOpen(false)}>
+                  Messages
+                  <UnreadBadge count={buyerUnread} />
+                </TextLink>
+                {showAdmin ? (
+                  <TextLink href="/admin" className="py-1" onClick={() => setOpen(false)}>
+                    Admin
+                  </TextLink>
+                ) : null}
+                {sellerRegistered ? (
+                  <>
+                    <TextLink href="/seller/dashboard" className="py-1" onClick={() => setOpen(false)}>
+                      Seller Dashboard
+                    </TextLink>
+                    <TextLink
+                      href="/seller/messages"
+                      className="inline-flex items-center gap-2 py-1"
+                      onClick={() => setOpen(false)}
+                    >
+                      Seller Messages
+                      <UnreadBadge count={sellerUnread} />
+                    </TextLink>
+                    {sellerApproved ? (
+                      <TextLink href="/sell" className="py-1" onClick={() => setOpen(false)}>
+                        Sell a Motorcycle
+                      </TextLink>
+                    ) : null}
+                  </>
+                ) : (
+                  <TextLink href="/seller/register" className="py-1" onClick={() => setOpen(false)}>
+                    Become a Seller
+                  </TextLink>
+                )}
+                <button
+                  type="button"
+                  className="text-left text-sm text-navy hover:text-brand"
+                  onClick={handleLogout}
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-3">
+                <TextLink href="/login" onClick={() => setOpen(false)}>
+                  Login
+                </TextLink>
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setOpen(false)
+                    navigate("/signup")
+                  }}
+                >
+                  Sign Up
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       ) : null}
     </header>
+  )
+}
+
+function AccountMenu({
+  name,
+  sellerRegistered,
+  sellerApproved,
+  showAdmin,
+  buyerUnread,
+  sellerUnread,
+  onLogout,
+}: {
+  name: string
+  sellerRegistered: boolean
+  sellerApproved: boolean
+  showAdmin: boolean
+  buyerUnread: number
+  sellerUnread: number
+  onLogout: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(event: MouseEvent) {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false)
+    }
+    window.addEventListener("mousedown", handleClick)
+    return () => window.removeEventListener("mousedown", handleClick)
+  }, [])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-navy hover:text-brand"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {name}
+        <ChevronDown className="size-4" aria-hidden="true" />
+      </button>
+      {open ? (
+        <div className="absolute right-0 z-30 mt-2 w-52 rounded-xl border border-line bg-white py-2">
+          <Link
+            to="/profile"
+            className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+            onClick={() => setOpen(false)}
+          >
+            My Profile
+          </Link>
+          <Link
+            to="/messages"
+            className="flex items-center justify-between gap-2 px-4 py-2 text-sm text-navy hover:bg-surface"
+            onClick={() => setOpen(false)}
+          >
+            <span>Messages</span>
+            <UnreadBadge count={buyerUnread} />
+          </Link>
+          {showAdmin ? (
+            <Link
+              to="/admin"
+              className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+              onClick={() => setOpen(false)}
+            >
+              Admin
+            </Link>
+          ) : null}
+          {sellerRegistered ? (
+            <>
+              <Link
+                to="/seller/dashboard"
+                className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+                onClick={() => setOpen(false)}
+              >
+                Seller Dashboard
+              </Link>
+              <Link
+                to="/seller/messages"
+                className="flex items-center justify-between gap-2 px-4 py-2 text-sm text-navy hover:bg-surface"
+                onClick={() => setOpen(false)}
+              >
+                <span>Seller Messages</span>
+                <UnreadBadge count={sellerUnread} />
+              </Link>
+              {sellerApproved ? (
+                <Link
+                  to="/sell"
+                  className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+                  onClick={() => setOpen(false)}
+                >
+                  Sell a Motorcycle
+                </Link>
+              ) : null}
+            </>
+          ) : (
+            <Link
+              to="/seller/register"
+              className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+              onClick={() => setOpen(false)}
+            >
+              Become a Seller
+            </Link>
+          )}
+          <button
+            type="button"
+            className="block w-full px-4 py-2 text-left text-sm text-navy hover:bg-surface"
+            onClick={() => {
+              setOpen(false)
+              onLogout()
+            }}
+          >
+            Log Out
+          </button>
+        </div>
+      ) : null}
+    </div>
   )
 }

@@ -20,9 +20,6 @@ export function HomePage() {
         <section id="about" className="sr-only">
           MOTODO.ID is a marketplace for custom and premium motorcycles in Indonesia.
         </section>
-        <section id="login" className="sr-only">
-          Login will be available in a later version.
-        </section>
       </main>
     </>
   )

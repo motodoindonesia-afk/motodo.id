@@ -1,6 +1,17 @@
 import type { MotorcycleListing } from "../types/marketplace"
 
-export const motorcycleListings: MotorcycleListing[] = [
+const harleyImages = ["/listings/sportster.jpg", "/listings/hero.jpg", "/listings/chopper.jpg"]
+const triumphImages = ["/listings/triumph.jpg", "/listings/brat.jpg", "/listings/hero.jpg"]
+const chopperImages = ["/listings/chopper.jpg", "/listings/sportster.jpg", "/listings/hero.jpg"]
+const bobberImages = ["/listings/bobber.jpg", "/listings/chopper.jpg", "/listings/brat.jpg"]
+const bratImages = ["/listings/brat.jpg", "/listings/hero.jpg", "/listings/triumph.jpg"]
+const otherImages = ["/listings/hero.jpg", "/listings/brat.jpg", "/listings/sportster.jpg"]
+
+function sellerIdFromName(name: string) {
+  return `seller-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`
+}
+
+const listingsData: Array<Omit<MotorcycleListing, "sellerId">> = [
   {
     id: "sportster-1200",
     name: "Harley-Davidson Sportster 1200",
@@ -9,7 +20,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2018,
     location: "Jakarta Selatan",
     category: "Harley-Davidson",
-    image: "/listings/sportster.jpg",
+    image: harleyImages[0],
+    images: harleyImages,
+    mileage: "18.400 km",
+    engine: "1.202 cc V-twin",
+    transmission: "5-speed",
+    fuel: "Petrol",
+    color: "Vivid Black",
+    description:
+      "Well-maintained Sportster 1200 with a clean custom setup. Regularly serviced at an authorized workshop and ready for weekend rides around Jakarta. Peanut tank, solo seat, and stock 1200 Evolution engine with a deep exhaust note. Papers complete, no accident history.",
+    seller: {
+      name: "Jakarta Custom Garage",
+      location: "Jakarta Selatan",
+      memberSince: "2024",
+      verified: true,
+    },
     listedAt: "2026-08-28T08:00:00.000Z",
   },
   {
@@ -20,7 +45,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2020,
     location: "Bandung",
     category: "Triumph",
-    image: "/listings/triumph.jpg",
+    image: triumphImages[0],
+    images: triumphImages,
+    mileage: "12.800 km",
+    engine: "1.200 cc parallel-twin",
+    transmission: "6-speed",
+    fuel: "Petrol",
+    color: "Jet Black",
+    description:
+      "A refined Bonneville T120 kept in Bandung highland conditions. Smooth 1200 twin, heated grips, and original Triumph accessories. Ideal for long Sunday rides to Lembang or Pangalengan. Service book is complete and the bike starts first kick of the starter every time.",
+    seller: {
+      name: "Bandung Motorworks",
+      location: "Bandung",
+      memberSince: "2023",
+      verified: true,
+    },
     listedAt: "2026-08-26T08:00:00.000Z",
   },
   {
@@ -31,7 +70,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2019,
     location: "Surabaya",
     category: "Chopper",
-    image: "/listings/chopper.jpg",
+    image: chopperImages[0],
+    images: chopperImages,
+    mileage: "9.600 km",
+    engine: "750 cc V-twin",
+    transmission: "5-speed",
+    fuel: "Petrol",
+    color: "Brushed Silver",
+    description:
+      "Hand-built chopper from a Surabaya workshop with extended forks, a raw-metal tank, and a low solo saddle. Built for show and short boulevard rides rather than daily commuting. Recent carb rebuild, new tires, and a clean frame with no rust.",
+    seller: {
+      name: "Surabaya Chop Shop",
+      location: "Surabaya",
+      memberSince: "2022",
+      verified: true,
+    },
     listedAt: "2026-08-22T08:00:00.000Z",
   },
   {
@@ -42,7 +95,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2017,
     location: "Jakarta Timur",
     category: "Bobber",
-    image: "/listings/bobber.jpg",
+    image: bobberImages[0],
+    images: bobberImages,
+    mileage: "24.100 km",
+    engine: "399 cc inline-four",
+    transmission: "6-speed",
+    fuel: "Petrol",
+    color: "Gloss Black",
+    description:
+      "Honda CB400 Super Four converted to a tidy bobber with a flat brown seat and blacked-out covers. The inline-four still pulls cleanly through the revs. Used as a weekend bike in East Jakarta. Recent oil and chain service, STNK and BPKB ready for transfer.",
+    seller: {
+      name: "East Jakarta Rides",
+      location: "Jakarta Timur",
+      memberSince: "2024",
+      verified: true,
+    },
     listedAt: "2026-08-18T08:00:00.000Z",
   },
   {
@@ -53,7 +120,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2022,
     location: "Bali",
     category: "Brat Cafe",
-    image: "/listings/brat.jpg",
+    image: bratImages[0],
+    images: bratImages,
+    mileage: "7.200 km",
+    engine: "155 cc single",
+    transmission: "6-speed",
+    fuel: "Petrol",
+    color: "Matte Silver",
+    description:
+      "Yamaha XSR 155 dressed as a brat cafe with a flat tan seat, round LED headlight, and a short aftermarket exhaust. Light, easy to live with in Canggu traffic, and still under a practical running cost. One-owner Bali bike with dealer service history.",
+    seller: {
+      name: "Bali Brat Co.",
+      location: "Bali",
+      memberSince: "2023",
+      verified: true,
+    },
     listedAt: "2026-08-16T08:00:00.000Z",
   },
   {
@@ -64,7 +145,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2016,
     location: "Jakarta Utara",
     category: "Harley-Davidson",
-    image: "/listings/sportster.jpg",
+    image: harleyImages[0],
+    images: harleyImages,
+    mileage: "21.050 km",
+    engine: "883 cc V-twin",
+    transmission: "5-speed",
+    fuel: "Petrol",
+    color: "Black Denim",
+    description:
+      "Classic Iron 883 in a dark denim finish. Compact Sportster stance with mid controls and a peanut tank. Garage-kept in North Jakarta, ridden mostly on weekends. Exhaust and air cleaner already upgraded; original parts are included in the sale.",
+    seller: {
+      name: "Jakarta Custom Garage",
+      location: "Jakarta Utara",
+      memberSince: "2024",
+      verified: true,
+    },
     listedAt: "2026-08-12T08:00:00.000Z",
   },
   {
@@ -75,7 +170,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2019,
     location: "Yogyakarta",
     category: "Triumph",
-    image: "/listings/triumph.jpg",
+    image: triumphImages[0],
+    images: triumphImages,
+    mileage: "15.300 km",
+    engine: "900 cc parallel-twin",
+    transmission: "5-speed",
+    fuel: "Petrol",
+    color: "Korosi Red",
+    description:
+      "Friendly Street Twin for city riding and short tours from Yogyakarta. Torque-rich 900 twin, upright riding position, and original Triumph luggage rack. Recently replaced brake pads and battery. A clean modern-classic that is easy to live with every day.",
+    seller: {
+      name: "Yogyakarta Twin Garage",
+      location: "Yogyakarta",
+      memberSince: "2023",
+      verified: false,
+    },
     listedAt: "2026-08-10T08:00:00.000Z",
   },
   {
@@ -86,7 +195,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2015,
     location: "Bandung",
     category: "Chopper",
-    image: "/listings/chopper.jpg",
+    image: chopperImages[0],
+    images: chopperImages,
+    mileage: "11.700 km",
+    engine: "1.340 cc V-twin",
+    transmission: "6-speed",
+    fuel: "Petrol",
+    color: "Two-tone Cream / Black",
+    description:
+      "Softail-based chopper with springer forks, mini ape hangers, and a cream-and-black tank. Built for cruising Bandung’s cooler evenings. Frame and weld work are tidy, and the bike sits low with a wide rear tire. Best suited to riders who already know custom geometry.",
+    seller: {
+      name: "Bandung Motorworks",
+      location: "Bandung",
+      memberSince: "2023",
+      verified: true,
+    },
     listedAt: "2026-08-08T08:00:00.000Z",
   },
   {
@@ -97,7 +220,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2023,
     location: "Surabaya",
     category: "Bobber",
-    image: "/listings/bobber.jpg",
+    image: bobberImages[0],
+    images: bobberImages,
+    mileage: "3.850 km",
+    engine: "177 cc single",
+    transmission: "5-speed",
+    fuel: "Petrol",
+    color: "Ebony",
+    description:
+      "Low-mileage W175 bobber conversion with a shortened rear fender and a slim bench seat. Perfect first custom for Surabaya streets: simple air-cooled single, easy parts, and low running costs. Still looks fresh from the workshop.",
+    seller: {
+      name: "Surabaya Chop Shop",
+      location: "Surabaya",
+      memberSince: "2022",
+      verified: true,
+    },
     listedAt: "2026-08-06T08:00:00.000Z",
   },
   {
@@ -108,7 +245,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2018,
     location: "Bali",
     category: "Brat Cafe",
-    image: "/listings/brat.jpg",
+    image: bratImages[0],
+    images: bratImages,
+    mileage: "19.600 km",
+    engine: "689 cc parallel-twin",
+    transmission: "6-speed",
+    fuel: "Petrol",
+    color: "Historic Red",
+    description:
+      "XSR 700 cafe setup with clip-ons, a rear cowl, and a slightly louder exhaust. Plenty of midrange for coastal roads from Seminyak to Uluwatu. Serviced with genuine Yamaha parts. A more serious ride than the 155, still in the same neo-retro family.",
+    seller: {
+      name: "Bali Brat Co.",
+      location: "Bali",
+      memberSince: "2023",
+      verified: true,
+    },
     listedAt: "2026-08-04T08:00:00.000Z",
   },
   {
@@ -119,7 +270,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2022,
     location: "Medan",
     category: "Others",
-    image: "/listings/hero.jpg",
+    image: otherImages[0],
+    images: otherImages,
+    mileage: "8.900 km",
+    engine: "349 cc single",
+    transmission: "5-speed",
+    fuel: "Petrol",
+    color: "Halcyon Black",
+    description:
+      "Royal Enfield Classic 350 with the J-series engine — smoother and more reliable than older UCE bikes. Used gently in Medan with highway trips to Berastagi. Chrome is clean, seat is original, and the thump is exactly what you want from a Classic.",
+    seller: {
+      name: "Medan Classic Rides",
+      location: "Medan",
+      memberSince: "2025",
+      verified: false,
+    },
     listedAt: "2026-08-02T08:00:00.000Z",
   },
   {
@@ -130,7 +295,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2021,
     location: "Jakarta Selatan",
     category: "Harley-Davidson",
-    image: "/listings/sportster.jpg",
+    image: harleyImages[0],
+    images: harleyImages,
+    mileage: "10.250 km",
+    engine: "1.868 cc Milwaukee-Eight",
+    transmission: "6-speed",
+    fuel: "Petrol",
+    color: "Billard Gray",
+    description:
+      "Softail Street Bob with the Milwaukee-Eight 114. Mini-apes, a round headlight, and a stripped cruiser look that still covers Jakarta–Puncak comfortably. One careful owner, always stored indoors. Includes original saddlebags and a recent tire set.",
+    seller: {
+      name: "Jakarta Custom Garage",
+      location: "Jakarta Selatan",
+      memberSince: "2024",
+      verified: true,
+    },
     listedAt: "2026-07-30T08:00:00.000Z",
   },
   {
@@ -141,7 +320,21 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2021,
     location: "Bali",
     category: "Triumph",
-    image: "/listings/triumph.jpg",
+    image: triumphImages[0],
+    images: triumphImages,
+    mileage: "11.400 km",
+    engine: "900 cc parallel-twin",
+    transmission: "5-speed",
+    fuel: "Petrol",
+    color: "Jet Black",
+    description:
+      "Scrambler 900 with high pipes and a comfortable dual seat — equally happy on asphalt and light gravel around Bali. Torque is generous at low speed, which makes island traffic less tiring. Imported with complete documents and a fresh service.",
+    seller: {
+      name: "Bali Brat Co.",
+      location: "Bali",
+      memberSince: "2023",
+      verified: true,
+    },
     listedAt: "2026-07-26T08:00:00.000Z",
   },
   {
@@ -152,13 +345,42 @@ export const motorcycleListings: MotorcycleListing[] = [
     year: 2020,
     location: "Jakarta Barat",
     category: "Bobber",
-    image: "/listings/bobber.jpg",
+    image: bobberImages[0],
+    images: bobberImages,
+    mileage: "16.700 km",
+    engine: "471 cc parallel-twin",
+    transmission: "6-speed",
+    fuel: "Petrol",
+    color: "Matte Black",
+    description:
+      "Honda Rebel 500 in matte black — low seat, light clutch, and a parallel-twin that is easy in West Jakarta traffic. A modern bobber that still feels approachable for newer riders. Crash bars fitted, original mirrors included, and the paint is unmarked.",
+    seller: {
+      name: "West Jakarta Moto",
+      location: "Jakarta Barat",
+      memberSince: "2024",
+      verified: true,
+    },
     listedAt: "2026-07-22T08:00:00.000Z",
   },
 ]
+
+export const motorcycleListings: MotorcycleListing[] = listingsData.map((listing) => ({
+  ...listing,
+  sellerId: sellerIdFromName(listing.seller.name),
+}))
 
 export const featuredListings = motorcycleListings.slice(0, 5)
 
 export function getMotorcycleById(id: string) {
   return motorcycleListings.find((listing) => listing.id === id)
+}
+
+export function getRelatedMotorcycles(listing: MotorcycleListing, limit = 4) {
+  const sameCategory = motorcycleListings.filter(
+    (item) => item.id !== listing.id && item.category === listing.category,
+  )
+  const others = motorcycleListings.filter(
+    (item) => item.id !== listing.id && item.category !== listing.category,
+  )
+  return [...sameCategory, ...others].slice(0, limit)
 }

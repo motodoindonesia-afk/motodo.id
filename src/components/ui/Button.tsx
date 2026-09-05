@@ -23,6 +23,7 @@ export function Button({
         variant === "text" && "text-navy hover:text-brand",
         variant === "secondary" &&
           "border border-line bg-white px-4 py-2.5 text-navy hover:bg-surface",
+        "disabled:pointer-events-none disabled:opacity-60",
         className,
       )}
       {...props}

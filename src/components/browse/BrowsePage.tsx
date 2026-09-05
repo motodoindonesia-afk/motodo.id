@@ -1,7 +1,6 @@
 import { SlidersHorizontal, X } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
-import { motorcycleListings } from "../../data/listings"
 import {
   emptyBrowseFilters,
   filterListings,
@@ -10,6 +9,8 @@ import {
   paginateListings,
   sortListings,
 } from "../../lib/browse"
+import { getPublicListings } from "../../lib/listings"
+import { useListingsLive } from "../../lib/useListingsLive"
 import { SORT_OPTIONS, type BrowseFilters, type SortOption } from "../../types/marketplace"
 import { Container } from "../layout/Container"
 import { Button } from "../ui/Button"
@@ -19,6 +20,7 @@ import { FilterSidebar } from "./FilterSidebar"
 import { Pagination } from "./Pagination"
 
 export function BrowsePage() {
+  const listingVersion = useListingsLive()
   const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState<BrowseFilters>({
     ...emptyBrowseFilters,
@@ -42,8 +44,8 @@ export function BrowsePage() {
   }, [filtersOpen])
 
   const filtered = useMemo(
-    () => sortListings(filterListings(motorcycleListings, filters), sort),
-    [filters, sort],
+    () => sortListings(filterListings(getPublicListings(), filters), sort),
+    [filters, sort, listingVersion],
   )
   const paged = paginateListings(filtered, page)
 
