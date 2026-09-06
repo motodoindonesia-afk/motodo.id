@@ -1,6 +1,8 @@
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
+import { isSupabaseConfigured } from "../../lib/supabase"
+import { supabaseSignInWithGoogle } from "../../lib/supabaseAuth"
 import { Button } from "../ui/Button"
 import { AuthInput, Field } from "./AuthField"
 import { PasswordInput } from "./PasswordInput"
@@ -23,8 +25,14 @@ export function LoginForm() {
   const [errors, setErrors] = useState<Errors>({})
   const [formError, setFormError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [forgotOpen, setForgotOpen] = useState(false)
-  const [googleNote, setGoogleNote] = useState("")
+
+  useEffect(() => {
+    const oauthError = searchParams.get("error_description") || searchParams.get("error")
+    if (!oauthError) return
+    setFormError(oauthError.replace(/\+/g, " "))
+  }, [searchParams])
 
   function validate() {
     const next: Errors = {}
@@ -39,7 +47,6 @@ export function LoginForm() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setFormError("")
-    setGoogleNote("")
     if (!validate()) return
 
     setLoading(true)
@@ -52,6 +59,21 @@ export function LoginForm() {
       setFormError(error instanceof Error ? error.message : "Unable to log in.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleGoogle() {
+    setFormError("")
+    if (!isSupabaseConfigured()) {
+      setFormError("This environment is not configured.")
+      return
+    }
+    setGoogleLoading(true)
+    try {
+      await supabaseSignInWithGoogle()
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Unable to continue with Google.")
+      setGoogleLoading(false)
     }
   }
 
@@ -110,15 +132,11 @@ export function LoginForm() {
         type="button"
         variant="secondary"
         className="w-full py-3"
-        onClick={() => setGoogleNote("Google sign-in will be available soon.")}
+        disabled={googleLoading}
+        onClick={() => void handleGoogle()}
       >
         Continue with Google
       </Button>
-      {googleNote ? (
-        <p className="mt-3 text-center text-sm text-navy-muted" role="status">
-          {googleNote}
-        </p>
-      ) : null}
 
       <p className="mt-6 text-center text-sm text-navy-muted">
         Don't have an account?{" "}

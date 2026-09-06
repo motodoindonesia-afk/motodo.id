@@ -50,6 +50,12 @@ function authMessage(error: { message: string } | null): string {
   if (lower.includes("invalid login")) return "Incorrect email or password."
   if (lower.includes("already registered")) return "An account with this email already exists."
   if (lower.includes("email not confirmed")) return "Confirm your email before logging in."
+  if (lower.includes("provider is not enabled") || lower.includes("unsupported provider")) {
+    return "Google sign-in is not available right now."
+  }
+  if (lower.includes("oauth") || lower.includes("unable to exchange")) {
+    return "Unable to continue with Google. Please try again."
+  }
   return message
 }
 
@@ -80,9 +86,19 @@ export async function loadSessionUser(): Promise<{ user: AuthUser; profile: Moto
   if (error) throw new Error(authMessage(error))
   const sessionUser = data.session?.user
   if (!sessionUser) return null
-  const profile = await fetchMotodoProfile(sessionUser.id)
-  if (!profile) return null
+  const profile = await fetchProfileWithRetry(sessionUser.id)
   return { user: authUserFromProfile(sessionUser, profile), profile }
+}
+
+export async function supabaseSignInWithGoogle() {
+  const client = getSupabaseClient()
+  const { error } = await client.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/login`,
+    },
+  })
+  if (error) throw new Error(authMessage(error))
 }
 
 export async function supabaseSignup(input: SignupInput): Promise<{ user: AuthUser; profile: MotodoProfile }> {
