@@ -37,7 +37,7 @@ Suggested settings:
 SPA fallback (required so `/dashboard`, `/sellers`, etc. work on refresh):
 
 - `wrangler.ritme.jsonc` sets `assets.not_found_handling` to `single-page-application`
-- The Ritme build also emits `_redirects` with `/*    /index.html   200`
+- Do not add a `dist-ritme/_redirects` catch-all to `/index.html`. That rule conflicts with Workers Assets HTML rewriting and fails deploy with an infinite-loop error.
 
 Do not use a root `wrangler.jsonc` / `wrangler.toml`. Those default names would be auto-detected and could deploy Motodo's `dist/` instead of Ritme.
 
