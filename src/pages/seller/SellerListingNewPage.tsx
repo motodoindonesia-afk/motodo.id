@@ -3,10 +3,12 @@ import { useAuth } from "../../context/AuthContext"
 import { getSellerProfile } from "../../lib/seller"
 import { ListingForm } from "../../components/seller/ListingForm"
 import { Container } from "../../components/layout/Container"
+import { useT } from "../../i18n"
 
 export function SellerListingNewPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const t = useT()
   if (!user) return null
   const profile = getSellerProfile(user.id)
   if (!profile) return null
@@ -15,9 +17,9 @@ export function SellerListingNewPage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">List Your Motorcycle</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.listTitle")}</h1>
           <p className="mt-2 text-base leading-relaxed text-navy-muted">
-            Provide accurate information to help buyers find your motorcycle.
+            {t("seller.listBody")}
           </p>
           <div className="mt-8">
             <ListingForm

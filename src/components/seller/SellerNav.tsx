@@ -6,28 +6,30 @@ import { useChatLive } from "../../lib/useChatLive"
 import { useOrdersLive } from "../../lib/useOrdersLive"
 import { UnreadBadge } from "../chat/UnreadBadge"
 import { cn } from "../../lib/cn"
+import { useT, type MessageKey } from "../../i18n"
 
-const LINKS = [
-  { to: "/seller/dashboard", label: "Dashboard" },
-  { to: "/seller/listings", label: "Listings", approvedOnly: true },
-  { to: "/seller/orders", label: "Orders" },
-  { to: "/seller/reviews", label: "Reviews" },
-  { to: "/seller/messages", label: "Messages" },
-  { to: "/seller/profile", label: "Profile" },
-] as const
+const LINKS: { to: string; key: MessageKey; approvedOnly?: boolean; messages?: boolean; orders?: boolean }[] = [
+  { to: "/seller/dashboard", key: "seller.dashboard" },
+  { to: "/seller/listings", key: "seller.listings", approvedOnly: true },
+  { to: "/seller/orders", key: "seller.orders", orders: true },
+  { to: "/seller/reviews", key: "seller.reviews" },
+  { to: "/seller/messages", key: "seller.messages", messages: true },
+  { to: "/seller/profile", key: "seller.profile" },
+]
 
 export function SellerNav({ approved }: { approved: boolean }) {
   const { user } = useAuth()
+  const t = useT()
   useChatLive()
   useOrdersLive()
   const unread = user ? getUnreadCount(user.id, "seller") : 0
   const pendingOrders = user ? getSellerOrderCounts(user.id).pending : 0
 
   return (
-    <nav className="mt-6 overflow-x-auto" aria-label="Seller">
+    <nav className="mt-6 overflow-x-auto" aria-label={t("seller.nav")}>
       <ul className="flex min-w-max gap-1 border-b border-line">
         {LINKS.map((link) => {
-          if ("approvedOnly" in link && link.approvedOnly && !approved) return null
+          if (link.approvedOnly && !approved) return null
           return (
             <li key={link.to}>
               <NavLink
@@ -40,9 +42,9 @@ export function SellerNav({ approved }: { approved: boolean }) {
                   )
                 }
               >
-                {link.label}
-                {link.label === "Messages" ? <UnreadBadge count={unread} /> : null}
-                {link.label === "Orders" && pendingOrders > 0 ? (
+                {t(link.key)}
+                {link.messages ? <UnreadBadge count={unread} /> : null}
+                {link.orders && pendingOrders > 0 ? (
                   <span className="rounded-full bg-surface px-1.5 text-xs text-navy">{pendingOrders}</span>
                 ) : null}
               </NavLink>

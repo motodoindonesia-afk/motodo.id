@@ -7,6 +7,7 @@ import {
 } from "../../lib/chat"
 import { UnreadBadge } from "./UnreadBadge"
 import { cn } from "../../lib/cn"
+import { useT } from "../../i18n"
 
 type Props = {
   conversations: Conversation[]
@@ -17,6 +18,7 @@ type Props = {
 }
 
 export function ConversationList({ conversations, selectedId, viewerId, role, hrefFor }: Props) {
+  const t = useT()
   return (
     <ul className="divide-y divide-line">
       {conversations.map((conversation) => {
@@ -29,14 +31,14 @@ export function ConversationList({ conversations, selectedId, viewerId, role, hr
               to={hrefFor(conversation.id)}
               className={cn(
                 "flex gap-3 px-4 py-3 hover:bg-surface",
-                selectedId === conversation.id && "bg-surface",
+                selectedId === conversation.id && "bg-brand-soft",
               )}
             >
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-surface">
                 {photo ? (
                   <img src={photo} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-[10px] text-navy-muted">No photo</div>
+                  <div className="flex h-full items-center justify-center text-[10px] text-navy-muted">{t("chat.noPhoto")}</div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -49,7 +51,7 @@ export function ConversationList({ conversations, selectedId, viewerId, role, hr
                 </p>
                 <div className="mt-1 flex items-center justify-between gap-2">
                   <p className={cn("truncate text-sm text-navy-muted", unread > 0 && "font-medium text-navy")}>
-                    {conversation.lastMessage || "No messages yet."}
+                    {conversation.lastMessage || t("chat.noMessagesYet")}
                   </p>
                   <UnreadBadge count={unread} />
                 </div>

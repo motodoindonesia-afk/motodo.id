@@ -2,18 +2,19 @@ import { Link } from "react-router-dom"
 import type { ListingStatus } from "../../types/marketplace"
 import type { SellerOwnedListing } from "../../lib/sellerListings"
 import { cn } from "../../lib/cn"
-
-const statusLabel: Record<ListingStatus, string> = {
-  active: "Active",
-  draft: "Draft",
-  sold: "Sold",
-}
+import { useT } from "../../i18n"
 
 const actionClass =
   "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
 
 export function ProfileListingRow({ listing }: { listing: SellerOwnedListing }) {
+  const t = useT()
   const status = listing.status
+  const statusLabel: Record<ListingStatus, string> = {
+    active: t("seller.statusActive"),
+    draft: t("seller.statusDraft"),
+    sold: t("seller.statusSold"),
+  }
 
   return (
     <article className="flex flex-col gap-4 rounded-xl border border-line bg-white p-4 sm:flex-row sm:items-center">
@@ -44,10 +45,10 @@ export function ProfileListingRow({ listing }: { listing: SellerOwnedListing }) 
           to={`/motorcycles/${listing.id}`}
           className={cn(actionClass, "border border-line bg-white text-navy hover:bg-surface")}
         >
-          View
+          {t("seller.view")}
         </Link>
         <Link to="/sell" className={cn(actionClass, "bg-brand text-white hover:bg-brand-hover")}>
-          Edit
+          {t("common.edit")}
         </Link>
       </div>
     </article>

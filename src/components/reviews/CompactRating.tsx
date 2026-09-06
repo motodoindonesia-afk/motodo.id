@@ -1,5 +1,6 @@
 import { formatAverageRating } from "../../lib/reviews"
 import { StarRating } from "./StarRating"
+import { useT } from "../../i18n"
 
 export function CompactRating({
   average,
@@ -10,6 +11,7 @@ export function CompactRating({
   count: number
   emptyLabel: string
 }) {
+  const t = useT()
   const formatted = formatAverageRating(average)
   if (count === 0 || formatted === null) {
     return <p className="text-sm text-navy-muted">{emptyLabel}</p>
@@ -19,7 +21,7 @@ export function CompactRating({
       <StarRating value={Math.round(average ?? 0)} readOnly size="sm" />
       <span className="text-sm font-semibold text-navy">{formatted}</span>
       <span className="text-sm text-navy-muted">
-        {count} {count === 1 ? "review" : "reviews"}
+        {count === 1 ? t("review.countOne") : t("review.countMany", { count })}
       </span>
     </div>
   )

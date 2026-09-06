@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { X } from "lucide-react"
 import type { MotorcycleListing } from "../../types/marketplace"
 import { Button } from "../ui/Button"
+import { useT } from "../../i18n"
 
 type Props = {
   listing: MotorcycleListing
@@ -9,6 +10,7 @@ type Props = {
 }
 
 export function ContactSellerModal({ listing, onClose }: Props) {
+  const t = useT()
   useEffect(() => {
     const previous = document.body.style.overflow
     document.body.style.overflow = "hidden"
@@ -28,7 +30,7 @@ export function ContactSellerModal({ listing, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <button
         type="button"
-        aria-label="Close contact panel"
+        aria-label={t("listing.closeContact")}
         className="absolute inset-0 bg-navy/30"
         onClick={onClose}
       />
@@ -41,7 +43,7 @@ export function ContactSellerModal({ listing, onClose }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="contact-seller-title" className="text-lg font-bold text-navy">
-              Contact Seller
+              {t("listing.contactSeller")}
             </h2>
             <p className="mt-1 text-sm text-navy-muted">
               {listing.seller.name} · {listing.name}
@@ -51,31 +53,31 @@ export function ContactSellerModal({ listing, onClose }: Props) {
             type="button"
             onClick={onClose}
             className="rounded-lg p-1.5 text-navy hover:bg-surface"
-            aria-label="Close"
+            aria-label={t("common.close")}
           >
             <X className="size-5" />
           </button>
         </div>
 
         <p className="mt-4 rounded-xl bg-surface px-4 py-3 text-sm leading-relaxed text-navy-muted">
-          Messaging is not connected yet. Use this panel as a preview — seller chat will be added in a later version.
+          {t("listing.contactPreview")}
         </p>
 
         <div className="mt-5 space-y-3 text-sm text-navy">
           <p>
-            <span className="text-navy-muted">Seller</span>
+            <span className="text-navy-muted">{t("listing.seller")}</span>
             <br />
             <span className="font-medium">{listing.seller.name}</span>
           </p>
           <p>
-            <span className="text-navy-muted">Location</span>
+            <span className="text-navy-muted">{t("listing.location")}</span>
             <br />
             <span className="font-medium">{listing.seller.location}</span>
           </p>
         </div>
 
         <Button className="mt-6 w-full" onClick={onClose}>
-          Close
+          {t("common.close")}
         </Button>
       </div>
     </div>

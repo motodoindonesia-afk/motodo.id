@@ -7,6 +7,7 @@ import {
   type MotorcycleCategory,
 } from "../../types/marketplace"
 import { Button } from "../ui/Button"
+import { categoryLabel, locationLabel, useLanguage } from "../../i18n"
 
 type Props = {
   filters: BrowseFilters
@@ -43,7 +44,7 @@ function NumberField({
         value={value}
         placeholder={placeholder}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
-        className="mt-1 h-9 w-full rounded-lg border border-transparent bg-surface px-3 text-ui text-navy placeholder:text-navy-muted/80 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20"
+        className="mt-1 h-9 w-full rounded-lg border border-line bg-white px-3 text-ui text-navy placeholder:text-navy-muted/80 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20"
       />
     </label>
   )
@@ -56,6 +57,8 @@ export function FilterSidebar({
   showHeading = true,
   idPrefix = "",
 }: Props) {
+  const { locale, t } = useLanguage()
+
   function toggleCategory(category: MotorcycleCategory) {
     const selected = filters.categories.includes(category)
       ? filters.categories.filter((item) => item !== category)
@@ -74,22 +77,22 @@ export function FilterSidebar({
     <aside className="space-y-5">
       {showHeading ? (
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-ui font-bold text-navy">Filters</h2>
+          <h2 className="text-ui font-bold text-navy">{t("browse.filters")}</h2>
           <Button variant="text" className="px-0 py-0 text-ui text-brand hover:text-brand-hover" onClick={onClear}>
-            Clear All Filters
+            {t("browse.clearAll")}
           </Button>
         </div>
       ) : (
         <div className="flex justify-end">
           <Button variant="text" className="px-0 py-0 text-ui text-brand hover:text-brand-hover" onClick={onClear}>
-            Clear All Filters
+            {t("browse.clearAll")}
           </Button>
         </div>
       )}
 
       <fieldset>
         <legend className="mb-3">
-          <FieldLabel>Category</FieldLabel>
+          <FieldLabel>{t("browse.category")}</FieldLabel>
         </legend>
         <div className="space-y-2.5">
           {MOTORCYCLE_CATEGORIES.map((category) => (
@@ -100,7 +103,7 @@ export function FilterSidebar({
                 onChange={() => toggleCategory(category)}
                 className="size-4 rounded border-line text-brand accent-brand"
               />
-              {category}
+              {categoryLabel(locale, category)}
             </label>
           ))}
         </div>
@@ -108,19 +111,19 @@ export function FilterSidebar({
 
       <fieldset>
         <legend className="mb-3">
-          <FieldLabel>Price</FieldLabel>
+          <FieldLabel>{t("browse.price")}</FieldLabel>
         </legend>
         <div className="grid grid-cols-2 gap-3">
           <NumberField
             id={`${idPrefix}min-price`}
-            label="Minimum price"
+            label={t("browse.minPrice")}
             value={filters.minPrice}
             placeholder="e.g. 50000000"
             onChange={(minPrice) => onChange({ ...filters, minPrice })}
           />
           <NumberField
             id={`${idPrefix}max-price`}
-            label="Maximum price"
+            label={t("browse.maxPrice")}
             value={filters.maxPrice}
             placeholder="e.g. 300000000"
             onChange={(maxPrice) => onChange({ ...filters, maxPrice })}
@@ -130,19 +133,19 @@ export function FilterSidebar({
 
       <fieldset>
         <legend className="mb-3">
-          <FieldLabel>Year</FieldLabel>
+          <FieldLabel>{t("browse.year")}</FieldLabel>
         </legend>
         <div className="grid grid-cols-2 gap-3">
           <NumberField
             id={`${idPrefix}min-year`}
-            label="Minimum year"
+            label={t("browse.minYear")}
             value={filters.minYear}
             placeholder="e.g. 2016"
             onChange={(minYear) => onChange({ ...filters, minYear })}
           />
           <NumberField
             id={`${idPrefix}max-year`}
-            label="Maximum year"
+            label={t("browse.maxYear")}
             value={filters.maxYear}
             placeholder="e.g. 2024"
             onChange={(maxYear) => onChange({ ...filters, maxYear })}
@@ -152,7 +155,7 @@ export function FilterSidebar({
 
       <fieldset>
         <legend className="mb-3">
-          <FieldLabel>Location</FieldLabel>
+          <FieldLabel>{t("browse.location")}</FieldLabel>
         </legend>
         <div className="space-y-2.5">
           {LOCATION_FILTERS.map((location) => (
@@ -163,7 +166,7 @@ export function FilterSidebar({
                 onChange={() => toggleLocation(location)}
                 className="size-4 rounded border-line text-brand accent-brand"
               />
-              {location}
+              {locationLabel(locale, location)}
             </label>
           ))}
         </div>

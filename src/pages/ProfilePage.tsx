@@ -1,10 +1,10 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { roleLabel } from "../lib/auth"
-import { formatMemberSince, roleDescription } from "../lib/profile"
+import { formatMemberSince } from "../lib/profile"
+import { useLanguage } from "../i18n"
 import { deleteListing, getListingsBySeller } from "../lib/listings"
-import { getSellerProfile, isSellerProfilesReady, sellerStatusHeading } from "../lib/seller"
+import { getSellerProfile, isSellerProfilesReady } from "../lib/seller"
 import { useSellerLive } from "../lib/useSellerLive"
 import { useListingsLive } from "../lib/useListingsLive"
 import { SellerStatusBadge } from "../components/seller/SellerStatusBadge"
@@ -27,19 +27,20 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: boolean }) {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   useSellerLive()
   const profile = getSellerProfile(userId)
 
   if (!profile && !isSellerRole) {
     return (
       <section className="mt-8">
-        <h2 className="text-xl font-bold text-navy">Want to sell your motorcycle?</h2>
+        <h2 className="text-xl font-bold text-navy">{t("profile.wantSell")}</h2>
         <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
           <p className="text-sm leading-relaxed text-navy-muted">
-            Register as a Motodo seller with your garage or dealership details.
+            {t("profile.registerSeller")}
           </p>
           <Button className="mt-4" onClick={() => navigate("/seller/register")}>
-            Become a Seller
+            {t("nav.becomeSeller")}
           </Button>
         </div>
       </section>
@@ -49,14 +50,14 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
   if (!profile) {
     return (
       <section className="mt-8">
-        <h2 className="text-xl font-bold text-navy">Seller Center</h2>
+        <h2 className="text-xl font-bold text-navy">{t("profile.sellerCenter")}</h2>
         <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-          <p className="text-sm font-medium text-navy">Complete Seller Registration</p>
+          <p className="text-sm font-medium text-navy">{t("profile.completeReg")}</p>
           <p className="mt-2 text-sm leading-relaxed text-navy-muted">
-            Add your business, NIB, and showroom details to start listing motorcycles.
+            {t("profile.completeRegBody")}
           </p>
           <Button className="mt-4" onClick={() => navigate("/seller/register")}>
-            Become a Seller
+            {t("nav.becomeSeller")}
           </Button>
         </div>
       </section>
@@ -65,13 +66,19 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
 
   return (
     <section className="mt-8">
-      <h2 className="text-xl font-bold text-navy">Seller Center</h2>
+      <h2 className="text-xl font-bold text-navy">{t("profile.sellerCenter")}</h2>
       <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-medium text-navy">{sellerStatusHeading(profile.status)}</p>
+          <p className="text-sm font-medium text-navy">
+            {profile.status === "approved"
+              ? t("listing.verifiedSeller")
+              : profile.status === "rejected"
+                ? t("seller.rejectedReg")
+                : t("seller.verifyPending")}
+          </p>
           <SellerStatusBadge
             status={profile.status}
-            label={profile.status === "approved" ? "Verified Seller" : undefined}
+            label={profile.status === "approved" ? t("listing.verifiedSeller") : undefined}
           />
         </div>
         <p className="mt-2 text-sm text-navy-muted">{profile.businessName}</p>
@@ -79,10 +86,10 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
           <p className="mt-2 text-sm text-red-700">{profile.rejectionReason}</p>
         ) : null}
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-          <Button onClick={() => navigate("/seller/dashboard")}>Seller Dashboard</Button>
+          <Button onClick={() => navigate("/seller/dashboard")}>{t("nav.sellerDashboard")}</Button>
           {profile.status === "rejected" ? (
             <Button variant="secondary" onClick={() => navigate("/seller/register")}>
-              Edit Registration
+              {t("profile.editRegistration")}
             </Button>
           ) : null}
         </div>
@@ -93,6 +100,7 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
 
 export function ProfilePage() {
   const { user, profile, logout, updateProfile, loading } = useAuth()
+  const { t, tm } = useLanguage()
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
   const [fullName, setFullName] = useState(user?.fullName ?? "")
@@ -105,7 +113,7 @@ export function ProfilePage() {
   if (loading || !isSellerProfilesReady()) {
     return (
       <main className="bg-white py-16">
-        <p className="text-center text-sm text-navy-muted">Loading...</p>
+        <p className="text-center text-sm text-navy-muted">{t("common.loading")}</p>
       </main>
     )
   }
@@ -113,7 +121,9 @@ export function ProfilePage() {
   if (!user) return null
   const displayName = profile?.fullName ?? user.fullName
   const accountType = profile?.accountType ?? user.role
-  const privilegeLabel = profile?.role === "admin" ? "Admin" : "User"
+  const privilegeLabel = profile?.role === "admin" ? t("auth.admin") : t("auth.user")
+  const accountTypeLabel = accountType === "seller" ? t("auth.seller") : t("auth.buyer")
+  const accountTypeDesc = accountType === "seller" ? t("auth.sellerDesc") : t("auth.buyerDesc")
   const sellerListings = getListingsBySeller(user.id)
   const sellerProfile = getSellerProfile(user.id)
 
@@ -124,22 +134,22 @@ export function ProfilePage() {
 
   async function saveProfile() {
     if (!fullName.trim()) {
-      setError("Full name is required.")
+      setError(t("auth.nameRequired"))
       setSuccess("")
       return
     }
     try {
       const next = await updateProfile({ fullName: fullName.trim() })
       if (!next) {
-        setError("Unable to update your profile.")
+        setError(t("auth.unableUpdateProfile"))
         setSuccess("")
         return
       }
       setEditing(false)
       setError("")
-      setSuccess("Profile updated.")
+      setSuccess(t("profile.saved"))
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Unable to update your profile.")
+      setError(saveError instanceof Error ? tm(saveError.message, "auth.unableUpdateProfile") : t("auth.unableUpdateProfile"))
       setSuccess("")
     }
   }
@@ -148,25 +158,25 @@ export function ProfilePage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">My Profile</h1>
-          <p className="mt-2 text-navy-muted">Your Motodo account details.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("nav.myProfile")}</h1>
+          <p className="mt-2 text-navy-muted">{t("profile.subtitle")}</p>
 
           <section className="mt-8 rounded-2xl border border-line bg-white px-5 py-6 sm:px-6">
             <dl className="space-y-4">
-              <InfoRow label="Full Name" value={displayName} />
-              <InfoRow label="Email" value={user.email} />
-              <InfoRow label="Account Type" value={roleLabel(accountType)} />
-              <InfoRow label="Role" value={privilegeLabel} />
-              <InfoRow label="Member Since" value={formatMemberSince(profile?.createdAt ?? user.createdAt)} />
+              <InfoRow label={t("profile.fullName")} value={displayName} />
+              <InfoRow label={t("profile.email")} value={user.email} />
+              <InfoRow label={t("profile.accountType")} value={accountTypeLabel} />
+              <InfoRow label={t("profile.role")} value={privilegeLabel} />
+              <InfoRow label={t("profile.memberSince")} value={formatMemberSince(profile?.createdAt ?? user.createdAt)} />
             </dl>
           </section>
 
           <section className="mt-8">
-            <h2 className="text-xl font-bold text-navy">Personal Information</h2>
+            <h2 className="text-xl font-bold text-navy">{t("profile.personal")}</h2>
             <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
               {editing ? (
                 <div className="space-y-4">
-                  <Field label="Full Name" htmlFor="profile-name" error={error}>
+                  <Field label={t("profile.fullName")} htmlFor="profile-name" error={error}>
                     <AuthInput
                       id="profile-name"
                       value={fullName}
@@ -175,16 +185,16 @@ export function ProfilePage() {
                     />
                   </Field>
                   <div>
-                    <p className="text-sm font-medium text-navy">Email</p>
+                    <p className="text-sm font-medium text-navy">{t("profile.email")}</p>
                     <p className="mt-1 text-sm text-navy-muted">{user.email}</p>
-                    <p className="mt-1 text-xs text-navy-muted">Email cannot be changed yet.</p>
+                    <p className="mt-1 text-xs text-navy-muted">{t("profile.emailLocked")}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-navy">Account Type</p>
-                    <p className="mt-1 text-sm text-navy-muted">{roleLabel(accountType)}</p>
+                    <p className="text-sm font-medium text-navy">{t("profile.accountType")}</p>
+                    <p className="mt-1 text-sm text-navy-muted">{accountTypeLabel}</p>
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <Button onClick={saveProfile}>Save</Button>
+                    <Button onClick={saveProfile}>{t("common.save")}</Button>
                     <Button
                       variant="secondary"
                       onClick={() => {
@@ -193,17 +203,17 @@ export function ProfilePage() {
                         setError("")
                       }}
                     >
-                      Cancel
+                      {t("common.cancel")}
                     </Button>
                   </div>
                 </div>
               ) : (
                 <>
                   <dl className="space-y-4">
-                    <InfoRow label="Full Name" value={displayName} />
-                    <InfoRow label="Email" value={user.email} />
-                    <InfoRow label="Account Type" value={roleLabel(accountType)} />
-                    <InfoRow label="Role" value={privilegeLabel} />
+                    <InfoRow label={t("profile.fullName")} value={displayName} />
+                    <InfoRow label={t("profile.email")} value={user.email} />
+                    <InfoRow label={t("profile.accountType")} value={accountTypeLabel} />
+                    <InfoRow label={t("profile.role")} value={privilegeLabel} />
                   </dl>
                   {success ? (
                     <p className="mt-4 text-sm text-brand" role="status">
@@ -218,7 +228,7 @@ export function ProfilePage() {
                       setSuccess("")
                     }}
                   >
-                    Edit Profile
+                    {t("profile.editProfile")}
                   </Button>
                 </>
               )}
@@ -226,30 +236,30 @@ export function ProfilePage() {
           </section>
 
           <section className="mt-8">
-            <h2 className="text-xl font-bold text-navy">Account Type</h2>
+            <h2 className="text-xl font-bold text-navy">{t("profile.accountType")}</h2>
             <div className="mt-4 rounded-2xl border border-line bg-surface px-5 py-5 sm:px-6">
-              <p className="text-sm font-semibold text-navy">{roleLabel(accountType)}</p>
-              <p className="mt-1 text-sm leading-relaxed text-navy-muted">{roleDescription(accountType)}</p>
+              <p className="text-sm font-semibold text-navy">{accountTypeLabel}</p>
+              <p className="mt-1 text-sm leading-relaxed text-navy-muted">{accountTypeDesc}</p>
             </div>
           </section>
 
           <section className="mt-8">
-            <h2 className="text-xl font-bold text-navy">Orders</h2>
+            <h2 className="text-xl font-bold text-navy">{t("common.orders")}</h2>
             <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-              <p className="text-sm text-navy-muted">View motorcycles you have ordered.</p>
-              <p className="mt-2 text-sm text-navy-muted">You can review a motorcycle after your order is completed.</p>
+              <p className="text-sm text-navy-muted">{t("profile.viewOrders")}</p>
+              <p className="mt-2 text-sm text-navy-muted">{t("orders.reviewHint")}</p>
               <Button className="mt-4" onClick={() => navigate("/orders")}>
-                My Orders
+                {t("nav.myOrders")}
               </Button>
             </div>
           </section>
 
           <section className="mt-8">
-            <h2 className="text-xl font-bold text-navy">Messages</h2>
+            <h2 className="text-xl font-bold text-navy">{t("common.messages")}</h2>
             <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-              <p className="text-sm text-navy-muted">Ask sellers about motorcycles and keep your conversations in one place.</p>
+              <p className="text-sm text-navy-muted">{t("profile.messagesBody")}</p>
               <Button className="mt-4" onClick={() => navigate("/messages")}>
-                Messages
+                {t("common.messages")}
               </Button>
             </div>
           </section>
@@ -258,17 +268,17 @@ export function ProfilePage() {
 
           {sellerProfile ? (
             <section className="mt-8">
-              <h2 className="text-xl font-bold text-navy">My Listings</h2>
+              <h2 className="text-xl font-bold text-navy">{t("profile.myListings")}</h2>
               {sellerListings.length === 0 ? (
                 <div className="mt-4 rounded-2xl border border-line px-5 py-8 text-center sm:px-6">
-                  <p className="text-sm text-navy-muted">You haven't listed any motorcycles yet.</p>
+                  <p className="text-sm text-navy-muted">{t("profile.noListings")}</p>
                   {sellerProfile.status === "approved" ? (
                     <Button className="mt-4" onClick={() => navigate("/seller/listings/new")}>
-                      Add Motorcycle
+                      {t("profile.addMotorcycle")}
                     </Button>
                   ) : (
                     <p className="mt-2 text-sm text-navy-muted">
-                      Listing creation is available after seller verification is approved.
+                      {t("profile.listingAfterApproval")}
                     </p>
                   )}
                 </div>
@@ -284,22 +294,22 @@ export function ProfilePage() {
 
           <section className="mt-8">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <h2 className="text-xl font-bold text-navy">Saved Motorcycles</h2>
-              <ViewAllLink href="/favorites">View All Saved Motorcycles</ViewAllLink>
+              <h2 className="text-xl font-bold text-navy">{t("profile.savedTitle")}</h2>
+              <ViewAllLink href="/favorites">{t("profile.viewAllSaved")}</ViewAllLink>
             </div>
             <div className="mt-4 rounded-2xl border border-line px-5 py-8 sm:px-6">
               <p className="text-sm text-navy-muted">
-                Saved motorcycles will appear here once Favorites is available.
+                {t("profile.savedBody")}
               </p>
             </div>
           </section>
 
           <section className="mt-8">
-            <h2 className="text-xl font-bold text-navy">Account</h2>
+            <h2 className="text-xl font-bold text-navy">{t("profile.account")}</h2>
             <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-              <p className="text-sm text-navy-muted">Sign out of your Motodo account on this device.</p>
+              <p className="text-sm text-navy-muted">{t("profile.signOutBody")}</p>
               <Button variant="secondary" className="mt-4" onClick={handleLogout}>
-                Log Out
+                {t("common.logout")}
               </Button>
             </div>
           </section>

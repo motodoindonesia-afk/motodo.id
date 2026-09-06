@@ -8,6 +8,7 @@ import {
 } from "../../lib/sellerForm"
 import { AuthInput, AuthSelect, AuthTextarea, Field } from "../auth/AuthField"
 import { Button } from "../ui/Button"
+import { businessTypeLabel, useLanguage } from "../../i18n"
 
 type Props = {
   initial: Partial<SellerFormValues>
@@ -26,6 +27,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onSubmit }: Props) {
+  const { locale, t, tm } = useLanguage()
   const [values, setValues] = useState<SellerFormValues>(() => emptySellerForm(initial))
   const [errors, setErrors] = useState<SellerFormErrors>({})
   const [formError, setFormError] = useState("")
@@ -46,7 +48,7 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
     try {
       await onSubmit(values)
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to save seller registration.")
+      setFormError(error instanceof Error ? tm(error.message, "reg.unable") : t("reg.unable"))
     } finally {
       setLoading(false)
     }
@@ -54,8 +56,8 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-      <Section title="Contact Information">
-        <Field label="Full Name" htmlFor="seller-name" error={errors.fullName}>
+      <Section title={t("reg.contact")}>
+        <Field label={t("auth.fullName")} htmlFor="seller-name" error={errors.fullName ? tm(errors.fullName) : undefined}>
           <AuthInput
             id="seller-name"
             value={values.fullName}
@@ -63,10 +65,10 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
             onChange={(event) => update("fullName", event.target.value)}
           />
         </Field>
-        <Field label="Email" htmlFor="seller-email" hint="Email is taken from your Motodo account.">
+        <Field label={t("auth.email")} htmlFor="seller-email" hint={t("reg.emailHint")}>
           <AuthInput id="seller-email" value={values.email} readOnly disabled className="bg-surface" />
         </Field>
-        <Field label="Phone / WhatsApp" htmlFor="seller-phone" error={errors.phone}>
+        <Field label={t("reg.phone")} htmlFor="seller-phone" error={errors.phone ? tm(errors.phone) : undefined}>
           <AuthInput
             id="seller-phone"
             value={values.phone}
@@ -77,27 +79,27 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
         </Field>
       </Section>
 
-      <Section title="Business Information">
-        <Field label="Business / Garage Name" htmlFor="seller-business" error={errors.businessName}>
+      <Section title={t("reg.business")}>
+        <Field label={t("reg.businessName")} htmlFor="seller-business" error={errors.businessName ? tm(errors.businessName) : undefined}>
           <AuthInput
             id="seller-business"
             value={values.businessName}
             invalid={Boolean(errors.businessName)}
-            placeholder="Jakarta Custom Garage"
+            placeholder={t("reg.businessPlaceholder")}
             onChange={(event) => update("businessName", event.target.value)}
           />
         </Field>
-        <Field label="Business Type" htmlFor="seller-type" error={errors.businessType}>
+        <Field label={t("seller.businessType")} htmlFor="seller-type" error={errors.businessType ? tm(errors.businessType) : undefined}>
           <AuthSelect
             id="seller-type"
             value={values.businessType}
             invalid={Boolean(errors.businessType)}
             onChange={(event) => update("businessType", event.target.value as BusinessType | "")}
           >
-            <option value="">Select business type</option>
+            <option value="">{t("reg.selectType")}</option>
             {BUSINESS_TYPES.map((type) => (
               <option key={type} value={type}>
-                {type}
+                {businessTypeLabel(locale, type)}
               </option>
             ))}
           </AuthSelect>
@@ -105,52 +107,52 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
         <Field
           label="NIB"
           htmlFor="seller-nib"
-          error={errors.nib}
-          hint="Nomor Induk Berusaha. Entered as text for now — no government verification yet."
+          hint={t("reg.nibHint")}
+          error={errors.nib ? tm(errors.nib) : undefined}
         >
           <AuthInput
             id="seller-nib"
             value={values.nib}
             invalid={Boolean(errors.nib)}
-            placeholder="13-digit NIB"
+            placeholder={t("reg.nibPlaceholder")}
             onChange={(event) => update("nib", event.target.value)}
           />
         </Field>
-        <Field label="Year Established" htmlFor="seller-year" error={errors.yearEstablished}>
+        <Field label={t("reg.yearEstablished")} htmlFor="seller-year" error={errors.yearEstablished ? tm(errors.yearEstablished) : undefined}>
           <AuthInput
             id="seller-year"
             inputMode="numeric"
             value={values.yearEstablished}
             invalid={Boolean(errors.yearEstablished)}
-            placeholder="e.g. 2018"
+            placeholder={t("reg.yearPlaceholder")}
             onChange={(event) => update("yearEstablished", event.target.value)}
           />
         </Field>
       </Section>
 
-      <Section title="Showroom Information">
+      <Section title={t("reg.showroom")}>
         <p className="text-sm leading-relaxed text-navy-muted">
-          Motodo sellers should have a physical showroom or business location where buyers can view motorcycles.
+          {t("reg.showroomBody")}
         </p>
-        <Field label="City" htmlFor="seller-city" error={errors.city}>
+        <Field label={t("orders.city")} htmlFor="seller-city" error={errors.city ? tm(errors.city) : undefined}>
           <AuthInput
             id="seller-city"
             value={values.city}
             invalid={Boolean(errors.city)}
-            placeholder="Jakarta Selatan"
+            placeholder={t("reg.cityPlaceholder")}
             onChange={(event) => update("city", event.target.value)}
           />
         </Field>
-        <Field label="Showroom Address" htmlFor="seller-address" error={errors.showroomAddress}>
+        <Field label={t("seller.showroomAddress")} htmlFor="seller-address" error={errors.showroomAddress ? tm(errors.showroomAddress) : undefined}>
           <AuthTextarea
             id="seller-address"
             value={values.showroomAddress}
             invalid={Boolean(errors.showroomAddress)}
-            placeholder="Street, number, and area"
+            placeholder={t("reg.addressPlaceholder")}
             onChange={(event) => update("showroomAddress", event.target.value)}
           />
         </Field>
-        <Field label="Postal Code" htmlFor="seller-postal" error={errors.postalCode}>
+        <Field label={t("reg.postal")} htmlFor="seller-postal" error={errors.postalCode ? tm(errors.postalCode) : undefined}>
           <AuthInput
             id="seller-postal"
             inputMode="numeric"
@@ -162,8 +164,8 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
         </Field>
       </Section>
 
-      <Section title="Online Presence">
-        <Field label="Instagram" htmlFor="seller-instagram" optional error={errors.instagram}>
+      <Section title={t("reg.online")}>
+        <Field label={t("reg.instagram")} htmlFor="seller-instagram" optional error={errors.instagram ? tm(errors.instagram) : undefined}>
           <AuthInput
             id="seller-instagram"
             value={values.instagram}
@@ -171,7 +173,7 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
             onChange={(event) => update("instagram", event.target.value)}
           />
         </Field>
-        <Field label="Website" htmlFor="seller-website" optional error={errors.website}>
+        <Field label={t("seller.website")} htmlFor="seller-website" optional error={errors.website ? tm(errors.website) : undefined}>
           <AuthInput
             id="seller-website"
             value={values.website}
@@ -181,18 +183,18 @@ export function SellerRegistrationForm({ initial, submitLabel, loadingLabel, onS
         </Field>
       </Section>
 
-      <Section title="About the Business">
+      <Section title={t("reg.about")}>
         <Field
-          label="Tell buyers about your garage or business."
+          label={t("reg.aboutLabel")}
           htmlFor="seller-about"
-          error={errors.description}
-          hint="Include specialization, brands, custom work, experience, and services."
+          error={errors.description ? tm(errors.description) : undefined}
+          hint={t("reg.aboutHint")}
         >
           <AuthTextarea
             id="seller-about"
             value={values.description}
             invalid={Boolean(errors.description)}
-            placeholder="We specialize in Harley-Davidson customs, restorations, and dealer-quality servicing."
+            placeholder={t("reg.aboutPlaceholder")}
             onChange={(event) => update("description", event.target.value)}
           />
         </Field>

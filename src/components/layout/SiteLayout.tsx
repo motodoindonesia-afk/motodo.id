@@ -16,10 +16,12 @@ export function SiteLayout() {
   }, [location.pathname, location.hash])
 
   return (
-    <>
+    <div className="flex min-h-screen min-w-0 flex-col">
       <Header />
-      <Outlet />
+      <div className="min-w-0 flex-1">
+        <Outlet />
+      </div>
       <Footer />
-    </>
+    </div>
   )
 }

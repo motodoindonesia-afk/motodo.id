@@ -12,9 +12,11 @@ import {
 import { getSellerRatingSummary } from "../lib/reviews"
 import { useReviewsLive } from "../lib/useReviewsLive"
 import { useSellerLive } from "../lib/useSellerLive"
+import { useT } from "../i18n"
 
 export function PublicSellerReviewsPage() {
   const { sellerId = "" } = useParams()
+  const t = useT()
   useSellerLive()
   useReviewsLive()
 
@@ -24,10 +26,10 @@ export function PublicSellerReviewsPage() {
     return (
       <main className="bg-white py-16 sm:py-20">
         <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Seller not found</h1>
-          <p className="mt-3 text-navy-muted">This seller profile is unavailable or the link is incorrect.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.notFound")}</h1>
+          <p className="mt-3 text-navy-muted">{t("seller.notFoundBody")}</p>
           <Link to="/browse" className="mt-8 inline-flex text-sm font-medium text-brand hover:text-brand-hover">
-            Return to Browse
+            {t("listing.returnBrowse")}
           </Link>
         </Container>
       </main>
@@ -46,33 +48,31 @@ export function PublicSellerReviewsPage() {
       <Container>
         <div className="mx-auto max-w-3xl">
           <Link to={storePath} className="text-sm font-medium text-brand hover:text-brand-hover">
-            ← Back to {profile.businessName}
+            {t("seller.backTo", { name: profile.businessName })}
           </Link>
           <div className="mt-5">
             <h1 className="text-3xl font-bold tracking-tight text-navy">{profile.businessName}</h1>
             {approved ? (
               <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-navy">
                 <ShieldCheck className="size-4 text-brand" aria-hidden="true" />
-                Verified Seller
+                {t("listing.verifiedSeller")}
               </p>
             ) : null}
           </div>
 
           {!approved ? (
             <p className="mt-8 rounded-2xl border border-line bg-surface px-5 py-8 text-center text-navy-muted">
-              {profile.status === "pending"
-                ? "This seller profile is currently under verification."
-                : "This seller profile is currently unavailable."}
+              {profile.status === "pending" ? t("seller.underVerification") : t("seller.unavailable")}
             </p>
           ) : (
             <>
               <section className="mt-8 rounded-2xl border border-line px-5 py-6 sm:px-6">
                 <RatingSummary
-                  title="Customer Reviews"
+                  title={t("seller.customerReviews")}
                   average={average}
                   count={summary.count}
                   breakdown={reviews.length > 0 ? breakdown : undefined}
-                  emptyLabel="No reviews yet."
+                  emptyLabel={t("listing.noReviews")}
                 />
               </section>
               {reviews.length > 0 ? (

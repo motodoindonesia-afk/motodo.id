@@ -4,8 +4,12 @@ import { coerceListingQuantity } from "../../lib/listingForm"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { Container } from "../layout/Container"
 import { ListingCard } from "../ui/ListingCard"
+import { ListingCardSkeleton } from "../ui/ListingCardSkeleton"
+import { EmptyState } from "../ui/EmptyState"
 import { HomeSectionHeader } from "./HomeSectionHeader"
+import { HOME_PRODUCT_COUNT, HomeProductCell, HomeProductGrid } from "./HomeProductGrid"
 import { getPublicHomeListings } from "./homeListings"
+import { useT } from "../../i18n"
 
 function pad(value: number) {
   return String(value).padStart(2, "0")
@@ -45,15 +49,16 @@ export function FlashSale() {
   useListingsLive()
   const countdown = useEndOfDayCountdown()
   const listings = getPublicHomeListings()
+  const t = useT()
 
   return (
     <section className="pb-6">
       <Container>
         <HomeSectionHeader
-          title="Flash Sale"
+          title={t("home.flashSale")}
           icon={<Zap className="size-4 text-brand" strokeWidth={1.75} aria-hidden="true" />}
           trailing={
-            <span className="flex items-center gap-1" aria-label="Countdown">
+            <span className="flex items-center gap-1" aria-label={t("home.countdown")}>
               <CountdownBox value={countdown.hours} />
               <span className="text-meta text-navy-muted">:</span>
               <CountdownBox value={countdown.minutes} />
@@ -63,20 +68,26 @@ export function FlashSale() {
           }
         />
         {listings === null ? (
-          <p className="text-ui text-navy-muted">Loading...</p>
+          <HomeProductGrid>
+            {Array.from({ length: HOME_PRODUCT_COUNT }).map((_, index) => (
+              <HomeProductCell key={index}>
+                <ListingCardSkeleton />
+              </HomeProductCell>
+            ))}
+          </HomeProductGrid>
         ) : listings.length === 0 ? (
-          <p className="text-ui text-navy-muted">Belum ada motor untuk ditampilkan.</p>
+          <EmptyState title={t("home.emptyListings")} />
         ) : (
-          <div className="-mx-5 flex min-w-0 items-stretch gap-3 overflow-x-auto px-5 pb-1">
-            {listings.slice(0, 6).map((listing) => {
+          <HomeProductGrid>
+            {listings.slice(0, HOME_PRODUCT_COUNT).map((listing) => {
               const remaining = coerceListingQuantity(listing.quantity)
               const fill = remaining <= 0 ? 0 : Math.min(100, Math.max(16, remaining * 20))
               return (
-                <div key={listing.id} className="w-[168px] shrink-0 self-stretch sm:w-[180px]">
+                <HomeProductCell key={listing.id}>
                   <ListingCard
                     listing={listing}
                     badge={
-                      <span className="rounded-sm bg-brand px-1.5 py-0.5 text-[10px] font-medium text-white">Promo</span>
+                      <span className="rounded-sm bg-brand px-1.5 py-0.5 text-[10px] font-medium text-white">{t("home.promo")}</span>
                     }
                     hideQuantity
                     footer={
@@ -84,14 +95,14 @@ export function FlashSale() {
                         <div className="h-1 overflow-hidden rounded-full bg-brand-soft">
                           <div className="h-full rounded-full bg-brand" style={{ width: `${fill}%` }} />
                         </div>
-                        <p className="mt-1 min-h-[1.4em] text-meta text-navy-muted">Tersisa {remaining}</p>
+                        <p className="mt-1 min-h-[1.4em] text-meta text-navy-muted">{t("home.remaining", { count: remaining })}</p>
                       </div>
                     }
                   />
-                </div>
+                </HomeProductCell>
               )
             })}
-          </div>
+          </HomeProductGrid>
         )}
       </Container>
     </section>

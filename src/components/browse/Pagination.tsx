@@ -1,4 +1,5 @@
 import { cn } from "../../lib/cn"
+import { useT } from "../../i18n"
 
 type Props = {
   currentPage: number
@@ -16,19 +17,20 @@ function pageItems(currentPage: number, totalPages: number) {
 }
 
 export function Pagination({ currentPage, totalPages, onPageChange }: Props) {
+  const t = useT()
   if (totalPages <= 1) return null
 
   const pages = pageItems(currentPage, totalPages)
 
   return (
-    <nav className="mt-6 flex items-center justify-center gap-1.5" aria-label="Pagination">
+    <nav className="mt-6 flex items-center justify-center gap-1.5" aria-label={t("browse.pagination")}>
       <button
         type="button"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
         className="rounded-lg px-2.5 py-1.5 text-ui font-medium text-navy hover:text-brand disabled:cursor-not-allowed disabled:text-navy-muted/50"
       >
-        Previous
+        {t("pagination.previous")}
       </button>
       {pages.map((page, index) => {
         const previous = pages[index - 1]
@@ -61,7 +63,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Props) {
         onClick={() => onPageChange(currentPage + 1)}
         className="rounded-lg px-2.5 py-1.5 text-ui font-medium text-navy hover:text-brand disabled:cursor-not-allowed disabled:text-navy-muted/50"
       >
-        Next
+        {t("pagination.next")}
       </button>
     </nav>
   )

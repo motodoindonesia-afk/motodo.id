@@ -47,6 +47,7 @@ import { NotificationsPage } from "./pages/NotificationsPage"
 import { PublicSellerPage } from "./pages/PublicSellerPage"
 import { PublicSellerReviewsPage } from "./pages/PublicSellerReviewsPage"
 import { NotFoundPage } from "./pages/NotFoundPage"
+import { LanguageProvider } from "./i18n"
 
 function SellerListingGate({ children }: { children: ReactNode }) {
   return (
@@ -60,10 +61,15 @@ function SellerListingGate({ children }: { children: ReactNode }) {
 
 export default function App() {
   if (isProductionConfigBlocked()) {
-    return <ProductionConfigError />
+    return (
+      <LanguageProvider>
+        <ProductionConfigError />
+      </LanguageProvider>
+    )
   }
 
   return (
+    <LanguageProvider>
     <BrowserRouter>
       <AuthProvider>
         <SellerProfilesProvider>
@@ -73,6 +79,8 @@ export default function App() {
         <ReviewsProvider>
         <NotificationsProvider>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route element={<SiteLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route
@@ -179,8 +187,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
             <Route
               path="/profile"
               element={
@@ -376,5 +382,6 @@ export default function App() {
         </SellerProfilesProvider>
       </AuthProvider>
     </BrowserRouter>
+    </LanguageProvider>
   )
 }

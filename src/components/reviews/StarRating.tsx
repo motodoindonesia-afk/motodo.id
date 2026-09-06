@@ -1,5 +1,5 @@
-import { ratingLabel } from "../../lib/reviews"
 import { cn } from "../../lib/cn"
+import { useT } from "../../i18n"
 
 type Props = {
   value: number
@@ -9,10 +9,11 @@ type Props = {
 }
 
 export function StarRating({ value, onChange, readOnly = false, size = "md" }: Props) {
+  const t = useT()
   const interactive = Boolean(onChange) && !readOnly
 
   return (
-    <div className="inline-flex items-center gap-0.5" role={interactive ? "radiogroup" : "img"} aria-label={`${value} out of 5 stars`}>
+    <div className="inline-flex items-center gap-0.5" role={interactive ? "radiogroup" : "img"} aria-label={t("review.starsAria", { value })}>
       {[1, 2, 3, 4, 5].map((star) => {
         const filled = star <= value
         const className = cn(
@@ -33,7 +34,7 @@ export function StarRating({ value, onChange, readOnly = false, size = "md" }: P
             type="button"
             role="radio"
             aria-checked={value === star}
-            aria-label={ratingLabel(star)}
+            aria-label={star === 1 ? t("review.starOne") : t("review.starRating", { count: star })}
             className={className}
             onClick={() => onChange?.(star)}
           >

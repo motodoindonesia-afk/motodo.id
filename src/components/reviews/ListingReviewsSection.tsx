@@ -4,9 +4,11 @@ import { ReviewCard } from "./ReviewCard"
 import { Button } from "../ui/Button"
 import { getListingReviews, getListingRatingSummary, getRatingBreakdown } from "../../lib/reviews"
 import { useReviewsLive } from "../../lib/useReviewsLive"
+import { useT } from "../../i18n"
 
 export function ListingReviewsSection({ listingId }: { listingId: string }) {
   useReviewsLive()
+  const t = useT()
   const [expanded, setExpanded] = useState(false)
   const reviews = getListingReviews(listingId)
   const summary = getListingRatingSummary(listingId)
@@ -16,7 +18,7 @@ export function ListingReviewsSection({ listingId }: { listingId: string }) {
 
   return (
     <section className="mt-12 sm:mt-14">
-      <RatingSummary title="Reviews" average={average} count={summary.count} breakdown={reviews.length > 0 ? breakdown : undefined} />
+      <RatingSummary title={t("review.reviews")} average={average} count={summary.count} breakdown={reviews.length > 0 ? breakdown : undefined} />
       {reviews.length > 0 ? (
         <>
           <div className="mt-6 grid gap-4">
@@ -26,7 +28,7 @@ export function ListingReviewsSection({ listingId }: { listingId: string }) {
           </div>
           {reviews.length > 5 ? (
             <Button variant="secondary" className="mt-4" onClick={() => setExpanded((value) => !value)}>
-              {expanded ? "Show fewer reviews" : "View All Reviews"}
+              {expanded ? t("review.showFewer") : t("review.viewAll")}
             </Button>
           ) : null}
         </>

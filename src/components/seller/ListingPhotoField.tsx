@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 import { fileToStoredImage, MAX_LISTING_PHOTOS } from "../../lib/listingImages"
 import { Button } from "../ui/Button"
 import { cn } from "../../lib/cn"
+import { useLanguage } from "../../i18n"
 
 type Props = {
   images: string[]
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export function ListingPhotoField({ images, error, onChange }: Props) {
+  const { t, tm } = useLanguage()
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [localError, setLocalError] = useState("")
@@ -18,7 +20,7 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
     if (!fileList?.length) return
     const remaining = MAX_LISTING_PHOTOS - images.length
     if (remaining <= 0) {
-      setLocalError("You can add up to 10 photos.")
+      setLocalError(t("form.photoMax"))
       return
     }
     setBusy(true)
@@ -31,7 +33,7 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
       }
       onChange([...images, ...next])
     } catch (caught) {
-      setLocalError(caught instanceof Error ? caught.message : "Unable to add that photo.")
+      setLocalError(caught instanceof Error ? tm(caught.message, "photo.unable") : t("photo.unable"))
     } finally {
       setBusy(false)
       if (inputRef.current) inputRef.current.value = ""
@@ -51,15 +53,15 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-navy">Add Photos</p>
-          <p className="mt-1 text-xs text-navy-muted">Up to 10 photos. The first photo is the cover image.</p>
+          <p className="text-sm font-medium text-navy">{t("photo.add")}</p>
+          <p className="mt-1 text-xs text-navy-muted">{t("photo.hint")}</p>
         </div>
         <Button
           variant="secondary"
           onClick={() => inputRef.current?.click()}
           disabled={busy || images.length >= MAX_LISTING_PHOTOS}
         >
-          {busy ? "Adding photos..." : "Add Photos"}
+          {busy ? t("photo.adding") : t("photo.add")}
         </Button>
       </div>
       <input
@@ -79,7 +81,7 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
                 <img src={src} alt="" className="h-full w-full object-cover" />
                 {index === 0 ? (
                   <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-navy">
-                    Cover
+                    {t("photo.cover")}
                   </span>
                 ) : null}
               </div>
@@ -90,7 +92,7 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
                   onClick={() => move(index, -1)}
                   disabled={index === 0}
                 >
-                  Up
+                  {t("photo.up")}
                 </button>
                 <button
                   type="button"
@@ -98,14 +100,14 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
                   onClick={() => move(index, 1)}
                   disabled={index === images.length - 1}
                 >
-                  Down
+                  {t("photo.down")}
                 </button>
                 <button
                   type="button"
                   className="ml-auto rounded-md px-2 py-1 text-xs text-red-700 hover:bg-red-50"
                   onClick={() => onChange(images.filter((_, itemIndex) => itemIndex !== index))}
                 >
-                  Remove
+                  {t("photo.remove")}
                 </button>
               </div>
             </li>
@@ -113,13 +115,13 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
         </ul>
       ) : (
         <p className="mt-4 rounded-xl border border-dashed border-line px-4 py-8 text-center text-sm text-navy-muted">
-          No photos yet. Add at least one image of the motorcycle.
+          {t("photo.empty")}
         </p>
       )}
 
       {error || localError ? (
         <p className="mt-2 text-sm text-red-700" role="alert">
-          {error || localError}
+          {error ? tm(error) : localError}
         </p>
       ) : null}
     </div>

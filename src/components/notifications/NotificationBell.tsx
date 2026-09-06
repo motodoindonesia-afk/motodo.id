@@ -13,10 +13,12 @@ import { useNotificationsLive } from "../../lib/useNotificationsLive"
 import { UnreadBadge } from "../chat/UnreadBadge"
 import { NotificationTypeIcon } from "./NotificationTypeIcon"
 import { cn } from "../../lib/cn"
+import { useT } from "../../i18n"
 
 export function NotificationBell() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const t = useT()
   useNotificationsLive()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -46,7 +48,7 @@ export function NotificationBell() {
       <button
         type="button"
         className="inline-flex items-center gap-1.5 text-navy hover:text-brand"
-        aria-label="Notifications"
+        aria-label={t("notify.title")}
         aria-expanded={open}
         onClick={() => {
           if (window.matchMedia("(max-width: 1023px)").matches) {
@@ -62,11 +64,11 @@ export function NotificationBell() {
       {open ? (
         <div className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-xl border border-line bg-white sm:w-96">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <p className="text-sm font-semibold text-navy">Notifications</p>
-            {unread > 0 ? <span className="text-xs text-navy-muted">{unread} unread</span> : null}
+            <p className="text-sm font-semibold text-navy">{t("notify.title")}</p>
+            {unread > 0 ? <span className="text-xs text-navy-muted">{t("notify.unreadCount", { count: unread })}</span> : null}
           </div>
           {latest.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-navy-muted">You're all caught up.</p>
+            <p className="px-4 py-8 text-center text-sm text-navy-muted">{t("notify.emptyAll")}</p>
           ) : (
             <ul>
               {latest.map((item) => (
@@ -83,7 +85,7 @@ export function NotificationBell() {
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start justify-between gap-2">
                         <span className="text-sm font-semibold text-navy">{item.title}</span>
-                        {!item.read ? <span className="mt-1 size-1.5 shrink-0 rounded-full bg-brand" aria-label="Unread" /> : null}
+                        {!item.read ? <span className="mt-1 size-1.5 shrink-0 rounded-full bg-brand" aria-label={t("notify.unread")} /> : null}
                       </span>
                       <span className="mt-0.5 line-clamp-2 block text-xs text-navy-muted">{item.message}</span>
                       <span className="mt-1 block text-xs text-navy-muted">{formatNotificationTime(item.createdAt)}</span>
@@ -101,7 +103,7 @@ export function NotificationBell() {
               navigate("/notifications")
             }}
           >
-            View All Notifications
+            {t("notify.viewAll")}
           </button>
         </div>
       ) : null}

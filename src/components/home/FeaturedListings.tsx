@@ -2,45 +2,60 @@ import { Sparkles } from "lucide-react"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { Container } from "../layout/Container"
 import { ListingCard } from "../ui/ListingCard"
+import { ListingCardSkeleton } from "../ui/ListingCardSkeleton"
+import { EmptyState } from "../ui/EmptyState"
 import { HomeSectionHeader } from "./HomeSectionHeader"
+import { HOME_PRODUCT_COUNT, HomeProductCell, HomeProductGrid } from "./HomeProductGrid"
 import { getPublicHomeListings } from "./homeListings"
+import { useT } from "../../i18n"
+
+function FeaturedBody({
+  listings,
+}: {
+  listings: ReturnType<typeof getPublicHomeListings>
+}) {
+  const t = useT()
+
+  if (listings === null) {
+    return (
+      <HomeProductGrid>
+        {Array.from({ length: HOME_PRODUCT_COUNT }).map((_, index) => (
+          <HomeProductCell key={index}>
+            <ListingCardSkeleton />
+          </HomeProductCell>
+        ))}
+      </HomeProductGrid>
+    )
+  }
+
+  if (listings.length === 0) {
+    return <EmptyState title={t("home.emptyListings")} />
+  }
+
+  return (
+    <HomeProductGrid>
+      {listings.slice(0, HOME_PRODUCT_COUNT).map((listing) => (
+        <HomeProductCell key={listing.id}>
+          <ListingCard listing={listing} />
+        </HomeProductCell>
+      ))}
+    </HomeProductGrid>
+  )
+}
 
 export function FeaturedListings() {
   useListingsLive()
   const listings = getPublicHomeListings()
-
-  if (listings === null) {
-    return (
-      <section id="browse" className="pb-8">
-        <Container>
-          <HomeSectionHeader
-            title="Rekomendasi"
-            icon={<Sparkles className="size-4 text-brand" strokeWidth={1.75} aria-hidden="true" />}
-          />
-          <p className="text-ui text-navy-muted">Loading...</p>
-        </Container>
-      </section>
-    )
-  }
+  const t = useT()
 
   return (
     <section id="browse" className="pb-8">
       <Container>
         <HomeSectionHeader
-          title="Rekomendasi"
+          title={t("home.recommended")}
           icon={<Sparkles className="size-4 text-brand" strokeWidth={1.75} aria-hidden="true" />}
         />
-        {listings.length === 0 ? (
-          <p className="text-ui text-navy-muted">Belum ada motor untuk ditampilkan.</p>
-        ) : (
-          <div className="-mx-5 flex items-stretch gap-3 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3 xl:grid-cols-5">
-            {listings.slice(0, 5).map((listing) => (
-              <div key={listing.id} className="h-full min-w-[168px] sm:min-w-0">
-                <ListingCard listing={listing} />
-              </div>
-            ))}
-          </div>
-        )}
+        <FeaturedBody listings={listings} />
       </Container>
     </section>
   )

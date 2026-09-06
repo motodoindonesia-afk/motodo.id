@@ -7,6 +7,7 @@ import { SellerDataGate } from "../../components/seller/SellerDataGate"
 import { SellerRegistrationForm } from "../../components/seller/SellerRegistrationForm"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
+import { useT } from "../../i18n"
 
 export function SellerRegisterPage() {
   const { user } = useAuth()
@@ -22,6 +23,7 @@ export function SellerRegisterPage() {
 function SellerRegisterInner() {
   const { user, updateProfile } = useAuth()
   const navigate = useNavigate()
+  const t = useT()
   const [submitted, setSubmitted] = useState(false)
 
   if (!user) return null
@@ -63,12 +65,12 @@ function SellerRegisterInner() {
       <main className="bg-white py-10 sm:py-14">
         <Container>
           <div className="mx-auto max-w-xl rounded-2xl border border-line px-6 py-10 text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-navy">Registration submitted</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.regSubmitted")}</h1>
             <p className="mt-3 text-base leading-relaxed text-navy-muted">
-              Your seller profile is currently pending verification.
+              {t("seller.regPending")}
             </p>
             <Button className="mt-8" onClick={() => navigate("/seller/dashboard")}>
-              Go to Seller Dashboard
+              {t("seller.goDashboard")}
             </Button>
           </div>
         </Container>
@@ -80,11 +82,9 @@ function SellerRegisterInner() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Become a Motodo Seller</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.becomeTitle")}</h1>
           <p className="mt-2 text-base leading-relaxed text-navy-muted">
-            {existing?.status === "rejected"
-              ? "Update your registration and submit it for another review."
-              : "Create your seller profile and start listing motorcycles on Motodo."}
+            {existing?.status === "rejected" ? t("seller.becomeResubmit") : t("seller.becomeCreate")}
           </p>
           <div className="mt-8">
             <SellerRegistrationForm
@@ -107,8 +107,8 @@ function SellerRegisterInner() {
                     }
                   : { fullName: user.fullName, email: user.email }
               }
-              submitLabel={existing?.status === "rejected" ? "Resubmit Seller Registration" : "Submit Seller Registration"}
-              loadingLabel="Submitting..."
+              submitLabel={existing?.status === "rejected" ? t("seller.resubmit") : t("seller.submitReg")}
+              loadingLabel={t("seller.submitting")}
               onSubmit={handleSubmit}
             />
           </div>

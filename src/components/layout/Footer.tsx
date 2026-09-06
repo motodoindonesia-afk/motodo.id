@@ -1,24 +1,25 @@
 import { Mail } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Container } from "./Container"
+import { useT, type MessageKey } from "../../i18n"
 
-const motodoLinks = [
-  { label: "Tentang Kami", href: "/#about" },
-  { label: "Komunitas", href: "/#community" },
-  { label: "Artikel & Edukasi", href: "/#articles" },
-  { label: "Kebijakan Privasi", href: "/#privacy" },
-  { label: "Syarat & Ketentuan", href: "/#terms" },
-  { label: "Pusat Bantuan", href: "/#help" },
-] as const
+const motodoLinks: { key: MessageKey; href: string; help?: boolean }[] = [
+  { key: "footer.about", href: "/#about" },
+  { key: "footer.community", href: "/#community" },
+  { key: "footer.articles", href: "/#articles" },
+  { key: "footer.privacy", href: "/#privacy" },
+  { key: "footer.terms", href: "/#terms" },
+  { key: "footer.helpCenter", href: "/#help", help: true },
+]
 
-const sellerLinks = [
-  { label: "Mulai Berjualan", href: "/sell" },
-  { label: "Seller Centre", href: "/seller/register" },
-  { label: "Panduan Penjual", href: "/#help" },
-  { label: "Biaya & Komisi", href: "/#premium" },
-  { label: "Kebijakan Penjual", href: "/#terms" },
-  { label: "Hubungi Tim Kami", href: "mailto:care@motodo.id" },
-] as const
+const sellerLinks: { key: MessageKey; href: string }[] = [
+  { key: "nav.startSelling", href: "/sell" },
+  { key: "nav.sellerCentre", href: "/seller/register" },
+  { key: "footer.sellerGuide", href: "/#help" },
+  { key: "footer.fees", href: "/#premium" },
+  { key: "footer.sellerPolicy", href: "/#terms" },
+  { key: "footer.contactTeam", href: "mailto:care@motodo.id" },
+]
 
 const linkClass =
   "text-[13px] font-normal leading-6 text-navy-muted transition-colors hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
@@ -51,10 +52,11 @@ function FooterLink({ href, children, id }: { href: string; children: string; id
 }
 
 function AppStoreBadge() {
+  const t = useT()
   return (
     <a
       href="#app-store"
-      aria-label="Download on the App Store"
+      aria-label={t("footer.appStore")}
       className="inline-flex h-10 items-center gap-2 rounded-[7px] bg-black px-3 text-white"
     >
       <svg viewBox="0 0 16 20" className="h-[18px] w-[14px] shrink-0" aria-hidden="true">
@@ -64,7 +66,7 @@ function AppStoreBadge() {
         />
       </svg>
       <span className="flex flex-col leading-none">
-        <span className="text-[8px] font-medium tracking-wide">Download on the</span>
+        <span className="text-[8px] font-medium tracking-wide">{t("footer.appStoreSmall")}</span>
         <span className="mt-[2px] text-[13px] font-semibold tracking-tight">App Store</span>
       </span>
     </a>
@@ -72,10 +74,11 @@ function AppStoreBadge() {
 }
 
 function GooglePlayBadge() {
+  const t = useT()
   return (
     <a
       href="#google-play"
-      aria-label="Get it on Google Play"
+      aria-label={t("footer.googlePlay")}
       className="inline-flex h-10 items-center gap-2 rounded-[7px] bg-black px-3 text-white"
     >
       <svg viewBox="0 0 18 20" className="h-[18px] w-[16px] shrink-0" aria-hidden="true">
@@ -85,7 +88,7 @@ function GooglePlayBadge() {
         <path fill="#4285F4" d="M16.3 5.9 10.8 10 .8 1.1 16.3 9.9c.7.4.7 1.4 0 1.8Z" />
       </svg>
       <span className="flex flex-col leading-none">
-        <span className="text-[8px] font-medium tracking-[0.12em]">GET IT ON</span>
+        <span className="text-[8px] font-medium tracking-[0.12em]">{t("footer.googlePlaySmall")}</span>
         <span className="mt-[2px] text-[13px] font-semibold tracking-tight">Google Play</span>
       </span>
     </a>
@@ -93,6 +96,8 @@ function GooglePlayBadge() {
 }
 
 export function Footer() {
+  const t = useT()
+
   return (
     <footer id="contact" className="border-t border-line bg-white">
       <Container>
@@ -100,41 +105,41 @@ export function Footer() {
           <div className="lg:pr-8">
             <p className="text-[13px] font-normal leading-none text-navy">motodo.id</p>
             <p className="mt-3 max-w-[260px] text-[13px] font-normal leading-6 text-navy-muted">
-              Custom & Premium Motorcycles Marketplace in Indonesia.
+              {t("footer.tagline")}
             </p>
             <div id="app-store" className="mt-5 flex flex-wrap gap-2">
               <AppStoreBadge />
               <GooglePlayBadge />
             </div>
-            <p className="mt-6 text-[13px] font-normal text-navy-muted">© 2026 Motodo. All rights reserved.</p>
+            <p className="mt-6 text-[13px] font-normal text-navy-muted">{t("footer.copyright")}</p>
           </div>
 
-          <nav className="lg:border-l lg:border-line lg:px-8" aria-label="Motodo">
-            <FooterHeading>Motodo</FooterHeading>
+          <nav className="lg:border-l lg:border-line lg:px-8" aria-label={t("footer.motodo")}>
+            <FooterHeading>{t("footer.motodo")}</FooterHeading>
             <ul className="mt-4 flex flex-col gap-2.5">
               {motodoLinks.map((link) => (
-                <li key={link.label} id={link.label === "Pusat Bantuan" ? "help" : undefined}>
-                  <FooterLink href={link.href}>{link.label}</FooterLink>
+                <li key={link.key} id={link.help ? "help" : undefined}>
+                  <FooterLink href={link.href}>{t(link.key)}</FooterLink>
                 </li>
               ))}
             </ul>
           </nav>
 
-          <nav className="lg:border-l lg:border-line lg:px-8" aria-label="Untuk Penjual">
-            <FooterHeading>Untuk Penjual</FooterHeading>
+          <nav className="lg:border-l lg:border-line lg:px-8" aria-label={t("footer.forSellers")}>
+            <FooterHeading>{t("footer.forSellers")}</FooterHeading>
             <ul className="mt-4 flex flex-col gap-2.5">
               {sellerLinks.map((link) => (
-                <li key={link.label}>
-                  <FooterLink href={link.href}>{link.label}</FooterLink>
+                <li key={link.key}>
+                  <FooterLink href={link.href}>{t(link.key)}</FooterLink>
                 </li>
               ))}
             </ul>
           </nav>
 
           <div className="lg:border-l lg:border-line lg:pl-8">
-            <FooterHeading>Hubungi Kami</FooterHeading>
+            <FooterHeading>{t("footer.contactUs")}</FooterHeading>
             <p className="mt-4 max-w-[240px] text-[13px] font-normal leading-6 text-navy-muted">
-              Punya pertanyaan? Hubungi tim kami melalui email berikut:
+              {t("footer.contactBody")}
             </p>
             <a
               href="mailto:care@motodo.id"

@@ -8,13 +8,9 @@ import { formatIDR } from "../../lib/listingForm"
 import { getListingPickupDetails } from "../../lib/listings"
 import {
   canSellerViewOrder,
-  deliveryFeeLabel,
-  deliveryMethodLabel,
   formatOrderDate,
   getOrderById,
   OrderError,
-  paymentMethodLabel,
-  paymentStatusLabel,
   SELLER_SUCCESS_FEE_RATE,
   updateSellerOrderStatus,
 } from "../../lib/orders"
@@ -22,6 +18,25 @@ import { getSellerProfile } from "../../lib/seller"
 import { useOrdersLive } from "../../lib/useOrdersLive"
 import { useSellerLive } from "../../lib/useSellerLive"
 import type { OrderStatus } from "../../types/order"
+import { useLanguage, type Translate } from "../../i18n"
+import type { DeliveryMethod, PaymentMethod, PaymentStatus } from "../../types/order"
+
+function deliveryLabel(t: Translate, method: DeliveryMethod) {
+  if (method === "pickup") return t("orders.pickupShowroom")
+  if (method === "seller_fleet") return t("orders.sellerFleet")
+  return t("orders.thirdParty")
+}
+
+function paymentLabel(t: Translate, method: PaymentMethod) {
+  return method === "bank_transfer" ? t("orders.bankTransfer") : t("orders.otherPayment")
+}
+
+function paymentStatusText(t: Translate, status?: PaymentStatus) {
+  if (status === "paid") return t("orders.paid")
+  if (status === "failed") return t("orders.failed")
+  if (status === "refunded") return t("orders.refunded")
+  return t("orders.pending")
+}
 
 export function SellerOrderDetailPage() {
   const { orderId } = useParams()
@@ -29,6 +44,7 @@ export function SellerOrderDetailPage() {
   const navigate = useNavigate()
   useSellerLive()
   useOrdersLive()
+  const { t, tm } = useLanguage()
   const [error, setError] = useState("")
   const [updating, setUpdating] = useState(false)
 
@@ -41,9 +57,9 @@ export function SellerOrderDetailPage() {
     return (
       <main className="bg-white py-16 sm:py-20">
         <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Order not found.</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.notFound")}</h1>
           <Button className="mt-8" onClick={() => navigate("/seller/orders")}>
-            Back to Orders
+            {t("seller.backOrders")}
           </Button>
         </Container>
       </main>
@@ -54,9 +70,9 @@ export function SellerOrderDetailPage() {
     return (
       <main className="bg-white py-16 sm:py-20">
         <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">You don't have permission to view this order.</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.noPermission")}</h1>
           <Button className="mt-8" onClick={() => navigate("/seller/orders")}>
-            Back to Orders
+            {t("seller.backOrders")}
           </Button>
         </Container>
       </main>
@@ -74,7 +90,7 @@ export function SellerOrderDetailPage() {
     try {
       await updateSellerOrderStatus(currentOrder.id, currentUser.id, next)
     } catch (err) {
-      setError(err instanceof OrderError || err instanceof Error ? err.message : "Unable to update order.")
+      setError(err instanceof OrderError || err instanceof Error ? tm(err.message, "seller.unableUpdate") : t("seller.unableUpdate"))
     } finally {
       setUpdating(false)
     }
@@ -84,13 +100,13 @@ export function SellerOrderDetailPage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Order Information</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.orderInfo")}</h1>
           <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
             <dl className="space-y-2 text-sm">
-              <Row label="Order ID" value={order.id} />
-              <Row label="Date" value={formatOrderDate(order.createdAt)} />
+              <Row label={t("seller.orderId")} value={order.id} />
+              <Row label={t("seller.date")} value={formatOrderDate(order.createdAt)} />
               <div className="flex justify-between gap-4">
-                <dt className="text-navy-muted">Status</dt>
+                <dt className="text-navy-muted">{t("orders.status")}</dt>
                 <dd>
                   <OrderStatusBadge status={order.status} />
                 </dd>
@@ -99,16 +115,16 @@ export function SellerOrderDetailPage() {
           </div>
 
           <section className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">Buyer Information</h2>
+            <h2 className="text-lg font-bold text-navy">{t("seller.buyerInfo")}</h2>
             <dl className="mt-4 space-y-2 text-sm">
-              <Row label="Buyer Name" value={order.buyerName || "—"} />
-              <Row label="Buyer Email" value={order.buyerEmail || "—"} />
-              <Row label="Buyer Phone" value={order.buyerPhone || "—"} />
+              <Row label={t("seller.buyerName")} value={order.buyerName || "—"} />
+              <Row label={t("seller.buyerEmail")} value={order.buyerEmail || "—"} />
+              <Row label={t("seller.buyerPhone")} value={order.buyerPhone || "—"} />
             </dl>
           </section>
 
           <section className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">Motorcycle</h2>
+            <h2 className="text-lg font-bold text-navy">{t("orders.motorcycle")}</h2>
             <div className="mt-4 flex flex-col gap-4 sm:flex-row">
               <div className="h-32 w-full overflow-hidden rounded-xl bg-surface sm:h-24 sm:w-32 sm:shrink-0">
                 {order.listingImage ? (
@@ -116,38 +132,38 @@ export function SellerOrderDetailPage() {
                 ) : null}
               </div>
               <dl className="space-y-2 text-sm">
-                <Row label="Motorcycle Name" value={order.listingName} />
-                <Row label="Quantity" value={String(order.quantity)} />
-                <Row label="Unit Price" value={formatIDR(order.unitPrice)} />
+                <Row label={t("seller.motorcycleName")} value={order.listingName} />
+                <Row label={t("checkout.quantity")} value={String(order.quantity)} />
+                <Row label={t("orders.unitPrice")} value={formatIDR(order.unitPrice)} />
               </dl>
             </div>
           </section>
 
           <section className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">Transaction Summary</h2>
+            <h2 className="text-lg font-bold text-navy">{t("seller.transactionSummary")}</h2>
             <dl className="mt-4 space-y-2 text-sm">
-              <Row label="Unit Price" value={formatIDR(order.unitPrice)} />
-              <Row label="Quantity" value={String(order.quantity)} />
-              <Row label="Subtotal" value={formatIDR(order.subtotal)} />
-              <Row label="Discount" value={formatIDR(order.discountAmount)} />
-              <Row label="Buyer Total" value={formatIDR(order.buyerTotal)} />
+              <Row label={t("orders.unitPrice")} value={formatIDR(order.unitPrice)} />
+              <Row label={t("checkout.quantity")} value={String(order.quantity)} />
+              <Row label={t("orders.subtotal")} value={formatIDR(order.subtotal)} />
+              <Row label={t("orders.discount")} value={formatIDR(order.discountAmount)} />
+              <Row label={t("orders.total")} value={formatIDR(order.buyerTotal)} />
             </dl>
             <div className="mt-5 border-t border-line pt-5">
-              <h3 className="text-sm font-semibold text-navy">Seller Fees</h3>
-              <p className="mt-2 text-sm text-navy-muted">Motodo charges a {feePercent}% success fee per transaction.</p>
+              <h3 className="text-sm font-semibold text-navy">{t("seller.sellerFees")}</h3>
+              <p className="mt-2 text-sm text-navy-muted">{t("seller.feePercent", { percent: feePercent })}</p>
               <dl className="mt-4 space-y-2 text-sm">
-                <Row label="Success Fee Rate" value={`${feePercent}%`} />
-                <Row label="Success Fee" value={`-${formatIDR(order.sellerSuccessFeeAmount)}`} />
+                <Row label={t("seller.feeRate")} value={`${feePercent}%`} />
+                <Row label={t("seller.successFee")} value={`-${formatIDR(order.sellerSuccessFeeAmount)}`} />
               </dl>
             </div>
             <div className="mt-5 border-t border-line pt-5">
-              <Row label="Seller Net Amount" value={formatIDR(order.sellerNetAmount)} strong />
+              <Row label={t("seller.sellerNetAmount")} value={formatIDR(order.sellerNetAmount)} strong />
             </div>
           </section>
 
           <section className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">Delivery</h2>
-            <p className="mt-3 text-sm font-medium text-navy">{deliveryMethodLabel(order.deliveryMethod)}</p>
+            <h2 className="text-lg font-bold text-navy">{t("orders.delivery")}</h2>
+            <p className="mt-3 text-sm font-medium text-navy">{deliveryLabel(t, order.deliveryMethod)}</p>
             {order.deliveryMethod === "pickup" ? (
               <div className="mt-3 text-sm text-navy-muted">
                 <p>{pickup.businessName || profile.businessName}</p>
@@ -155,33 +171,40 @@ export function SellerOrderDetailPage() {
                   {pickup.address || profile.showroomAddress}
                   {pickup.city || profile.city ? `, ${pickup.city || profile.city}` : ""}
                 </p>
-                <p className="mt-2">Delivery Fee: Not applicable</p>
+                <p className="mt-2">{t("orders.deliveryFee")}: {t("orders.feeNA")}</p>
               </div>
             ) : null}
             {order.deliveryMethod === "seller_fleet" ? (
               <div className="mt-3 space-y-1 text-sm text-navy-muted">
-                <p>Delivery is provided directly by the seller.</p>
-                <p>Delivery Address: {order.deliveryAddress || "—"}</p>
-                <p>City: {order.deliveryCity || "—"}</p>
-                {order.deliveryNotes ? <p>Delivery Notes: {order.deliveryNotes}</p> : null}
-                <p>Delivery Fee: To be confirmed with seller</p>
+                <p>{t("checkout.fleetDesc")}</p>
+                <p>{t("orders.deliveryAddress")}: {order.deliveryAddress || "—"}</p>
+                <p>{t("orders.city")}: {order.deliveryCity || "—"}</p>
+                {order.deliveryNotes ? <p>{t("orders.deliveryNotes")}: {order.deliveryNotes}</p> : null}
+                <p>{t("orders.deliveryFee")}: {t("orders.feeTBCSeller")}</p>
               </div>
             ) : null}
             {order.deliveryMethod === "third_party" ? (
               <div className="mt-3 space-y-1 text-sm text-navy-muted">
-                {order.deliveryProvider ? <p>Provider: {order.deliveryProvider}</p> : null}
-                {order.deliveryAddress ? <p>Delivery Address: {order.deliveryAddress}</p> : null}
-                {order.deliveryCity ? <p>City: {order.deliveryCity}</p> : null}
-                {order.deliveryNotes ? <p>Notes: {order.deliveryNotes}</p> : null}
-                <p>Delivery Fee: {deliveryFeeLabel(order)}</p>
+                {order.deliveryProvider ? <p>{t("orders.provider")}: {order.deliveryProvider}</p> : null}
+                {order.deliveryAddress ? <p>{t("orders.deliveryAddress")}: {order.deliveryAddress}</p> : null}
+                {order.deliveryCity ? <p>{t("orders.city")}: {order.deliveryCity}</p> : null}
+                {order.deliveryNotes ? <p>{t("orders.notes")}: {order.deliveryNotes}</p> : null}
+                <p>
+                  {t("orders.deliveryFee")}:{" "}
+                  {typeof order.deliveryFee === "number" && order.deliveryFee > 0
+                    ? formatIDR(order.deliveryFee)
+                    : t("orders.feeTBC")}
+                </p>
               </div>
             ) : null}
           </section>
 
           <section className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">Payment</h2>
-            <p className="mt-3 text-sm text-navy">{paymentMethodLabel(order.paymentMethod)}</p>
-            <p className="mt-2 text-sm text-navy-muted">Status: {paymentStatusLabel(order.paymentStatus)}</p>
+            <h2 className="text-lg font-bold text-navy">{t("orders.payment")}</h2>
+            <p className="mt-3 text-sm text-navy">{paymentLabel(t, order.paymentMethod)}</p>
+            <p className="mt-2 text-sm text-navy-muted">
+              {t("orders.status")}: {paymentStatusText(t, order.paymentStatus)}
+            </p>
           </section>
 
           {error ? (
@@ -194,20 +217,20 @@ export function SellerOrderDetailPage() {
             {order.status === "pending" ? (
               <>
                 <Button disabled={updating} onClick={() => handleStatus("confirmed")}>
-                  Confirm Order
+                  {t("seller.confirmOrder")}
                 </Button>
                 <Button variant="secondary" disabled={updating} onClick={() => handleStatus("cancelled")}>
-                  Cancel Order
+                  {t("seller.cancelOrder")}
                 </Button>
               </>
             ) : null}
             {order.status === "confirmed" ? (
               <Button disabled={updating} onClick={() => handleStatus("completed")}>
-                Mark Completed
+                {t("seller.markCompleted")}
               </Button>
             ) : null}
             <Button variant="secondary" onClick={() => navigate("/seller/orders")}>
-              Back to Orders
+              {t("seller.backOrders")}
             </Button>
           </div>
         </div>

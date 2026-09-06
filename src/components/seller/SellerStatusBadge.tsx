@@ -1,8 +1,11 @@
 import type { SellerStatus } from "../../types/seller"
-import { statusLabel } from "../../lib/seller"
 import { cn } from "../../lib/cn"
+import { useT } from "../../i18n"
 
 export function SellerStatusBadge({ status, label }: { status: SellerStatus; label?: string }) {
+  const t = useT()
+  const fallback =
+    status === "approved" ? t("status.approved") : status === "rejected" ? t("status.rejected") : t("seller.pendingVerify")
   return (
     <span
       className={cn(
@@ -12,7 +15,7 @@ export function SellerStatusBadge({ status, label }: { status: SellerStatus; lab
         status === "rejected" && "bg-red-50 text-red-700",
       )}
     >
-      {label ?? statusLabel(status)}
+      {label ?? fallback}
     </span>
   )
 }

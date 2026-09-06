@@ -4,15 +4,24 @@ import { OrderStatusBadge } from "../components/orders/OrderStatusBadge"
 import { Button } from "../components/ui/Button"
 import { Container } from "../components/layout/Container"
 import { formatIDR } from "../lib/listingForm"
-import { deliveryMethodLabel, formatOrderDate, getBuyerOrders } from "../lib/orders"
+import { formatOrderDate, getBuyerOrders } from "../lib/orders"
 import { getReviewByOrderId } from "../lib/reviews"
 import { useOrdersLive } from "../lib/useOrdersLive"
 import { useReviewsLive } from "../lib/useReviewsLive"
 import { StarRating } from "../components/reviews/StarRating"
+import { useLanguage } from "../i18n"
+import type { DeliveryMethod } from "../types/order"
+
+function deliveryLabel(t: ReturnType<typeof useLanguage>["t"], method: DeliveryMethod) {
+  if (method === "pickup") return t("orders.pickupShowroom")
+  if (method === "seller_fleet") return t("orders.sellerFleet")
+  return t("orders.thirdParty")
+}
 
 export function OrdersPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useLanguage()
   useOrdersLive()
   useReviewsLive()
   const orders = user ? getBuyerOrders(user.id) : []
@@ -22,21 +31,21 @@ export function OrdersPage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">My Orders</h1>
-          <p className="mt-2 text-navy-muted">Track motorcycles you have ordered on Motodo.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.title")}</h1>
+          <p className="mt-2 text-navy-muted">{t("orders.subtitle")}</p>
 
           {orders.length === 0 ? (
-            <div className="mt-8 rounded-2xl border border-line px-5 py-10 text-center">
-              <p className="text-sm text-navy-muted">No orders yet.</p>
-              <p className="mt-2 text-sm text-navy-muted">You can review a motorcycle after your order is completed.</p>
+            <div className="mt-8 rounded-2xl border border-line bg-white px-5 py-10 text-center shadow-card">
+              <p className="text-sm text-navy-muted">{t("orders.empty")}</p>
+              <p className="mt-2 text-sm text-navy-muted">{t("orders.reviewHint")}</p>
               <Button className="mt-4" onClick={() => navigate("/browse")}>
-                Browse Motorcycles
+                {t("common.browseMotorcycles")}
               </Button>
             </div>
           ) : (
             <div className="mt-8 grid gap-4">
               {!hasCompleted ? (
-                <p className="text-sm text-navy-muted">You can review a motorcycle after your order is completed.</p>
+                <p className="text-sm text-navy-muted">{t("orders.reviewHint")}</p>
               ) : null}
               {orders.map((order) => {
                 const review = getReviewByOrderId(order.id)
@@ -45,7 +54,7 @@ export function OrdersPage() {
                 <button
                   key={order.id}
                   type="button"
-                  className="flex flex-col gap-4 rounded-2xl border border-line p-4 text-left sm:flex-row sm:items-center"
+                  className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-4 text-left shadow-card sm:flex-row sm:items-center"
                   onClick={() =>
                     navigate(order.status === "completed" ? `/orders/${order.id}#review` : `/orders/${order.id}`)
                   }
@@ -62,18 +71,18 @@ export function OrdersPage() {
                     </div>
                     <p className="mt-1 text-xs text-navy-muted">{order.id}</p>
                     <p className="mt-2 text-sm text-navy">
-                      Quantity {order.quantity} · {formatIDR(order.buyerTotal)}
+                      {t("orders.quantity", { count: order.quantity })} · {formatIDR(order.buyerTotal)}
                     </p>
                     <p className="mt-1 text-xs text-navy-muted">
-                      {deliveryMethodLabel(order.deliveryMethod)} · {formatOrderDate(order.createdAt)}
+                      {deliveryLabel(t, order.deliveryMethod)} · {formatOrderDate(order.createdAt)}
                     </p>
                     {order.status === "completed" ? (
                       reviewed ? (
                         <p className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-navy">
-                          Reviewed <StarRating value={review?.rating ?? 0} readOnly size="sm" />
+                          {t("orders.reviewed")} <StarRating value={review?.rating ?? 0} readOnly size="sm" />
                         </p>
                       ) : (
-                        <p className="mt-2 text-sm font-medium text-brand">Rate Purchase</p>
+                        <p className="mt-2 text-sm font-medium text-brand">{t("orders.rate")}</p>
                       )
                     ) : null}
                   </div>

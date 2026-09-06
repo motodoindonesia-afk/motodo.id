@@ -6,12 +6,14 @@ import { useListingsLive } from "../../lib/useListingsLive"
 import { ListingForm } from "../../components/seller/ListingForm"
 import { SellerListingAccessMessage } from "../../components/seller/SellerListingAccessMessage"
 import { Container } from "../../components/layout/Container"
+import { useT } from "../../i18n"
 
 export function SellerListingEditPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
   useListingsLive()
+  const t = useT()
 
   if (!user) return null
   const profile = getSellerProfile(user.id)
@@ -19,13 +21,13 @@ export function SellerListingEditPage() {
   const listing = id ? getListingById(id) : null
 
   if (!listing) {
-    return <SellerListingAccessMessage title="Listing not found" onBack={() => navigate("/seller/listings")} />
+    return <SellerListingAccessMessage title={t("seller.notFoundListing")} onBack={() => navigate("/seller/listings")} />
   }
 
   if (!canManageListing(listing, user.id)) {
     return (
       <SellerListingAccessMessage
-        title="You don't have permission to access this listing."
+        title={t("seller.noListingAccess")}
         onBack={() => navigate("/seller/listings")}
       />
     )
@@ -35,9 +37,9 @@ export function SellerListingEditPage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Edit Listing</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.editTitle")}</h1>
           <p className="mt-2 text-base leading-relaxed text-navy-muted">
-            Provide accurate information to help buyers find your motorcycle.
+            {t("seller.listBody")}
           </p>
           <div className="mt-8">
             <ListingForm

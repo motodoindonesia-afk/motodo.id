@@ -9,6 +9,7 @@ import { Container } from "../../components/layout/Container"
 import { getSellerProfile, updateSellerProfile } from "../../lib/seller"
 import { isValidIndonesianPhone, isValidWebsite } from "../../lib/sellerForm"
 import { useSellerLive } from "../../lib/useSellerLive"
+import { useLanguage } from "../../i18n"
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -18,6 +19,7 @@ export function SellerProfileEditPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   useSellerLive()
+  const { t, tm } = useLanguage()
   const profile = user ? getSellerProfile(user.id) : null
   const [businessName, setBusinessName] = useState(profile?.businessName ?? "")
   const [description, setDescription] = useState(profile?.description ?? "")
@@ -41,31 +43,31 @@ export function SellerProfileEditPage() {
     event.preventDefault()
     setError("")
     if (!businessName.trim()) {
-      setError("Business name is required.")
+      setError(t("seller.businessNameRequired"))
       return
     }
     if (!description.trim()) {
-      setError("Business description is required.")
+      setError(t("seller.descRequired"))
       return
     }
     if (!phone.trim() || !isValidIndonesianPhone(phone)) {
-      setError("Enter a valid Indonesian phone number.")
+      setError(t("seller.phoneInvalid"))
       return
     }
     if (!email.trim() || !isValidEmail(email.trim())) {
-      setError("Enter a valid email address.")
+      setError(t("auth.emailInvalid"))
       return
     }
     if (!showroomAddress.trim()) {
-      setError("Showroom address is required.")
+      setError(t("form.showroomRequired"))
       return
     }
     if (!city.trim()) {
-      setError("City is required.")
+      setError(t("checkout.cityRequired"))
       return
     }
     if (!isValidWebsite(website)) {
-      setError("Enter a valid website URL.")
+      setError(t("seller.websiteInvalid"))
       return
     }
 
@@ -85,7 +87,7 @@ export function SellerProfileEditPage() {
       if (!next) throw new Error("Unable to update seller profile.")
       navigate("/seller/profile")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to update seller profile.")
+      setError(err instanceof Error ? tm(err.message, "seller.unableUpdateProfile") : t("seller.unableUpdateProfile"))
     } finally {
       setLoading(false)
     }
@@ -96,38 +98,38 @@ export function SellerProfileEditPage() {
       <Container>
         <div className="mx-auto max-w-2xl">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight text-navy">Edit Seller Profile</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.editProfile")}</h1>
             <SellerStatusBadge status={profile.status} />
           </div>
           <SellerNav approved={approved} />
 
           <form className="mt-8 space-y-4" onSubmit={(event) => void handleSubmit(event)} noValidate>
-            <Field label="Business Name" htmlFor="seller-business-name">
+            <Field label={t("seller.businessName")} htmlFor="seller-business-name">
               <AuthInput id="seller-business-name" value={businessName} onChange={(event) => setBusinessName(event.target.value)} />
             </Field>
-            <Field label="Business Description" htmlFor="seller-description">
+            <Field label={t("seller.businessDesc")} htmlFor="seller-description">
               <AuthTextarea id="seller-description" value={description} onChange={(event) => setDescription(event.target.value)} />
             </Field>
-            <Field label="Phone Number" htmlFor="seller-phone">
+            <Field label={t("checkout.phone")} htmlFor="seller-phone">
               <AuthInput id="seller-phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} />
             </Field>
-            <Field label="Email" htmlFor="seller-email">
+            <Field label={t("auth.email")} htmlFor="seller-email">
               <AuthInput id="seller-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
             </Field>
-            <Field label="Showroom Address" htmlFor="seller-address">
+            <Field label={t("seller.showroomAddress")} htmlFor="seller-address">
               <AuthInput id="seller-address" value={showroomAddress} onChange={(event) => setShowroomAddress(event.target.value)} />
             </Field>
-            <Field label="City" htmlFor="seller-city">
+            <Field label={t("orders.city")} htmlFor="seller-city">
               <AuthInput id="seller-city" value={city} onChange={(event) => setCity(event.target.value)} />
             </Field>
-            <Field label="Website" htmlFor="seller-website" optional>
+            <Field label={t("seller.website")} htmlFor="seller-website" optional>
               <AuthInput id="seller-website" value={website} onChange={(event) => setWebsite(event.target.value)} />
             </Field>
-            <Field label="Business Hours" htmlFor="seller-hours" optional>
+            <Field label={t("seller.businessHours")} htmlFor="seller-hours" optional>
               <AuthInput
                 id="seller-hours"
                 value={businessHours}
-                placeholder="Mon–Sat 09.00–17.00"
+                placeholder={t("seller.hoursPlaceholder")}
                 onChange={(event) => setBusinessHours(event.target.value)}
               />
             </Field>
@@ -137,15 +139,15 @@ export function SellerProfileEditPage() {
               <p className="mt-2 text-sm text-navy">{profile.nib}</p>
               {approved ? (
                 <p className="mt-2 text-sm text-navy-muted">
-                  Contact Motodo support to update verified business information.
+                  {t("seller.nibLocked")}
                 </p>
               ) : (
-                <p className="mt-2 text-sm text-navy-muted">NIB can be updated from seller registration until you are approved.</p>
+                <p className="mt-2 text-sm text-navy-muted">{t("seller.nibUntil")}</p>
               )}
             </div>
 
             <fieldset className="rounded-2xl border border-line px-5 py-5">
-              <legend className="text-sm font-semibold text-navy">Delivery Options</legend>
+              <legend className="text-sm font-semibold text-navy">{t("seller.deliveryOptions")}</legend>
               <label className="mt-4 flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
@@ -154,21 +156,21 @@ export function SellerProfileEditPage() {
                   onChange={(event) => setSellerFleetAvailable(event.target.checked)}
                 />
                 <span>
-                  <span className="block text-sm font-medium text-navy">Seller Fleet</span>
+                  <span className="block text-sm font-medium text-navy">{t("orders.sellerFleet")}</span>
                   <span className="mt-1 block text-sm text-navy-muted">
-                    I provide delivery using my own fleet.
+                    {t("seller.iProvideFleet")}
                   </span>
                 </span>
               </label>
               <div className="mt-4 rounded-xl bg-surface px-4 py-3 opacity-70">
-                <p className="text-sm font-medium text-navy">Third-Party Logistics</p>
-                <p className="mt-1 text-xs text-navy-muted">Coming Soon</p>
+                <p className="text-sm font-medium text-navy">{t("seller.thirdPartyTitle")}</p>
+                <p className="mt-1 text-xs text-navy-muted">{t("checkout.comingSoon")}</p>
                 <p className="mt-2 text-sm text-navy-muted">
-                  Third-party logistics integration will be available in a future release.
+                  {t("seller.thirdPartyBody")}
                 </p>
                 <label className="mt-3 flex cursor-not-allowed items-start gap-3">
                   <input type="checkbox" className="mt-1" disabled checked={false} />
-                  <span className="text-sm text-navy-muted">Enable third-party logistics</span>
+                  <span className="text-sm text-navy-muted">{t("seller.enableThird")}</span>
                 </label>
               </div>
             </fieldset>
@@ -181,10 +183,10 @@ export function SellerProfileEditPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Save Profile"}
+                {loading ? t("form.saving") : t("seller.saveProfile")}
               </Button>
               <Button type="button" variant="secondary" onClick={() => navigate("/seller/profile")}>
-                Cancel
+                {t("common.cancel")}
               </Button>
             </div>
           </form>

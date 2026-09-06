@@ -21,12 +21,13 @@ import { AuthSelect } from "../../components/auth/AuthField"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
 import { cn } from "../../lib/cn"
+import { sortOptionLabel, useLanguage, type MessageKey } from "../../i18n"
 
-const FILTERS: { id: "all" | SellerListingStatus; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "active", label: "Active" },
-  { id: "draft", label: "Draft" },
-  { id: "sold", label: "Sold" },
+const FILTERS: { id: "all" | SellerListingStatus; key: MessageKey }[] = [
+  { id: "all", key: "browse.all" },
+  { id: "active", key: "seller.statusActive" },
+  { id: "draft", key: "seller.statusDraft" },
+  { id: "sold", key: "seller.statusSold" },
 ]
 
 type LocationState = { published?: boolean; saved?: boolean; deleted?: boolean }
@@ -42,6 +43,7 @@ export function SellerListingsPage() {
   const [deleteTarget, setDeleteTarget] = useState<MotorcycleListing | null>(null)
   const [soldTarget, setSoldTarget] = useState<MotorcycleListing | null>(null)
   const [activeTarget, setActiveTarget] = useState<MotorcycleListing | null>(null)
+  const { locale, t } = useLanguage()
   const flash = (location.state as LocationState | null) ?? {}
   const listings = user ? getListingsBySeller(user.id) : []
   const counts = user ? getSellerListingCounts(user.id) : { total: 0, active: 0, draft: 0, sold: 0 }
@@ -58,28 +60,28 @@ export function SellerListingsPage() {
         <div className="mx-auto max-w-3xl">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy">My Listings</h1>
-              <p className="mt-2 text-navy-muted">Manage your motorcycle listings.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.myListings")}</h1>
+              <p className="mt-2 text-navy-muted">{t("seller.manageBody")}</p>
             </div>
-            <Button onClick={() => navigate("/seller/listings/new")}>Add Motorcycle</Button>
+            <Button onClick={() => navigate("/seller/listings/new")}>{t("profile.addMotorcycle")}</Button>
           </div>
           <SellerNav approved />
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Total Listings" value={counts.total} />
-            <StatCard label="Active" value={counts.active} />
-            <StatCard label="Draft" value={counts.draft} />
-            <StatCard label="Sold" value={counts.sold} />
+            <StatCard label={t("seller.totalListings")} value={counts.total} />
+            <StatCard label={t("seller.statusActive")} value={counts.active} />
+            <StatCard label={t("seller.statusDraft")} value={counts.draft} />
+            <StatCard label={t("seller.statusSold")} value={counts.sold} />
           </div>
 
           {flash.published ? (
             <p className="mt-6 rounded-2xl border border-line bg-surface px-5 py-4 text-sm font-medium text-navy" role="status">
-              Your motorcycle has been published.
+              {t("seller.published")}
             </p>
           ) : null}
           {flash.saved ? (
             <p className="mt-6 rounded-2xl border border-line bg-surface px-5 py-4 text-sm font-medium text-navy" role="status">
-              Listing updated.
+              {t("seller.updated")}
             </p>
           ) : null}
 
@@ -94,7 +96,7 @@ export function SellerListingsPage() {
                   filter === item.id ? "bg-brand text-white" : "bg-surface text-navy hover:text-brand",
                 )}
               >
-                {item.label}
+                {t(item.key)}
               </button>
             ))}
           </div>
@@ -103,25 +105,25 @@ export function SellerListingsPage() {
             <AuthInput
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search name, brand, or model"
+              placeholder={t("seller.searchListings")}
             />
             <AuthSelect value={sort} onChange={(event) => setSort(event.target.value as SellerListingSort)}>
-              <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
+              <option value="newest">{sortOptionLabel(locale, "newest")}</option>
+              <option value="oldest">{sortOptionLabel(locale, "oldest")}</option>
+              <option value="price-asc">{sortOptionLabel(locale, "price-asc")}</option>
+              <option value="price-desc">{sortOptionLabel(locale, "price-desc")}</option>
             </AuthSelect>
           </div>
 
           {listings.length === 0 ? (
             <div className="mt-8 rounded-2xl border border-line px-5 py-10 text-center">
-              <p className="text-sm text-navy-muted">You haven't listed any motorcycles yet.</p>
+              <p className="text-sm text-navy-muted">{t("profile.noListings")}</p>
               <Button className="mt-4" onClick={() => navigate("/seller/listings/new")}>
-                Add Motorcycle
+                {t("profile.addMotorcycle")}
               </Button>
             </div>
           ) : visible.length === 0 ? (
-            <p className="mt-8 text-sm text-navy-muted">No listings match this search or filter.</p>
+            <p className="mt-8 text-sm text-navy-muted">{t("seller.noMatch")}</p>
           ) : (
             <div className="mt-8 grid gap-4">
               {visible.map((listing) => (
@@ -149,9 +151,9 @@ export function SellerListingsPage() {
       ) : null}
       {soldTarget ? (
         <ConfirmListingModal
-          title="Mark as Sold"
-          message="Mark this motorcycle as sold?"
-          confirmLabel="Mark as Sold"
+          title={t("seller.markSold")}
+          message={t("seller.markSoldQ")}
+          confirmLabel={t("seller.markSold")}
           onCancel={() => setSoldTarget(null)}
           onConfirm={async () => {
             await markListingAsSold(soldTarget.id, user.id)
@@ -161,9 +163,9 @@ export function SellerListingsPage() {
       ) : null}
       {activeTarget ? (
         <ConfirmListingModal
-          title="Mark as Active"
-          message="Mark this motorcycle as active again?"
-          confirmLabel="Mark as Active"
+          title={t("seller.markActive")}
+          message={t("seller.markActiveQ")}
+          confirmLabel={t("seller.markActive")}
           onCancel={() => setActiveTarget(null)}
           onConfirm={async () => {
             await markListingAsActive(activeTarget.id, user.id)

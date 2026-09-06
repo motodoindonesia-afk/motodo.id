@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import type { MotorcycleListing } from "../../types/sellerListing"
 import { formatIDR } from "../../lib/listingForm"
-import { listingStatusLabel } from "../../lib/listings"
+import { useT } from "../../i18n"
 import { listingStockSummary } from "../../lib/inventory"
 import { formatShortDate } from "../../lib/profile"
 import { Button } from "../ui/Button"
@@ -16,6 +16,9 @@ type Props = {
 
 export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive }: Props) {
   const navigate = useNavigate()
+  const t = useT()
+  const statusLabel =
+    listing.status === "active" ? t("seller.statusActive") : listing.status === "sold" ? t("seller.statusSold") : t("seller.statusDraft")
   const cover = listing.images[0]
   const place = [listing.location, listing.city].filter(Boolean).join(", ")
   const stock = listingStockSummary(listing)
@@ -26,12 +29,12 @@ export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive 
         {cover ? (
           <img src={cover} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-navy-muted">No photo</div>
+          <div className="flex h-full items-center justify-center text-xs text-navy-muted">{t("chat.noPhoto")}</div>
         )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-semibold text-navy">{listing.name || "Untitled motorcycle"}</h3>
+          <h3 className="font-semibold text-navy">{listing.name || t("seller.untitled")}</h3>
           <span
             className={cn(
               "rounded-full px-2 py-0.5 text-xs font-medium",
@@ -40,14 +43,14 @@ export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive 
               listing.status === "sold" && "bg-surface text-navy",
             )}
           >
-            {listingStatusLabel(listing.status)}
+            {statusLabel}
           </span>
         </div>
         <p className="mt-1 text-sm font-semibold text-brand">{formatIDR(listing.price)}</p>
         <p className="mt-1 text-xs text-navy-muted">
-          {stock.available <= 0 ? "SOLD OUT" : `Available: ${stock.available}`}
-          {stock.reserved > 0 ? ` · Reserved: ${stock.reserved}` : ""}
-          {` · Stock: ${stock.total}`}
+          {stock.available <= 0 ? t("listing.soldOut") : t("seller.availableCount", { count: stock.available })}
+          {stock.reserved > 0 ? ` · ${t("seller.reserved", { count: stock.reserved })}` : ""}
+          {` · ${t("seller.stockCount", { count: stock.total })}`}
         </p>
         <p className="mt-1 text-xs text-navy-muted">
           {listing.year || "—"}
@@ -56,24 +59,24 @@ export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive 
       </div>
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" onClick={() => navigate(`/seller/listings/${listing.id}`)}>
-          View
+          {t("seller.view")}
         </Button>
         {listing.status === "draft" ? (
           <Button variant="secondary" onClick={() => navigate(`/seller/listings/${listing.id}/edit`)}>
-            Continue Editing
+            {t("seller.continueEditing")}
           </Button>
         ) : null}
         <Button variant="secondary" onClick={() => navigate(`/seller/listings/${listing.id}/edit`)}>
-          Edit
+          {t("common.edit")}
         </Button>
         {listing.status === "active" && onMarkSold ? (
           <Button variant="secondary" onClick={() => onMarkSold(listing)}>
-            Mark as Sold
+            {t("seller.markSold")}
           </Button>
         ) : null}
         {listing.status === "sold" && stock.available >= 1 && onMarkActive ? (
           <Button variant="secondary" onClick={() => onMarkActive(listing)}>
-            Mark as Active
+            {t("seller.markActive")}
           </Button>
         ) : null}
         <Button
@@ -81,7 +84,7 @@ export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive 
           className="border-red-200 text-red-700 hover:bg-red-50"
           onClick={() => onDelete(listing)}
         >
-          Delete
+          {t("common.delete")}
         </Button>
       </div>
     </article>

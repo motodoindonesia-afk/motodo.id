@@ -1,13 +1,14 @@
 import type { RatingBreakdown } from "../../types/review"
 import { formatAverageRating } from "../../lib/reviews"
 import { StarRating } from "./StarRating"
+import { useT } from "../../i18n"
 
 export function RatingSummary({
   title,
   average,
   count,
   breakdown,
-  emptyLabel = "No reviews yet.",
+  emptyLabel,
 }: {
   title?: string
   average: number | null
@@ -15,13 +16,15 @@ export function RatingSummary({
   breakdown?: RatingBreakdown
   emptyLabel?: string
 }) {
+  const t = useT()
   const formatted = formatAverageRating(average)
+  const empty = emptyLabel ?? t("listing.noReviews")
 
   if (count === 0 || formatted === null) {
     return (
       <div>
         {title ? <h2 className="text-xl font-bold text-navy sm:text-2xl">{title}</h2> : null}
-        <p className={title ? "mt-3 text-sm text-navy-muted" : "text-sm text-navy-muted"}>{emptyLabel}</p>
+        <p className={title ? "mt-3 text-sm text-navy-muted" : "text-sm text-navy-muted"}>{empty}</p>
       </div>
     )
   }
@@ -34,9 +37,11 @@ export function RatingSummary({
       <div className={title ? "mt-4" : ""}>
         <div className="flex flex-wrap items-center gap-3">
           <StarRating value={Math.round(average ?? 0)} readOnly />
-          <p className="text-lg font-semibold text-navy">{formatted} out of 5</p>
+          <p className="text-lg font-semibold text-navy">{t("review.outOf5", { rating: formatted })}</p>
         </div>
-        <p className="mt-1 text-sm text-navy-muted">Based on {count} {count === 1 ? "review" : "reviews"}</p>
+        <p className="mt-1 text-sm text-navy-muted">
+          {count === 1 ? t("review.basedOnOne") : t("review.basedOnMany", { count })}
+        </p>
       </div>
       {breakdown ? (
         <ul className="mt-5 space-y-1.5">
@@ -45,7 +50,7 @@ export function RatingSummary({
             const width = `${Math.round((amount / maxBar) * 100)}%`
             return (
               <li key={star} className="flex items-center gap-3 text-sm">
-                <span className="w-16 shrink-0 text-navy-muted">{star} {star === 1 ? "star" : "stars"}</span>
+                <span className="w-16 shrink-0 text-navy-muted">{star === 1 ? t("review.starOne") : t("review.starMany", { count: star })}</span>
                 <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-surface">
                   <div className="h-full rounded-full bg-brand" style={{ width: amount ? width : "0%" }} />
                 </div>

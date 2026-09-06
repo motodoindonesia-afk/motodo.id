@@ -8,11 +8,13 @@ import { getOrderById } from "../../lib/orders"
 import { getRatingBreakdown, getSellerRatingSummary, getSellerReviews } from "../../lib/reviews"
 import { useReviewsLive } from "../../lib/useReviewsLive"
 import { useSellerLive } from "../../lib/useSellerLive"
+import { useT } from "../../i18n"
 
 export function SellerReviewsPage() {
   const { user } = useAuth()
   useSellerLive()
   useReviewsLive()
+  const t = useT()
 
   if (!user) return null
   const profile = getSellerProfile(user.id)
@@ -27,8 +29,8 @@ export function SellerReviewsPage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Seller Reviews</h1>
-          <p className="mt-2 text-navy-muted">Reviews from buyers who completed orders with you.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.reviewsTitle")}</h1>
+          <p className="mt-2 text-navy-muted">{t("seller.reviewsBody")}</p>
           <SellerNav approved={profile.status === "approved"} />
 
           <section className="mt-8 rounded-2xl border border-line px-5 py-6 sm:px-6">
@@ -36,7 +38,7 @@ export function SellerReviewsPage() {
               average={average}
               count={summary.count}
               breakdown={reviews.length > 0 ? breakdown : undefined}
-              emptyLabel="You don't have any reviews yet."
+              emptyLabel={t("review.noSellerYet")}
             />
           </section>
 

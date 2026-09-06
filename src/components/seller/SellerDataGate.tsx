@@ -1,15 +1,14 @@
 import type { ReactNode } from "react"
 import { isSellerProfilesReady } from "../../lib/seller"
 import { useSellerLive } from "../../lib/useSellerLive"
+import { GateLoading } from "../ui/GateLoading"
+import { useT } from "../../i18n"
 
 export function SellerDataGate({ children }: { children: ReactNode }) {
   useSellerLive()
+  const t = useT()
   if (!isSellerProfilesReady()) {
-    return (
-      <main className="bg-white py-16">
-        <p className="text-center text-sm text-navy-muted">Loading...</p>
-      </main>
-    )
+    return <GateLoading message={t("common.loading")} />
   }
   return children
 }

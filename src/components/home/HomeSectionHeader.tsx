@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { ViewAllLink } from "../ui/ViewAllLink"
+import { useT } from "../../i18n"
 
 export function HomeSectionHeader({
   title,
@@ -10,6 +11,7 @@ export function HomeSectionHeader({
   icon?: ReactNode
   trailing?: ReactNode
 }) {
+  const t = useT()
   return (
     <div className="mb-3 flex items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-2">
@@ -20,7 +22,7 @@ export function HomeSectionHeader({
         {trailing}
       </div>
       <ViewAllLink href="/browse" className="text-ui">
-        Lihat Semua
+        {t("common.viewAll")}
       </ViewAllLink>
     </div>
   )

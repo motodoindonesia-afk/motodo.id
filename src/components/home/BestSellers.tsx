@@ -2,39 +2,50 @@ import { Flame } from "lucide-react"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { Container } from "../layout/Container"
 import { ListingCard } from "../ui/ListingCard"
+import { ListingCardSkeleton } from "../ui/ListingCardSkeleton"
+import { EmptyState } from "../ui/EmptyState"
 import { HomeSectionHeader } from "./HomeSectionHeader"
+import { HOME_PRODUCT_COUNT, HomeProductCell, HomeProductGrid } from "./HomeProductGrid"
 import { getPublicHomeListings } from "./homeListings"
+import { useT } from "../../i18n"
 
 export function BestSellers() {
   useListingsLive()
   const listings = getPublicHomeListings()
+  const t = useT()
 
   return (
     <section className="pb-6">
       <Container>
         <HomeSectionHeader
-          title="Produk Terlaris"
+          title={t("home.bestSellers")}
           icon={<Flame className="size-4 text-brand" strokeWidth={1.75} aria-hidden="true" />}
         />
         {listings === null ? (
-          <p className="text-ui text-navy-muted">Loading...</p>
+          <HomeProductGrid>
+            {Array.from({ length: HOME_PRODUCT_COUNT }).map((_, index) => (
+              <HomeProductCell key={index}>
+                <ListingCardSkeleton />
+              </HomeProductCell>
+            ))}
+          </HomeProductGrid>
         ) : listings.length === 0 ? (
-          <p className="text-ui text-navy-muted">Belum ada motor untuk ditampilkan.</p>
+          <EmptyState title={t("home.emptyListings")} />
         ) : (
-          <div className="-mx-5 flex min-w-0 items-stretch gap-3 overflow-x-auto px-5 pb-1">
-            {listings.slice(0, 6).map((listing, index) => (
-              <div key={listing.id} className="w-[168px] shrink-0 self-stretch sm:w-[180px]">
+          <HomeProductGrid>
+            {listings.slice(0, HOME_PRODUCT_COUNT).map((listing, index) => (
+              <HomeProductCell key={listing.id}>
                 <ListingCard
                   listing={listing}
                   badge={
                     <span className="rounded-sm bg-navy px-1.5 py-0.5 text-[10px] font-medium text-white">
-                      TOP {index + 1}
+                      {t("home.top", { n: index + 1 })}
                     </span>
                   }
                 />
-              </div>
+              </HomeProductCell>
             ))}
-          </div>
+          </HomeProductGrid>
         )}
       </Container>
     </section>

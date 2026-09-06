@@ -2,8 +2,9 @@ import { Heart } from "lucide-react"
 import { useState, type MouseEvent, type ReactNode } from "react"
 import { Link } from "react-router-dom"
 import type { MotorcycleListing } from "../../types/marketplace"
-import { formatAvailableQuantity } from "../../lib/listingForm"
+import { coerceListingQuantity } from "../../lib/listingForm"
 import { cn } from "../../lib/cn"
+import { availableQuantityLabel, categoryLabel, useLanguage } from "../../i18n"
 
 type Props = {
   listing: MotorcycleListing
@@ -14,9 +15,9 @@ type Props = {
   hideQuantity?: boolean
 }
 
-function cardMeta(listing: MotorcycleListing, showCategory: boolean) {
+function cardMeta(listing: MotorcycleListing, showCategory: boolean, locale: "id" | "en") {
   const parts = [listing.location, listing.year ? String(listing.year) : "", listing.mileage]
-  if (showCategory) parts.push(listing.category)
+  if (showCategory) parts.push(categoryLabel(locale, listing.category))
   return parts.filter((part) => part && part !== "—").join(" · ")
 }
 
@@ -28,6 +29,7 @@ export function MotorcycleCard({
   footer,
   hideQuantity = false,
 }: Props) {
+  const { locale, t } = useLanguage()
   const [saved, setSaved] = useState(false)
 
   function toggleFavorite(event: MouseEvent<HTMLButtonElement>) {
@@ -36,9 +38,10 @@ export function MotorcycleCard({
     setSaved((value) => !value)
   }
 
-  const meta = cardMeta(listing, showCategory)
+  const meta = cardMeta(listing, showCategory, locale)
+  const units = coerceListingQuantity(listing.quantity)
   const quantityLabel =
-    hideQuantity || listing.status === "sold" ? null : formatAvailableQuantity(listing.quantity)
+    hideQuantity || listing.status === "sold" ? null : availableQuantityLabel(locale, units)
 
   const media = (
     <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-surface">
@@ -73,11 +76,11 @@ export function MotorcycleCard({
   )
 
   return (
-    <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-white transition-colors hover:border-navy/20">
+    <article className="group relative flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card transition-colors hover:border-brand/25">
       {href ? (
         <Link
           to={href}
-          aria-label={`View ${listing.name}`}
+          aria-label={t("listing.view", { name: listing.name })}
           className="flex h-full min-h-0 flex-1 flex-col focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {inner}
@@ -88,7 +91,7 @@ export function MotorcycleCard({
       <button
         type="button"
         aria-pressed={saved}
-        aria-label={saved ? `Remove ${listing.name} from favorites` : `Save ${listing.name} to favorites`}
+        aria-label={saved ? t("listing.unsave", { name: listing.name }) : t("listing.save", { name: listing.name })}
         onClick={toggleFavorite}
         className={cn(
           "absolute right-2 top-2 z-10 rounded-full bg-white/80 p-1 text-navy transition-opacity hover:opacity-80",

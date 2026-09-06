@@ -2,26 +2,22 @@ import { Navigate } from "react-router-dom"
 import { SignupForm } from "../components/auth/SignupForm"
 import { AuthLayout } from "../components/auth/AuthLayout"
 import { useAuth } from "../context/AuthContext"
+import { useT } from "../i18n"
 
 export function SignupPage() {
   const { isAuthenticated, loading } = useAuth()
+  const t = useT()
   if (loading) {
     return (
-      <AuthLayout
-        title="Create your Motodo account"
-        subtitle="Join Motodo to buy, save, and sell motorcycles."
-      >
-        <p className="text-sm text-navy-muted">Loading...</p>
+      <AuthLayout variant="signup">
+        <p className="text-sm text-navy-muted">{t("common.loading")}</p>
       </AuthLayout>
     )
   }
   if (isAuthenticated) return <Navigate to="/" replace />
 
   return (
-    <AuthLayout
-      title="Create your Motodo account"
-      subtitle="Join Motodo to buy, save, and sell motorcycles."
-    >
+    <AuthLayout variant="signup">
       <SignupForm />
     </AuthLayout>
   )

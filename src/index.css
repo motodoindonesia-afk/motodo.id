@@ -13,6 +13,14 @@
   --color-surface: #eef3f8;
   --color-line: #e4ebf2;
   --color-brand-soft: #e8f1ff;
+  --color-page: #f4f8ff;
+  --color-page-mid: #f8fbff;
+  --color-ink: #0f172a;
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-danger: #b91c1c;
+
+  --shadow-card: 0 1px 2px rgb(15 39 71 / 0.04), 0 4px 14px rgb(15 39 71 / 0.045);
 
   --text-page: 1.375rem;
   --text-page--line-height: 1.25;
@@ -26,6 +34,8 @@
   --text-meta--line-height: 1.4;
   --text-ui: 0.8125rem;
   --text-ui--line-height: 1.4;
+
+  --breakpoint-desk: 75rem;
 }
 
 html {
@@ -57,4 +67,48 @@ option {
 
 ::selection {
   background: #d6e4fb;
+}
+
+/*
+  Motodo public marketplace tokens. Ritme html has no .motodo-app class,
+  so ops UI keeps the @theme defaults above.
+*/
+html.motodo-app {
+  --color-navy: #0f2747;
+  --color-navy-muted: #64748b;
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
+  --color-surface: #eef5ff;
+  --color-line: #e2eaf5;
+  --color-brand-soft: #f5f9ff;
+  overflow-x: clip;
+}
+
+html.motodo-app body {
+  background: linear-gradient(180deg, #f4f8ff 0%, #f8fbff 40%, #ffffff 100%);
+  background-attachment: fixed;
+  color: var(--color-ink);
+}
+
+html.motodo-app main.bg-white {
+  background-color: transparent;
+}
+
+html.motodo-app main .rounded-2xl.border.border-line:not([class*="bg-"]) {
+  background-color: #ffffff;
+}
+
+html.motodo-app main .rounded-2xl.border.border-line {
+  box-shadow: var(--shadow-card);
+}
+
+html.motodo-app main h1.text-3xl {
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+@media (min-width: 640px) {
+  html.motodo-app main h1.text-3xl {
+    font-size: 1.75rem;
+  }
 }

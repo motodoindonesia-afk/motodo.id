@@ -1,11 +1,14 @@
 import { useState, type FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { Lock, Mail } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 import type { UserRole } from "../../types/auth"
 import { Button } from "../ui/Button"
+import { AuthGoogleButton } from "./AuthGoogleButton"
 import { AuthInput, Field } from "./AuthField"
 import { PasswordInput } from "./PasswordInput"
 import { cn } from "../../lib/cn"
+import { useLanguage } from "../../i18n"
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -19,21 +22,9 @@ type Errors = {
   role?: string
 }
 
-const roles: { value: UserRole; title: string; description: string }[] = [
-  {
-    value: "buyer",
-    title: "Buyer",
-    description: "Browse motorcycles, save favorites, and contact sellers.",
-  },
-  {
-    value: "seller",
-    title: "Seller",
-    description: "List motorcycles and connect with buyers.",
-  },
-]
-
 export function SignupForm() {
   const { signup } = useAuth()
+  const { t, tm } = useLanguage()
   const navigate = useNavigate()
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -45,16 +36,29 @@ export function SignupForm() {
   const [loading, setLoading] = useState(false)
   const [googleNote, setGoogleNote] = useState("")
 
+  const roles: { value: UserRole; title: string; description: string }[] = [
+    {
+      value: "buyer",
+      title: t("auth.buyer"),
+      description: t("auth.buyerDesc"),
+    },
+    {
+      value: "seller",
+      title: t("auth.seller"),
+      description: t("auth.sellerDesc"),
+    },
+  ]
+
   function validate() {
     const next: Errors = {}
-    if (!fullName.trim()) next.fullName = "Full name is required."
-    if (!email.trim()) next.email = "Email is required."
-    else if (!isValidEmail(email.trim())) next.email = "Enter a valid email address."
-    if (!password) next.password = "Password is required."
-    else if (password.length < 8) next.password = "Password must be at least 8 characters."
-    if (!confirmPassword) next.confirmPassword = "Confirm your password."
-    else if (confirmPassword !== password) next.confirmPassword = "Passwords do not match."
-    if (!role) next.role = "Select an account type."
+    if (!fullName.trim()) next.fullName = t("auth.nameRequired")
+    if (!email.trim()) next.email = t("auth.emailRequired")
+    else if (!isValidEmail(email.trim())) next.email = t("auth.emailInvalid")
+    if (!password) next.password = t("auth.passwordRequired")
+    else if (password.length < 8) next.password = t("auth.passwordShort")
+    if (!confirmPassword) next.confirmPassword = t("auth.confirmRequired")
+    else if (confirmPassword !== password) next.confirmPassword = t("auth.passwordMismatch")
+    if (!role) next.role = t("auth.selectAccountType")
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -70,7 +74,7 @@ export function SignupForm() {
       await signup({ fullName, email, password, confirmPassword, role })
       navigate("/", { replace: true })
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to create account.")
+      setFormError(error instanceof Error ? tm(error.message, "auth.unableCreate") : t("auth.unableCreate"))
     } finally {
       setLoading(false)
     }
@@ -79,18 +83,18 @@ export function SignupForm() {
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        <Field label="Full Name" htmlFor="signup-name" error={errors.fullName}>
+        <Field label={t("auth.fullName")} htmlFor="signup-name" error={errors.fullName}>
           <AuthInput
             id="signup-name"
             name="fullName"
             autoComplete="name"
             value={fullName}
             invalid={Boolean(errors.fullName)}
-            placeholder="Your name"
+            placeholder={t("auth.namePlaceholder")}
             onChange={(event) => setFullName(event.target.value)}
           />
         </Field>
-        <Field label="Email" htmlFor="signup-email" error={errors.email}>
+        <Field label={t("auth.email")} htmlFor="signup-email" error={errors.email}>
           <AuthInput
             id="signup-email"
             name="email"
@@ -98,35 +102,38 @@ export function SignupForm() {
             autoComplete="email"
             value={email}
             invalid={Boolean(errors.email)}
-            placeholder="you@email.com"
+            placeholder={t("auth.emailPlaceholder")}
+            leading={<Mail className="size-4" />}
             onChange={(event) => setEmail(event.target.value)}
           />
         </Field>
-        <Field label="Password" htmlFor="signup-password" error={errors.password}>
+        <Field label={t("auth.password")} htmlFor="signup-password" error={errors.password}>
           <PasswordInput
             id="signup-password"
             name="password"
             autoComplete="new-password"
             value={password}
             invalid={Boolean(errors.password)}
-            placeholder="At least 8 characters"
+            placeholder={t("auth.newPasswordPlaceholder")}
+            leading={<Lock className="size-4" />}
             onChange={(event) => setPassword(event.target.value)}
           />
         </Field>
-        <Field label="Confirm Password" htmlFor="signup-confirm" error={errors.confirmPassword}>
+        <Field label={t("auth.confirmPassword")} htmlFor="signup-confirm" error={errors.confirmPassword}>
           <PasswordInput
             id="signup-confirm"
             name="confirmPassword"
             autoComplete="new-password"
             value={confirmPassword}
             invalid={Boolean(errors.confirmPassword)}
-            placeholder="Re-enter your password"
+            placeholder={t("auth.confirmPlaceholder")}
+            leading={<Lock className="size-4" />}
             onChange={(event) => setConfirmPassword(event.target.value)}
           />
         </Field>
 
         <fieldset>
-          <legend className="mb-2 text-sm font-medium text-navy">Account type</legend>
+          <legend className="mb-2 text-sm font-medium text-navy">{t("auth.accountType")}</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {roles.map((option) => {
               const selected = role === option.value
@@ -168,36 +175,25 @@ export function SignupForm() {
         ) : null}
 
         <Button type="submit" className="w-full py-3" disabled={loading}>
-          {loading ? "Creating account..." : "Create Account"}
+          {loading ? t("auth.creating") : t("auth.createAccount")}
         </Button>
       </form>
 
-      <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-navy-muted">
+      <div className="my-6 flex items-center gap-3 text-xs text-navy-muted">
         <span className="h-px flex-1 bg-line" />
-        OR
+        <span>{t("auth.orContinueSignup")}</span>
         <span className="h-px flex-1 bg-line" />
       </div>
 
-      <Button
-        type="button"
-        variant="secondary"
-        className="w-full py-3"
-        onClick={() => setGoogleNote("Google sign-in will be available soon.")}
-      >
-        Continue with Google
-      </Button>
+      <AuthGoogleButton
+        label={t("auth.googleShort")}
+        onClick={() => setGoogleNote(t("auth.comingSoonGoogle"))}
+      />
       {googleNote ? (
         <p className="mt-3 text-center text-sm text-navy-muted" role="status">
           {googleNote}
         </p>
       ) : null}
-
-      <p className="mt-6 text-center text-sm text-navy-muted">
-        Already have an account?{" "}
-        <Link to="/login" className="font-medium text-brand hover:text-brand-hover">
-          Log In
-        </Link>
-      </p>
     </>
   )
 }

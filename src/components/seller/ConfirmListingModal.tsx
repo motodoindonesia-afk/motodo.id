@@ -1,4 +1,5 @@
 import { Button } from "../ui/Button"
+import { useT } from "../../i18n"
 
 type Props = {
   title: string
@@ -17,9 +18,10 @@ export function ConfirmListingModal({
   onCancel,
   onConfirm,
 }: Props) {
+  const t = useT()
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      <button type="button" aria-label="Close" className="absolute inset-0 bg-navy/30" onClick={onCancel} />
+      <button type="button" aria-label={t("common.close")} className="absolute inset-0 bg-navy/30" onClick={onCancel} />
       <div
         role="dialog"
         aria-modal="true"
@@ -32,7 +34,7 @@ export function ConfirmListingModal({
         <p className="mt-2 text-sm leading-relaxed text-navy-muted">{message}</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button variant="secondary" onClick={onCancel}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             className={destructive ? "bg-red-700 hover:bg-red-800" : undefined}

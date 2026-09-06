@@ -16,6 +16,7 @@ import { SellerNav } from "../seller/SellerNav"
 import { Button } from "../ui/Button"
 import { Container } from "../layout/Container"
 import { cn } from "../../lib/cn"
+import { useT } from "../../i18n"
 
 type Props = {
   role: "buyer" | "seller"
@@ -25,6 +26,7 @@ export function MessagesWorkspace({ role }: Props) {
   const { conversationId } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const t = useT()
   const version = useChatLive()
   const userId = user?.id
   const selected = conversationId ? getConversation(conversationId) : null
@@ -41,7 +43,7 @@ export function MessagesWorkspace({ role }: Props) {
       <main className="bg-white py-10 sm:py-14">
         <Container>
           <div className="mx-auto max-w-lg text-center">
-            <h1 className="text-2xl font-bold text-navy">Loading messages…</h1>
+            <h1 className="text-2xl font-bold text-navy">{t("chat.loading")}</h1>
           </div>
         </Container>
       </main>
@@ -57,10 +59,10 @@ export function MessagesWorkspace({ role }: Props) {
       <main className="bg-white py-10 sm:py-14">
         <Container>
           <div className="mx-auto max-w-lg text-center">
-            <h1 className="text-2xl font-bold text-navy">Conversation not found</h1>
-            <p className="mt-2 text-sm text-navy-muted">You don't have permission to access this conversation.</p>
+            <h1 className="text-2xl font-bold text-navy">{t("chat.notFound")}</h1>
+            <p className="mt-2 text-sm text-navy-muted">{t("chat.noPermission")}</p>
             <Button className="mt-6" onClick={() => navigate(listHref)}>
-              Back to Messages
+              {t("chat.back")}
             </Button>
           </div>
         </Container>
@@ -71,28 +73,26 @@ export function MessagesWorkspace({ role }: Props) {
   return (
     <main className="bg-white py-8 sm:py-10">
       <Container>
-        <h1 className="text-3xl font-bold tracking-tight text-navy">Messages</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-navy">{t("chat.title")}</h1>
         <p className="mt-2 text-navy-muted">
-          {role === "seller" ? "Conversations with buyers about your listings." : "Conversations with sellers about motorcycles."}
+          {role === "seller" ? t("chat.sellerSub") : t("chat.buyerSub")}
         </p>
         {role === "seller" ? <SellerNav approved={getSellerProfile(user.id)?.status === "approved"} /> : null}
 
         {conversations.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-line px-5 py-12 text-center">
             <p className="text-base font-semibold text-navy">
-              {role === "seller" ? "No buyer messages yet." : "No messages yet."}
+              {role === "seller" ? t("chat.emptySeller") : t("chat.emptyBuyer")}
             </p>
             <p className="mt-2 text-sm text-navy-muted">
-              {role === "seller"
-                ? "Buyers who enquire about your motorcycles will appear here."
-                : "Start a conversation with a seller to ask about a motorcycle."}
+              {role === "seller" ? t("chat.emptySellerBody") : t("chat.emptyBuyerBody")}
             </p>
             <Button className="mt-6" onClick={() => navigate(role === "seller" ? "/seller/listings" : "/browse")}>
-              {role === "seller" ? "View Listings" : "Browse Motorcycles"}
+              {role === "seller" ? t("chat.viewListings") : t("common.browseMotorcycles")}
             </Button>
           </div>
         ) : (
-          <div className="mt-6 overflow-hidden rounded-2xl border border-line lg:grid lg:grid-cols-[minmax(260px,340px)_1fr]">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-white shadow-card lg:grid lg:grid-cols-[minmax(260px,340px)_1fr]">
             <aside className={cn("border-line lg:border-r", conversationId && "hidden lg:block")}>
               <ConversationList
                 conversations={conversations}
@@ -107,7 +107,7 @@ export function MessagesWorkspace({ role }: Props) {
                 <ChatThread conversation={selected} userId={user.id} backHref={listHref} />
               ) : (
                 <div className="flex min-h-[520px] items-center justify-center px-6 text-center lg:min-h-[560px]">
-                  <p className="text-sm text-navy-muted">Select a conversation to read and reply.</p>
+                  <p className="text-sm text-navy-muted">{t("chat.select")}</p>
                 </div>
               )}
             </section>
@@ -115,12 +115,12 @@ export function MessagesWorkspace({ role }: Props) {
         )}
 
         {conversations.length > 0 && !conversationId ? (
-          <p className="mt-4 text-center text-sm text-navy-muted lg:hidden">Select a conversation to open the chat.</p>
+          <p className="mt-4 text-center text-sm text-navy-muted lg:hidden">{t("chat.selectMobile")}</p>
         ) : null}
 
         <p className="mt-6">
           <Link to="/browse" className="text-sm font-medium text-brand hover:text-brand-hover">
-            Browse Motorcycles
+            {t("common.browseMotorcycles")}
           </Link>
         </p>
       </Container>

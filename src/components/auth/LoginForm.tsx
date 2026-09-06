@@ -1,11 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { Lock, Mail } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 import { isSupabaseConfigured } from "../../lib/supabase"
 import { supabaseSignInWithGoogle } from "../../lib/supabaseAuth"
 import { Button } from "../ui/Button"
+import { AuthGoogleButton } from "./AuthGoogleButton"
 import { AuthInput, Field } from "./AuthField"
 import { PasswordInput } from "./PasswordInput"
+import { useLanguage } from "../../i18n"
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -18,6 +21,7 @@ type Errors = {
 
 export function LoginForm() {
   const { login } = useAuth()
+  const { t, tm } = useLanguage()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [email, setEmail] = useState("")
@@ -31,15 +35,15 @@ export function LoginForm() {
   useEffect(() => {
     const oauthError = searchParams.get("error_description") || searchParams.get("error")
     if (!oauthError) return
-    setFormError(oauthError.replace(/\+/g, " "))
-  }, [searchParams])
+    setFormError(tm(oauthError.replace(/\+/g, " ")))
+  }, [searchParams, tm])
 
   function validate() {
     const next: Errors = {}
-    if (!email.trim()) next.email = "Email is required."
-    else if (!isValidEmail(email.trim())) next.email = "Enter a valid email address."
-    if (!password) next.password = "Password is required."
-    else if (password.length < 8) next.password = "Password must be at least 8 characters."
+    if (!email.trim()) next.email = t("auth.emailRequired")
+    else if (!isValidEmail(email.trim())) next.email = t("auth.emailInvalid")
+    if (!password) next.password = t("auth.passwordRequired")
+    else if (password.length < 8) next.password = t("auth.passwordShort")
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -56,7 +60,7 @@ export function LoginForm() {
       const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/"
       navigate(safeNext, { replace: true })
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to log in.")
+      setFormError(error instanceof Error ? tm(error.message, "auth.unableLogin") : t("auth.unableLogin"))
     } finally {
       setLoading(false)
     }
@@ -65,14 +69,14 @@ export function LoginForm() {
   async function handleGoogle() {
     setFormError("")
     if (!isSupabaseConfigured()) {
-      setFormError("This environment is not configured.")
+      setFormError(t("auth.envNotConfigured"))
       return
     }
     setGoogleLoading(true)
     try {
       await supabaseSignInWithGoogle()
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to continue with Google.")
+      setFormError(error instanceof Error ? tm(error.message, "auth.unableGoogle") : t("auth.unableGoogle"))
       setGoogleLoading(false)
     }
   }
@@ -80,7 +84,7 @@ export function LoginForm() {
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        <Field label="Email" htmlFor="login-email" error={errors.email}>
+        <Field label={t("auth.email")} htmlFor="login-email" error={errors.email}>
           <AuthInput
             id="login-email"
             name="email"
@@ -88,28 +92,30 @@ export function LoginForm() {
             autoComplete="email"
             value={email}
             invalid={Boolean(errors.email)}
-            placeholder="you@email.com"
+            placeholder={t("auth.emailPlaceholder")}
+            leading={<Mail className="size-4" />}
             onChange={(event) => setEmail(event.target.value)}
           />
         </Field>
-        <Field label="Password" htmlFor="login-password" error={errors.password}>
+        <Field label={t("auth.password")} htmlFor="login-password" error={errors.password}>
           <PasswordInput
             id="login-password"
             name="password"
             autoComplete="current-password"
             value={password}
             invalid={Boolean(errors.password)}
-            placeholder="Enter your password"
+            placeholder={t("auth.passwordPlaceholder")}
+            leading={<Lock className="size-4" />}
             onChange={(event) => setPassword(event.target.value)}
           />
         </Field>
         <div className="flex justify-end">
           <button
             type="button"
-            className="text-sm font-medium text-brand hover:text-brand-hover"
+            className="text-sm font-medium text-brand hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             onClick={() => setForgotOpen(true)}
           >
-            Forgot password?
+            {t("auth.forgot")}
           </button>
         </div>
         {formError ? (
@@ -118,38 +124,27 @@ export function LoginForm() {
           </p>
         ) : null}
         <Button type="submit" className="w-full py-3" disabled={loading}>
-          {loading ? "Logging in..." : "Log In"}
+          {loading ? t("auth.loggingIn") : t("auth.signInCta")}
         </Button>
       </form>
 
-      <div className="my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-navy-muted">
+      <div className="my-6 flex items-center gap-3 text-xs text-navy-muted">
         <span className="h-px flex-1 bg-line" />
-        OR
+        <span>{t("auth.orContinue")}</span>
         <span className="h-px flex-1 bg-line" />
       </div>
 
-      <Button
-        type="button"
-        variant="secondary"
-        className="w-full py-3"
+      <AuthGoogleButton
+        label={t("auth.googleShort")}
         disabled={googleLoading}
         onClick={() => void handleGoogle()}
-      >
-        Continue with Google
-      </Button>
-
-      <p className="mt-6 text-center text-sm text-navy-muted">
-        Don't have an account?{" "}
-        <Link to="/signup" className="font-medium text-brand hover:text-brand-hover">
-          Sign Up
-        </Link>
-      </p>
+      />
 
       {forgotOpen ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <button
             type="button"
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="absolute inset-0 bg-navy/30"
             onClick={() => setForgotOpen(false)}
           />
@@ -160,13 +155,13 @@ export function LoginForm() {
             className="relative z-10 mx-4 w-full max-w-md rounded-t-2xl bg-white px-6 py-6 sm:rounded-2xl"
           >
             <h2 id="forgot-title" className="text-lg font-bold text-navy">
-              Forgot password
+              {t("auth.forgotTitle")}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-navy-muted">
-              Password recovery will be available once real authentication is connected.
+              {t("auth.forgotBody")}
             </p>
             <Button className="mt-6 w-full" onClick={() => setForgotOpen(false)}>
-              Close
+              {t("common.close")}
             </Button>
           </div>
         </div>

@@ -15,10 +15,12 @@ import {
 import { getNotificationHref } from "../lib/notificationLinks"
 import { useNotificationsLive } from "../lib/useNotificationsLive"
 import { cn } from "../lib/cn"
+import { useT } from "../i18n"
 
 export function NotificationsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const t = useT()
   useNotificationsLive()
   const [filter, setFilter] = useState<"all" | "unread">("all")
 
@@ -33,15 +35,15 @@ export function NotificationsPage() {
         <div className="mx-auto max-w-3xl">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy">Notifications</h1>
-              <p className="mt-2 text-navy-muted">Activity for your Motodo account.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-navy">{t("notify.title")}</h1>
+              <p className="mt-2 text-navy-muted">{t("notify.subtitle")}</p>
             </div>
             <Button
               variant="secondary"
               onClick={() => void markAllNotificationsAsRead(user.id)}
               disabled={unread.length === 0}
             >
-              Mark all as read
+              {t("notify.markAll")}
             </Button>
           </div>
 
@@ -54,7 +56,7 @@ export function NotificationsPage() {
               )}
               onClick={() => setFilter("all")}
             >
-              All
+              {t("notify.all")}
             </button>
             <button
               type="button"
@@ -64,20 +66,20 @@ export function NotificationsPage() {
               )}
               onClick={() => setFilter("unread")}
             >
-              Unread
+              {t("notify.unread")}
             </button>
           </div>
 
           {visible.length === 0 ? (
             <div className="mt-8 rounded-2xl border border-line px-5 py-10 text-center">
               <p className="text-sm text-navy-muted">
-                {filter === "unread" ? "No unread notifications." : "You're all caught up."}
+                {filter === "unread" ? t("notify.emptyUnread") : t("notify.emptyAll")}
               </p>
             </div>
           ) : (
-            <ul className="mt-6 divide-y divide-line overflow-hidden rounded-2xl border border-line">
+            <ul className="mt-6 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white shadow-card">
               {visible.map((item) => (
-                <li key={item.id} className={cn(!item.read && "bg-surface/70")}>
+                <li key={item.id} className={cn(!item.read && "bg-brand-soft")}>
                   <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start">
                     <button
                       type="button"
@@ -94,10 +96,10 @@ export function NotificationsPage() {
                           <span className="text-sm font-semibold text-navy">{item.title}</span>
                           {!item.read ? (
                             <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand">
-                              Unread
+                              {t("notify.unread")}
                             </span>
                           ) : (
-                            <span className="text-[11px] text-navy-muted">Read</span>
+                            <span className="text-[11px] text-navy-muted">{t("notify.read")}</span>
                           )}
                         </span>
                         <span className="mt-1 block text-sm text-navy-muted">{item.message}</span>
@@ -110,7 +112,7 @@ export function NotificationsPage() {
                         className="shrink-0 self-start text-xs"
                         onClick={() => void markNotificationAsUnread(item.id, user.id)}
                       >
-                        Mark unread
+                        {t("notify.markUnread")}
                       </Button>
                     ) : null}
                   </div>

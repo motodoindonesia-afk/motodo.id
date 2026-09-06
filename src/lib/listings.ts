@@ -660,11 +660,23 @@ export function getPublicListingById(id: string): CatalogListing | undefined {
   return motorcycleListings.find((item) => item.id === id)
 }
 
-export function getRelatedPublicListings(listing: CatalogListing, limit = 4) {
-  const catalog = getPublicListings()
-  const sameCategory = catalog.filter((item) => item.id !== listing.id && item.category === listing.category)
-  const others = catalog.filter((item) => item.id !== listing.id && item.category !== listing.category)
-  return [...sameCategory, ...others].slice(0, limit)
+export function getRelatedPublicListings(listing: CatalogListing, limit = 8) {
+  const catalog = getPublicListings().filter((item) => item.id !== listing.id)
+  const ranked = catalog
+    .map((item) => {
+      let score = 0
+      if (item.category === listing.category) score += 4
+      if (listing.brand && item.brand && item.brand === listing.brand) score += 3
+      if (listing.location && item.location && item.location === listing.location) score += 1
+      if (listing.priceValue > 0) {
+        const delta = Math.abs(item.priceValue - listing.priceValue) / listing.priceValue
+        if (delta <= 0.25) score += 2
+        else if (delta <= 0.5) score += 1
+      }
+      return { item, score }
+    })
+    .sort((a, b) => b.score - a.score)
+  return ranked.slice(0, limit).map((entry) => entry.item)
 }
 
 export function subscribeListingUpdates(onChange: () => void) {

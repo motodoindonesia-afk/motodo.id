@@ -20,6 +20,7 @@ import { createListing, getListingById, updateListing } from "../../lib/listings
 import { AuthInput, AuthSelect, AuthTextarea, Field } from "../auth/AuthField"
 import { ListingPhotoField } from "./ListingPhotoField"
 import { Button } from "../ui/Button"
+import { catalogValue, categoryLabel, locationLabel, useLanguage } from "../../i18n"
 
 type Props = {
   profile: SellerProfile
@@ -40,6 +41,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function ListingForm({ profile, listing, mode = "create", onDraftSaved, onPreview, onSaved }: Props) {
+  const { locale, t, tm } = useLanguage()
   const [values, setValues] = useState<ListingFormValues>(() => emptyListingForm(profile, listing))
   const [errors, setErrors] = useState<ListingFormErrors>({})
   const [savedId, setSavedId] = useState(listing?.id)
@@ -75,12 +77,12 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
   async function handleDraft() {
     setErrors({})
     if (!values.name.trim()) {
-      setErrors({ name: "Add a motorcycle name before saving a draft." })
+      setErrors({ name: t("form.draftName") })
       return
     }
     const quantity = parseQuantityInput(values.quantity)
     if (!values.quantity.trim() || !Number.isInteger(quantity) || quantity < 1) {
-      setErrors({ quantity: "Enter a whole number of 1 or more." })
+      setErrors({ quantity: t("form.wholeQty") })
       return
     }
     setBusy("draft")
@@ -88,7 +90,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
       const saved = await persist("draft")
       onDraftSaved(saved)
     } catch (error) {
-      setErrors({ form: error instanceof Error ? error.message : "Unable to save draft." })
+      setErrors({ form: error instanceof Error ? tm(error.message, "form.unableDraft") : t("form.unableDraft") })
     } finally {
       setBusy(null)
     }
@@ -102,12 +104,12 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
       setErrors(nextErrors)
       if (Object.keys(nextErrors).length > 0) return
     } else if (!values.name.trim()) {
-      setErrors({ name: "Add a motorcycle name before saving." })
+      setErrors({ name: t("form.saveName") })
       return
     } else {
       const quantity = parseQuantityInput(values.quantity)
       if (!values.quantity.trim() || !Number.isInteger(quantity) || quantity < 1) {
-        setErrors({ quantity: "Enter a whole number of 1 or more." })
+        setErrors({ quantity: t("form.wholeQty") })
         return
       }
       setErrors({})
@@ -117,7 +119,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
       const saved = await persist(listing?.status ?? "draft")
       onSaved?.(saved)
     } catch (error) {
-      setErrors({ form: error instanceof Error ? error.message : "Unable to save listing." })
+      setErrors({ form: error instanceof Error ? tm(error.message, "form.unableSave") : t("form.unableSave") })
     } finally {
       setBusy(null)
     }
@@ -133,7 +135,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
       const saved = await persist(listing?.status === "active" || listing?.status === "sold" ? listing.status : "draft")
       onPreview(saved)
     } catch (error) {
-      setErrors({ form: error instanceof Error ? error.message : "Unable to save listing." })
+      setErrors({ form: error instanceof Error ? tm(error.message, "form.unableSave") : t("form.unableSave") })
     } finally {
       setBusy(null)
     }
@@ -141,8 +143,8 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
 
   return (
     <form className="space-y-5" onSubmit={(event) => void (mode === "edit" ? handleSaveChanges(event) : handlePreview(event))}>
-      <Section title="Basic Information">
-        <Field label="Motorcycle Name" htmlFor="listing-name" error={errors.name}>
+      <Section title={t("form.basicInfo")}>
+        <Field label={t("form.motorcycleName")} htmlFor="listing-name" error={errors.name ? tm(errors.name) : undefined}>
           <AuthInput
             id="listing-name"
             value={values.name}
@@ -150,23 +152,23 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
             onChange={(event) => update("name", event.target.value)}
           />
         </Field>
-        <Field label="Category" htmlFor="listing-category" error={errors.category}>
+        <Field label={t("listing.category")} htmlFor="listing-category" error={errors.category ? tm(errors.category) : undefined}>
           <AuthSelect
             id="listing-category"
             value={values.category}
             invalid={Boolean(errors.category)}
             onChange={(event) => update("category", event.target.value as ListingFormValues["category"])}
           >
-            <option value="">Select category</option>
+            <option value="">{t("form.selectCategory")}</option>
             {MOTORCYCLE_CATEGORIES.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {categoryLabel(locale, item)}
               </option>
             ))}
           </AuthSelect>
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Brand" htmlFor="listing-brand" error={errors.brand}>
+          <Field label={t("listing.brand")} htmlFor="listing-brand" error={errors.brand ? tm(errors.brand) : undefined}>
             <AuthInput
               id="listing-brand"
               value={values.brand}
@@ -174,7 +176,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
               onChange={(event) => update("brand", event.target.value)}
             />
           </Field>
-          <Field label="Model" htmlFor="listing-model" error={errors.model}>
+          <Field label={t("listing.model")} htmlFor="listing-model" error={errors.model ? tm(errors.model) : undefined}>
             <AuthInput
               id="listing-model"
               value={values.model}
@@ -185,13 +187,13 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
         </div>
       </Section>
 
-      <Section title="Price & Condition">
+      <Section title={t("form.priceCondition")}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            label="Price"
+            label={t("listing.price")}
             htmlFor="listing-price"
-            error={errors.price}
-            hint={Number.isFinite(priceNumber) && priceNumber > 0 ? formatIDR(priceNumber) : "Enter the asking price in Indonesian Rupiah."}
+            error={errors.price ? tm(errors.price) : undefined}
+            hint={Number.isFinite(priceNumber) && priceNumber > 0 ? formatIDR(priceNumber) : t("form.priceHint")}
           >
             <AuthInput
               id="listing-price"
@@ -202,10 +204,10 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
             />
           </Field>
           <Field
-            label="Quantity"
+            label={t("checkout.quantity")}
             htmlFor="listing-quantity"
-            error={errors.quantity}
-            hint="Total units in stock. Pending orders reserve inventory for buyers."
+            error={errors.quantity ? tm(errors.quantity) : undefined}
+            hint={t("form.qtyHint")}
           >
             <AuthInput
               id="listing-quantity"
@@ -219,26 +221,26 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
             />
           </Field>
         </div>
-        <Field label="Condition" htmlFor="listing-condition" error={errors.condition}>
+        <Field label={t("listing.condition")} htmlFor="listing-condition" error={errors.condition ? tm(errors.condition) : undefined}>
           <AuthSelect
             id="listing-condition"
             value={values.condition}
             invalid={Boolean(errors.condition)}
             onChange={(event) => update("condition", event.target.value as ListingFormValues["condition"])}
           >
-            <option value="">Select condition</option>
+            <option value="">{t("form.selectCondition")}</option>
             {LISTING_CONDITIONS.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {catalogValue(locale, item)}
               </option>
             ))}
           </AuthSelect>
         </Field>
       </Section>
 
-      <Section title="Motorcycle Specifications">
+      <Section title={t("form.specs")}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Year" htmlFor="listing-year" error={errors.year}>
+          <Field label={t("listing.year")} htmlFor="listing-year" error={errors.year ? tm(errors.year) : undefined}>
             <AuthInput
               id="listing-year"
               inputMode="numeric"
@@ -247,7 +249,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
               onChange={(event) => update("year", event.target.value.replace(/[^\d]/g, ""))}
             />
           </Field>
-          <Field label="Mileage" htmlFor="listing-mileage" error={errors.mileage} hint="Kilometers">
+          <Field label={t("listing.mileage")} htmlFor="listing-mileage" error={errors.mileage ? tm(errors.mileage) : undefined} hint={t("form.kilometers")}>
             <AuthInput
               id="listing-mileage"
               inputMode="numeric"
@@ -256,7 +258,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
               onChange={(event) => update("mileage", event.target.value.replace(/[^\d]/g, ""))}
             />
           </Field>
-          <Field label="Engine" htmlFor="listing-engine" error={errors.engine} hint="Example: 1200 cc">
+          <Field label={t("listing.engine")} htmlFor="listing-engine" error={errors.engine ? tm(errors.engine) : undefined} hint={t("form.engineHint")}>
             <AuthInput
               id="listing-engine"
               value={values.engine}
@@ -264,22 +266,22 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
               onChange={(event) => update("engine", event.target.value)}
             />
           </Field>
-          <Field label="Transmission" htmlFor="listing-transmission" error={errors.transmission}>
+          <Field label={t("listing.transmission")} htmlFor="listing-transmission" error={errors.transmission ? tm(errors.transmission) : undefined}>
             <AuthSelect
               id="listing-transmission"
               value={values.transmission}
               invalid={Boolean(errors.transmission)}
               onChange={(event) => update("transmission", event.target.value as ListingFormValues["transmission"])}
             >
-              <option value="">Select transmission</option>
+              <option value="">{t("form.selectTransmission")}</option>
               {LISTING_TRANSMISSIONS.map((item) => (
                 <option key={item} value={item}>
-                  {item}
+                  {catalogValue(locale, item)}
                 </option>
               ))}
             </AuthSelect>
           </Field>
-          <Field label="Fuel" htmlFor="listing-fuel" error={errors.fuel}>
+          <Field label={t("listing.fuel")} htmlFor="listing-fuel" error={errors.fuel ? tm(errors.fuel) : undefined}>
             <AuthSelect
               id="listing-fuel"
               value={values.fuel}
@@ -288,12 +290,12 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
             >
               {LISTING_FUELS.map((item) => (
                 <option key={item} value={item}>
-                  {item}
+                  {catalogValue(locale, item)}
                 </option>
               ))}
             </AuthSelect>
           </Field>
-          <Field label="Color" htmlFor="listing-color" error={errors.color}>
+          <Field label={t("listing.color")} htmlFor="listing-color" error={errors.color ? tm(errors.color) : undefined}>
             <AuthInput
               id="listing-color"
               value={values.color}
@@ -304,23 +306,23 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
         </div>
       </Section>
 
-      <Section title="Location">
-        <Field label="City" htmlFor="listing-city" error={errors.city}>
+      <Section title={t("listing.location")}>
+        <Field label={t("orders.city")} htmlFor="listing-city" error={errors.city ? tm(errors.city) : undefined}>
           <AuthSelect
             id="listing-city"
             value={values.city}
             invalid={Boolean(errors.city)}
             onChange={(event) => update("city", event.target.value)}
           >
-            <option value="">Select city</option>
+            <option value="">{t("form.selectCity")}</option>
             {cityOptions.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {locationLabel(locale, item)}
               </option>
             ))}
           </AuthSelect>
         </Field>
-        <Field label="Location / Area" htmlFor="listing-area" error={errors.location}>
+        <Field label={t("form.locationArea")} htmlFor="listing-area" error={errors.location ? tm(errors.location) : undefined}>
           <AuthInput
             id="listing-area"
             value={values.location}
@@ -328,7 +330,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
             onChange={(event) => update("location", event.target.value)}
           />
         </Field>
-        <Field label="Showroom Address" htmlFor="listing-showroom" error={errors.showroomAddress}>
+        <Field label={t("seller.showroomAddress")} htmlFor="listing-showroom" error={errors.showroomAddress ? tm(errors.showroomAddress) : undefined}>
           <AuthInput
             id="listing-showroom"
             value={values.showroomAddress}
@@ -338,12 +340,12 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
         </Field>
       </Section>
 
-      <Section title="Description">
+      <Section title={t("listing.description")}>
         <Field
-          label="Describe your motorcycle"
+          label={t("form.describe")}
           htmlFor="listing-description"
-          error={errors.description}
-          hint="Mention condition, modifications, service history, ownership, notable features, and any defects."
+          error={errors.description ? tm(errors.description) : undefined}
+          hint={t("form.describeHint")}
         >
           <AuthTextarea
             id="listing-description"
@@ -354,7 +356,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
         </Field>
       </Section>
 
-      <Section title="Photos">
+      <Section title={t("form.photos")}>
         <ListingPhotoField
           images={values.images}
           error={errors.images}
@@ -364,22 +366,22 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
 
       {errors.form ? (
         <p className="text-sm text-red-700" role="alert">
-          {errors.form}
+          {tm(errors.form)}
         </p>
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row">
         {mode === "edit" ? (
           <Button type="submit" disabled={Boolean(busy)}>
-            {busy === "save" ? "Saving..." : "Save Changes"}
+            {busy === "save" ? t("form.saving") : t("form.saveChanges")}
           </Button>
         ) : (
           <>
             <Button type="button" variant="secondary" onClick={() => void handleDraft()} disabled={Boolean(busy)}>
-              {busy === "draft" ? "Saving..." : "Save Draft"}
+              {busy === "draft" ? t("form.saving") : t("form.saveDraft")}
             </Button>
             <Button type="submit" disabled={Boolean(busy)}>
-              {busy === "preview" ? "Saving..." : "Preview Listing"}
+              {busy === "preview" ? t("form.saving") : t("form.previewListing")}
             </Button>
           </>
         )}
