@@ -3,7 +3,6 @@ import type { ReactNode } from "react"
 import { BrowsePage } from "./components/browse/BrowsePage"
 import { MotorcycleDetailPage } from "./components/browse/MotorcycleDetailPage"
 import { HomePage } from "./components/home/HomePage"
-import { AdminRoute } from "./components/admin/AdminRoute"
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"
 import { SiteLayout } from "./components/layout/SiteLayout"
 import { AuthProvider } from "./context/AuthContext"
@@ -13,8 +12,6 @@ import { OrdersProvider } from "./context/OrdersContext"
 import { ChatProvider } from "./context/ChatContext"
 import { ReviewsProvider } from "./context/ReviewsContext"
 import { NotificationsProvider } from "./context/NotificationsContext"
-import { AdminDirectoryProvider } from "./context/AdminDirectoryContext"
-import { AdminUsersDataGate } from "./components/admin/AdminUsersDataGate"
 import { ProductionConfigError } from "./components/layout/ProductionConfigError"
 import { isProductionConfigBlocked } from "./lib/supabase"
 import { NotificationsDataGate } from "./components/notifications/NotificationsDataGate"
@@ -25,18 +22,6 @@ import { ProfilePage } from "./pages/ProfilePage"
 import { SavedPage } from "./pages/SavedPage"
 import { SellPage } from "./pages/SellPage"
 import { SignupPage } from "./pages/SignupPage"
-import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage"
-import { AdminSellerDetailPage } from "./pages/admin/AdminSellerDetailPage"
-import { AdminSellersPage } from "./pages/admin/AdminSellersPage"
-import { AdminListingsPage } from "./pages/admin/AdminListingsPage"
-import { AdminListingDetailPage } from "./pages/admin/AdminListingDetailPage"
-import { AdminOrdersPage } from "./pages/admin/AdminOrdersPage"
-import { AdminOrderDetailPage } from "./pages/admin/AdminOrderDetailPage"
-import { AdminUsersPage } from "./pages/admin/AdminUsersPage"
-import { AdminUserDetailPage } from "./pages/admin/AdminUserDetailPage"
-import { AdminReviewsPage } from "./pages/admin/AdminReviewsPage"
-import { AdminReviewDetailPage } from "./pages/admin/AdminReviewDetailPage"
-import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage"
 import { SellerDashboardPage } from "./pages/seller/SellerDashboardPage"
 import { SellerListingNewPage } from "./pages/seller/SellerListingNewPage"
 import { SellerListingEditPage } from "./pages/seller/SellerListingEditPage"
@@ -73,14 +58,6 @@ function SellerListingGate({ children }: { children: ReactNode }) {
   )
 }
 
-function AdminGate({ children }: { children: ReactNode }) {
-  return (
-    <ProtectedRoute>
-      <AdminRoute>{children}</AdminRoute>
-    </ProtectedRoute>
-  )
-}
-
 export default function App() {
   if (isProductionConfigBlocked()) {
     return <ProductionConfigError />
@@ -95,7 +72,6 @@ export default function App() {
         <ChatProvider>
         <ReviewsProvider>
         <NotificationsProvider>
-        <AdminDirectoryProvider>
         <Routes>
           <Route element={<SiteLayout />}>
             <Route path="/" element={<HomePage />} />
@@ -387,124 +363,11 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin"
-              element={
-                <AdminGate>
-                  <AdminDashboardPage />
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/sellers"
-              element={
-                <AdminGate>
-                  <AdminSellersPage />
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/sellers/:id"
-              element={
-                <AdminGate>
-                  <AdminSellerDetailPage />
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/listings"
-              element={
-                <AdminGate>
-                  <ListingsDataGate>
-                    <AdminListingsPage />
-                  </ListingsDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/listings/:listingId"
-              element={
-                <AdminGate>
-                  <ListingsDataGate>
-                    <ReviewsDataGate>
-                      <AdminListingDetailPage />
-                    </ReviewsDataGate>
-                  </ListingsDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/orders"
-              element={
-                <AdminGate>
-                  <OrdersDataGate>
-                    <AdminOrdersPage />
-                  </OrdersDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/orders/:orderId"
-              element={
-                <AdminGate>
-                  <OrdersDataGate>
-                    <AdminOrderDetailPage />
-                  </OrdersDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <AdminGate>
-                  <AdminUsersDataGate>
-                    <AdminUsersPage />
-                  </AdminUsersDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/users/:userId"
-              element={
-                <AdminGate>
-                  <AdminUsersDataGate>
-                    <AdminUserDetailPage />
-                  </AdminUsersDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/reviews"
-              element={
-                <AdminGate>
-                  <ReviewsDataGate>
-                    <AdminReviewsPage />
-                  </ReviewsDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/reviews/:reviewId"
-              element={
-                <AdminGate>
-                  <ReviewsDataGate>
-                    <AdminReviewDetailPage />
-                  </ReviewsDataGate>
-                </AdminGate>
-              }
-            />
-            <Route
-              path="/admin/settings"
-              element={
-                <AdminGate>
-                  <AdminSettingsPage />
-                </AdminGate>
-              }
-            />
+            <Route path="/admin" element={<NotFoundPage />} />
+            <Route path="/admin/*" element={<NotFoundPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
-        </AdminDirectoryProvider>
         </NotificationsProvider>
         </ReviewsProvider>
         </ChatProvider>

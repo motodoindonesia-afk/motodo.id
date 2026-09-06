@@ -34,6 +34,7 @@ function mapProfileRowToAuthUser(row: ProfileDirectoryRow): AuthUser | null {
     role: isAccountType(row.account_type) ? row.account_type : "buyer",
     privilege: isPrivilege(row.role) ? row.role : "user",
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
   }
 }
 

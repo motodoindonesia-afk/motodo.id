@@ -1,0 +1,10 @@
+# Example Cloudflare Worker for Ritme. Copy to a dedicated Cloudflare project.
+# Do not use this file for the public Motodo Worker (motodo-homepage).
+
+name = "ritme-motodo"
+compatibility_date = "2025-09-01"
+
+[assets]
+directory = "./dist-ritme"
+not_found_handling = "single-page-application"
+binding = "ASSETS"

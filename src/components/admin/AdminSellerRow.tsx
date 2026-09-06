@@ -25,7 +25,7 @@ export function AdminSellerRow({ seller, stats, onApprove, onReject, approving }
   function actions() {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={() => navigate(`/admin/sellers/${seller.id}`)}>
+        <Button variant="secondary" onClick={() => navigate(`/sellers/${seller.id}`)}>
           Review
         </Button>
         {pending && onApprove ? (

@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { ConfirmActionModal } from "../../components/admin/ConfirmActionModal"
 import { ImageGallery } from "../../components/browse/ImageGallery"
 import { CompactRating } from "../../components/reviews/CompactRating"
@@ -12,17 +11,19 @@ import { adminSetListingStatus, getListingForAdmin, listingStatusLabel } from ".
 import { getSellerRatingSummary } from "../../lib/reviews"
 import { getSellerProfile, statusLabel } from "../../lib/seller"
 import { publicSellerPath } from "../../lib/sellers"
+import { motodoPublicHref } from "../../lib/opsPaths"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { useReviewsLive } from "../../lib/useReviewsLive"
 import { useSellerLive } from "../../lib/useSellerLive"
 
 export function AdminListingDetailPage() {
-  const { listingId } = useParams()
+  const { listingId, id } = useParams()
+  const listingIdResolved = listingId ?? id
   const navigate = useNavigate()
   useListingsLive()
   useSellerLive()
   useReviewsLive()
-  const listing = listingId ? getListingForAdmin(listingId) : null
+  const listing = listingIdResolved ? getListingForAdmin(listingIdResolved) : null
   const [confirmHide, setConfirmHide] = useState(false)
   const [message, setMessage] = useState("")
 
@@ -31,7 +32,7 @@ export function AdminListingDetailPage() {
       <main className="bg-white py-10 sm:py-14">
         <Container className="max-w-xl text-center">
           <h1 className="text-2xl font-bold text-navy">Listing not found</h1>
-          <Button className="mt-6" onClick={() => navigate("/admin/listings")}>
+          <Button className="mt-6" onClick={() => navigate("/listings")}>
             Back to listings
           </Button>
         </Container>
@@ -61,10 +62,9 @@ export function AdminListingDetailPage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Admin</h1>
-          <AdminNav />
+          <h1 className="text-3xl font-bold tracking-tight text-navy">Listing</h1>
           <p className="mt-6 text-sm">
-            <Link to="/admin/listings" className="font-medium text-brand hover:text-brand-hover">
+            <Link to="/listings" className="font-medium text-brand hover:text-brand-hover">
               ← Listings
             </Link>
           </p>
@@ -126,8 +126,18 @@ export function AdminListingDetailPage() {
               />
             </div>
             {seller ? (
-              <Link to={publicSellerPath(seller.userId)} className="mt-3 inline-block text-sm font-medium text-brand">
+              <a
+                href={motodoPublicHref(publicSellerPath(seller.userId))}
+                className="mt-3 inline-block text-sm font-medium text-brand"
+                target="_blank"
+                rel="noreferrer"
+              >
                 View public store
+              </a>
+            ) : null}
+            {seller ? (
+              <Link to={`/sellers/${seller.id}`} className="mt-3 ml-4 inline-block text-sm font-medium text-brand">
+                View in Ritme
               </Link>
             ) : null}
           </section>

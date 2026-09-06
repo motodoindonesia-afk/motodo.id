@@ -1,3 +1,4 @@
+/** Kept for reference. Ritme uses RitmeShell navigation instead. */
 import { NavLink } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { getPendingSellerCount } from "../../lib/adminPlatform"

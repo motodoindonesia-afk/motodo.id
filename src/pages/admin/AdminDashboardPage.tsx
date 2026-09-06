@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { Container } from "../../components/layout/Container"
 import { useAuth } from "../../context/AuthContext"
 import {
@@ -60,9 +59,8 @@ function AdminDashboardInner() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-6xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Admin Dashboard</h1>
-          <p className="mt-2 text-navy-muted">Manage Motodo marketplace operations.</p>
-          <AdminNav />
+          <h1 className="text-3xl font-bold tracking-tight text-navy">Dashboard</h1>
+          <p className="mt-2 text-navy-muted">Motodo Operations</p>
 
           {unread > 0 || pendingSellers > 0 ? (
             <p className="mt-4 text-sm text-navy-muted">

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { displayName } from "../../lib/auth"
-import { isAdmin } from "../../lib/admin"
 import { getSellerProfile, isSellerProfilesReady } from "../../lib/seller"
 import { getUnreadCount } from "../../lib/chat"
 import { getUnreadNotificationCount } from "../../lib/notifications"
@@ -28,7 +27,6 @@ export function Header() {
   const sellerProfile = user && isSellerProfilesReady() ? getSellerProfile(user.id) : null
   const sellerRegistered = Boolean(sellerProfile)
   const sellerApproved = sellerProfile?.status === "approved"
-  const showAdmin = isAdmin(user)
   const buyerUnread = user ? getUnreadCount(user.id, "buyer") : 0
   const sellerUnread = user && sellerRegistered ? getUnreadCount(user.id, "seller") : 0
   const notificationUnread = user ? getUnreadNotificationCount(user.id) : 0
@@ -87,7 +85,6 @@ export function Header() {
                 name={displayName(user)}
                 sellerRegistered={sellerRegistered}
                 sellerApproved={sellerApproved}
-                showAdmin={showAdmin}
                 buyerUnread={buyerUnread}
                 sellerUnread={sellerUnread}
                 onLogout={handleLogout}
@@ -146,11 +143,6 @@ export function Header() {
                   Notifications
                   <UnreadBadge count={notificationUnread} />
                 </TextLink>
-                {showAdmin ? (
-                  <TextLink href="/admin" className="py-1" onClick={() => setOpen(false)}>
-                    Admin
-                  </TextLink>
-                ) : null}
                 {sellerRegistered ? (
                   <>
                     <TextLink href="/seller/dashboard" className="py-1" onClick={() => setOpen(false)}>
@@ -221,7 +213,6 @@ function AccountMenu({
   name,
   sellerRegistered,
   sellerApproved,
-  showAdmin,
   buyerUnread,
   sellerUnread,
   onLogout,
@@ -229,7 +220,6 @@ function AccountMenu({
   name: string
   sellerRegistered: boolean
   sellerApproved: boolean
-  showAdmin: boolean
   buyerUnread: number
   sellerUnread: number
   onLogout: () => void
@@ -280,15 +270,6 @@ function AccountMenu({
             <span>Messages</span>
             <UnreadBadge count={buyerUnread} />
           </Link>
-          {showAdmin ? (
-            <Link
-              to="/admin"
-              className="block px-4 py-2 text-sm text-navy hover:bg-surface"
-              onClick={() => setOpen(false)}
-            >
-              Admin
-            </Link>
-          ) : null}
           {sellerRegistered ? (
             <>
               <Link

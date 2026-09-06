@@ -170,28 +170,28 @@ export function getActionRequired() {
       ? {
           id: "pending-sellers",
           label: `${pendingSellers} ${pendingSellers === 1 ? "seller" : "sellers"} waiting for verification`,
-          href: "/admin/sellers?status=pending",
+          href: "/sellers?status=pending",
         }
       : null,
     pendingOrders > 0
       ? {
           id: "pending-orders",
           label: `${pendingOrders} pending ${pendingOrders === 1 ? "order" : "orders"}`,
-          href: "/admin/orders?status=pending",
+          href: "/orders?status=pending",
         }
       : null,
     lowInventory > 0
       ? {
           id: "low-inventory",
           label: `${lowInventory} low inventory ${lowInventory === 1 ? "listing" : "listings"}`,
-          href: "/admin/listings?status=active",
+          href: "/listings?status=active",
         }
       : null,
     newReviews > 0
       ? {
           id: "new-reviews",
           label: `${newReviews} new ${newReviews === 1 ? "review" : "reviews"}`,
-          href: "/admin/reviews",
+          href: "/reviews",
         }
       : null,
   ].filter((item): item is { id: string; label: string; href: string } => item !== null)
@@ -205,7 +205,7 @@ export function getRecentActivity(limit = 12): AdminActivity[] {
       id: `seller-${seller.id}`,
       label: `New seller registered: ${seller.businessName}`,
       at: seller.createdAt,
-      href: `/admin/sellers/${seller.id}`,
+      href: `/sellers/${seller.id}`,
     })
   }
 
@@ -214,14 +214,14 @@ export function getRecentActivity(limit = 12): AdminActivity[] {
       id: `order-new-${order.id}`,
       label: `New order created for ${order.listingName}`,
       at: order.createdAt,
-      href: `/admin/orders/${order.id}`,
+      href: `/orders/${order.id}`,
     })
     if (order.status === "completed") {
       events.push({
         id: `order-done-${order.id}`,
         label: `Order completed for ${order.listingName}`,
         at: order.updatedAt,
-        href: `/admin/orders/${order.id}`,
+        href: `/orders/${order.id}`,
       })
     }
   }
@@ -231,7 +231,7 @@ export function getRecentActivity(limit = 12): AdminActivity[] {
       id: `listing-${listing.id}`,
       label: `Listing created: ${listing.name}`,
       at: listing.createdAt,
-      href: `/admin/listings/${listing.id}`,
+      href: `/listings/${listing.id}`,
     })
   }
 
@@ -240,7 +240,7 @@ export function getRecentActivity(limit = 12): AdminActivity[] {
       id: `review-${review.id}`,
       label: `Review submitted for ${getOrderByListingName(review.orderId, review.listingId)}`,
       at: review.createdAt,
-      href: `/admin/reviews/${review.id}`,
+      href: `/reviews/${review.id}`,
     })
   }
 

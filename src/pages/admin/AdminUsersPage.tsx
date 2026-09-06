@@ -1,20 +1,19 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { AuthInput } from "../../components/auth/AuthField"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
 import { cn } from "../../lib/cn"
-import { accountStatusLabel, getAllUsers, platformRole, type PlatformRole } from "../../lib/adminPlatform"
+import { accountTypeLabel, getAllUsers, privilegeLabel } from "../../lib/adminPlatform"
 import { formatShortDate } from "../../lib/profile"
 import { useAdminUsersLive } from "../../lib/useAdminUsersLive"
 import { useSellerLive } from "../../lib/useSellerLive"
 
-const FILTERS: { id: "all" | PlatformRole; label: string }[] = [
+const FILTERS: { id: "all" | "buyer" | "seller" | "admin"; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "Buyer", label: "Buyer" },
-  { id: "Seller", label: "Seller" },
-  { id: "Admin", label: "Admin" },
+  { id: "buyer", label: "Buyer" },
+  { id: "seller", label: "Seller" },
+  { id: "admin", label: "Admin" },
 ]
 
 export function AdminUsersPage() {
@@ -28,10 +27,13 @@ export function AdminUsersPage() {
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase()
     return users.filter((user) => {
-      const role = platformRole(user)
-      if (filter !== "all" && role !== filter) return false
+      const accountType = accountTypeLabel(user).toLowerCase()
+      const role = privilegeLabel(user).toLowerCase()
+      if (filter === "admin" && role !== "admin") return false
+      if (filter === "buyer" && (accountType !== "buyer" || role === "admin")) return false
+      if (filter === "seller" && accountType !== "seller") return false
       if (!needle) return true
-      return `${user.fullName} ${user.email} ${user.role} ${user.privilege ?? ""}`.toLowerCase().includes(needle)
+      return `${user.fullName} ${user.email} ${accountType} ${role}`.toLowerCase().includes(needle)
     })
   }, [users, filter, query])
 
@@ -40,8 +42,7 @@ export function AdminUsersPage() {
       <Container>
         <div className="mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Users</h1>
-          <p className="mt-2 text-navy-muted">Registered Motodo accounts.</p>
-          <AdminNav />
+          <p className="mt-2 text-navy-muted">Accounts from public.profiles. Read-only.</p>
 
           <div className="mt-6 flex flex-wrap gap-2">
             {FILTERS.map((item) => (
@@ -74,23 +75,23 @@ export function AdminUsersPage() {
                 <thead className="bg-surface">
                   <tr className="text-xs font-medium uppercase tracking-wide text-navy-muted">
                     <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Email</th>
+                    <th className="px-4 py-3">Account type</th>
                     <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Created Date</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Actions</th>
+                    <th className="px-4 py-3">Created</th>
+                    <th className="px-4 py-3">Updated</th>
+                    <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {visible.map((user) => (
                     <tr key={user.id} className="border-t border-line">
                       <td className="px-4 py-3 text-sm font-medium text-navy">{user.fullName}</td>
-                      <td className="px-4 py-3 text-sm text-navy-muted">{user.email.trim() || "—"}</td>
-                      <td className="px-4 py-3 text-sm text-navy-muted">{platformRole(user)}</td>
+                      <td className="px-4 py-3 text-sm text-navy-muted">{accountTypeLabel(user)}</td>
+                      <td className="px-4 py-3 text-sm text-navy-muted">{privilegeLabel(user)}</td>
                       <td className="px-4 py-3 text-sm text-navy-muted">{formatShortDate(user.createdAt)}</td>
-                      <td className="px-4 py-3 text-sm text-navy-muted">{accountStatusLabel()}</td>
+                      <td className="px-4 py-3 text-sm text-navy-muted">{user.updatedAt ? formatShortDate(user.updatedAt) : "—"}</td>
                       <td className="px-4 py-3">
-                        <Button variant="secondary" onClick={() => navigate(`/admin/users/${user.id}`)}>
+                        <Button variant="secondary" onClick={() => navigate(`/users/${user.id}`)}>
                           View
                         </Button>
                       </td>
@@ -99,6 +100,9 @@ export function AdminUsersPage() {
                 </tbody>
               </table>
             )}
+            <p className="mt-3 text-xs text-navy-muted">
+              Email is not stored on public.profiles, so it is shown only when already available on the signed-in session.
+            </p>
           </div>
         </div>
       </Container>

@@ -5,7 +5,6 @@ import { roleLabel } from "../lib/auth"
 import { formatMemberSince, roleDescription } from "../lib/profile"
 import { deleteListing, getListingsBySeller } from "../lib/listings"
 import { getSellerProfile, isSellerProfilesReady, sellerStatusHeading } from "../lib/seller"
-import { isAdmin } from "../lib/admin"
 import { useSellerLive } from "../lib/useSellerLive"
 import { useListingsLive } from "../lib/useListingsLive"
 import { SellerStatusBadge } from "../components/seller/SellerStatusBadge"
@@ -256,18 +255,6 @@ export function ProfilePage() {
           </section>
 
           <SellerCenter userId={user.id} isSellerRole={accountType === "seller"} />
-
-          {isAdmin(user) ? (
-            <section className="mt-8">
-              <h2 className="text-xl font-bold text-navy">Admin</h2>
-              <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
-                <p className="text-sm text-navy-muted">Review seller registrations and marketplace operations.</p>
-                <Button className="mt-4" onClick={() => navigate("/admin")}>
-                  Admin Dashboard
-                </Button>
-              </div>
-            </section>
-          ) : null}
 
           {sellerProfile ? (
             <section className="mt-8">

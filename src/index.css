@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "./**/*.{ts,tsx}";
+@source "../ritme/index.html";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;

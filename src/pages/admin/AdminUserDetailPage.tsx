@@ -1,5 +1,4 @@
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
 import {
@@ -17,12 +16,13 @@ import { useSellerLive } from "../../lib/useSellerLive"
 import { useOrdersLive } from "../../lib/useOrdersLive"
 
 export function AdminUserDetailPage() {
-  const { userId } = useParams()
+  const { userId, id } = useParams()
+  const userIdResolved = userId ?? id
   const navigate = useNavigate()
   useSellerLive()
   useOrdersLive()
   useAdminUsersLive()
-  const user = userId ? getAdminDirectoryUser(userId) : null
+  const user = userIdResolved ? getAdminDirectoryUser(userIdResolved) : null
   const seller = user ? getSellerProfile(user.id) : null
 
   if (!user) {
@@ -30,7 +30,7 @@ export function AdminUserDetailPage() {
       <main className="bg-white py-10 sm:py-14">
         <Container className="max-w-xl text-center">
           <h1 className="text-2xl font-bold text-navy">User not found</h1>
-          <Button className="mt-6" onClick={() => navigate("/admin/users")}>
+          <Button className="mt-6" onClick={() => navigate("/users")}>
             Back to users
           </Button>
         </Container>
@@ -42,10 +42,9 @@ export function AdminUserDetailPage() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Admin</h1>
-          <AdminNav />
+          <h1 className="text-3xl font-bold tracking-tight text-navy">User</h1>
           <p className="mt-6 text-sm">
-            <Link to="/admin/users" className="font-medium text-brand hover:text-brand-hover">
+            <Link to="/users" className="font-medium text-brand hover:text-brand-hover">
               ← Users
             </Link>
           </p>
@@ -78,6 +77,10 @@ export function AdminUserDetailPage() {
                 <dd className="font-medium text-navy">{formatShortDate(user.createdAt)}</dd>
               </div>
               <div className="flex justify-between gap-4">
+                <dt className="text-navy-muted">Updated Date</dt>
+                <dd className="font-medium text-navy">{user.updatedAt ? formatShortDate(user.updatedAt) : "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
                 <dt className="text-navy-muted">Account Status</dt>
                 <dd className="font-medium text-navy">{accountStatusLabel()}</dd>
               </div>
@@ -85,7 +88,7 @@ export function AdminUserDetailPage() {
                 <div className="flex justify-between gap-4">
                   <dt className="text-navy-muted">Seller Profile</dt>
                   <dd>
-                    <Link to={`/admin/sellers/${seller.id}`} className="font-medium text-brand hover:text-brand-hover">
+                    <Link to={`/sellers/${seller.id}`} className="font-medium text-brand hover:text-brand-hover">
                       View Seller Profile
                     </Link>
                   </dd>

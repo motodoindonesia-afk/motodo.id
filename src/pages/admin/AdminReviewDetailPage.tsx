@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { ConfirmActionModal } from "../../components/admin/ConfirmActionModal"
 import { StarRating } from "../../components/reviews/StarRating"
 import { Button } from "../../components/ui/Button"
@@ -11,10 +10,11 @@ import { getSellerProfile } from "../../lib/seller"
 import { useReviewsLive } from "../../lib/useReviewsLive"
 
 export function AdminReviewDetailPage() {
-  const { reviewId } = useParams()
+  const { reviewId, id } = useParams()
+  const reviewIdResolved = reviewId ?? id
   const navigate = useNavigate()
   useReviewsLive()
-  const review = reviewId ? getReviewById(reviewId) : null
+  const review = reviewIdResolved ? getReviewById(reviewIdResolved) : null
   const [confirmHide, setConfirmHide] = useState(false)
   const [message, setMessage] = useState("")
 
@@ -23,7 +23,7 @@ export function AdminReviewDetailPage() {
       <main className="bg-white py-10 sm:py-14">
         <Container className="max-w-xl text-center">
           <h1 className="text-2xl font-bold text-navy">Review not found</h1>
-          <Button className="mt-6" onClick={() => navigate("/admin/reviews")}>
+          <Button className="mt-6" onClick={() => navigate("/reviews")}>
             Back to reviews
           </Button>
         </Container>
@@ -50,9 +50,8 @@ export function AdminReviewDetailPage() {
       <Container>
         <div className="mx-auto max-w-2xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Admin</h1>
-          <AdminNav />
           <p className="mt-6 text-sm">
-            <Link to="/admin/reviews" className="font-medium text-brand hover:text-brand-hover">
+            <Link to="/reviews" className="font-medium text-brand hover:text-brand-hover">
               ← Reviews
             </Link>
           </p>
@@ -94,14 +93,14 @@ export function AdminReviewDetailPage() {
               </div>
             </dl>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link to={`/admin/orders/${review.orderId}`} className="text-sm font-medium text-brand hover:text-brand-hover">
+              <Link to={`/orders/${review.orderId}`} className="text-sm font-medium text-brand hover:text-brand-hover">
                 View Order
               </Link>
-              <Link to={`/admin/listings/${review.listingId}`} className="text-sm font-medium text-brand hover:text-brand-hover">
+              <Link to={`/listings/${review.listingId}`} className="text-sm font-medium text-brand hover:text-brand-hover">
                 View Motorcycle
               </Link>
               {seller ? (
-                <Link to={`/admin/sellers/${seller.id}`} className="text-sm font-medium text-brand hover:text-brand-hover">
+                <Link to={`/sellers/${seller.id}`} className="text-sm font-medium text-brand hover:text-brand-hover">
                   View Seller
                 </Link>
               ) : null}

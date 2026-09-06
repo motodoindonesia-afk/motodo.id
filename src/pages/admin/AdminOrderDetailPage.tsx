@@ -1,5 +1,4 @@
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
@@ -27,11 +26,12 @@ function Row({ label, value }: { label: string; value?: ReactNode }) {
 }
 
 export function AdminOrderDetailPage() {
-  const { orderId } = useParams()
+  const { orderId, id } = useParams()
+  const orderIdResolved = orderId ?? id
   const navigate = useNavigate()
   useOrdersLive()
   useSellerLive()
-  const order = orderId ? getOrderById(orderId) : null
+  const order = orderIdResolved ? getOrderById(orderIdResolved) : null
   const feePercent = Math.round(SELLER_SUCCESS_FEE_RATE * 100)
 
   if (!order) {
@@ -39,7 +39,7 @@ export function AdminOrderDetailPage() {
       <main className="bg-white py-10 sm:py-14">
         <Container className="max-w-xl text-center">
           <h1 className="text-2xl font-bold text-navy">Order not found</h1>
-          <Button className="mt-6" onClick={() => navigate("/admin/orders")}>
+          <Button className="mt-6" onClick={() => navigate("/orders")}>
             Back to orders
           </Button>
         </Container>
@@ -52,9 +52,8 @@ export function AdminOrderDetailPage() {
       <Container>
         <div className="mx-auto max-w-3xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Admin</h1>
-          <AdminNav />
           <p className="mt-6 text-sm">
-            <Link to="/admin/orders" className="font-medium text-brand hover:text-brand-hover">
+            <Link to="/orders" className="font-medium text-brand hover:text-brand-hover">
               ← Orders
             </Link>
           </p>
@@ -73,6 +72,25 @@ export function AdminOrderDetailPage() {
                 <Row label="Updated Date" value={formatOrderDate(order.updatedAt)} />
                 <Row label="Status" value={<OrderStatusBadge status={order.status} />} />
               </dl>
+              <ol className="mt-6 grid gap-2 sm:grid-cols-4">
+                {(["pending", "confirmed", "completed", "cancelled"] as const).map((step) => {
+                  const active = order.status === step
+                  return (
+                    <li
+                      key={step}
+                      className={`rounded-lg border px-3 py-2 text-center text-xs font-medium capitalize ${
+                        active ? "border-brand bg-brand/10 text-brand" : "border-line text-navy-muted"
+                      }`}
+                    >
+                      {step}
+                    </li>
+                  )
+                })}
+              </ol>
+              <p className="mt-3 text-xs text-navy-muted">
+                Order status is changed by buyers and sellers through existing order RPCs. Ritme does not override the
+                order machine from this screen.
+              </p>
             </section>
             <section className="rounded-2xl border border-line px-5 py-6">
               <h3 className="text-lg font-bold text-navy">Buyer</h3>
@@ -94,7 +112,7 @@ export function AdminOrderDetailPage() {
                 <Row
                   label="Name"
                   value={
-                    <Link to={`/admin/listings/${order.listingId}`} className="text-brand hover:text-brand-hover">
+                    <Link to={`/listings/${order.listingId}`} className="text-brand hover:text-brand-hover">
                       {order.listingName}
                     </Link>
                   }
@@ -135,6 +153,7 @@ export function AdminOrderDetailPage() {
                 <Row label="Payment Method" value={paymentMethodLabel(order.paymentMethod)} />
                 <Row label="Payment Status" value={order.paymentStatus ?? "pending"} />
               </dl>
+              <p className="mt-3 text-xs text-navy-muted">Payment remains mock until a payment gateway is connected.</p>
             </section>
           </div>
         </div>

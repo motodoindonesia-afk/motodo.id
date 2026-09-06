@@ -12,6 +12,7 @@ export type AuthUser = {
   privilege?: PrivilegeRole
   phone?: string
   createdAt: string
+  updatedAt?: string
 }
 
 export type LoginInput = {

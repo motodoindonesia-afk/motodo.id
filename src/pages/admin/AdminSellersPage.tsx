@@ -6,12 +6,12 @@ import { SellerDataGate } from "../../components/seller/SellerDataGate"
 import { sellerRowStats } from "../../lib/adminPlatform"
 import { useSellerLive } from "../../lib/useSellerLive"
 import { useAuth } from "../../context/AuthContext"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { AdminSellerRow } from "../../components/admin/AdminSellerRow"
 import { RejectSellerModal } from "../../components/admin/RejectSellerModal"
 import { AuthInput } from "../../components/auth/AuthField"
 import { Container } from "../../components/layout/Container"
 import { cn } from "../../lib/cn"
+import { userFacingMessage } from "../../lib/userFacingError"
 
 const FILTERS: { id: "all" | SellerStatus; label: string }[] = [
   { id: "all", label: "All" },
@@ -60,7 +60,7 @@ function AdminSellersInner() {
       await approveSeller(id, user.id)
       setMessage("Seller approved.")
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to approve seller.")
+      setMessage(userFacingMessage(error, "Something went wrong. Please try again."))
     } finally {
       setApprovingId(null)
     }
@@ -78,7 +78,6 @@ function AdminSellersInner() {
         <div className="mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Sellers</h1>
           <p className="mt-2 text-navy-muted">Review garage and dealer registrations.</p>
-          <AdminNav />
 
           <div className="mt-6 flex flex-wrap gap-2">
             {FILTERS.map((item) => (

@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { AuthInput } from "../../components/auth/AuthField"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
@@ -57,7 +56,6 @@ export function AdminReviewsPage() {
         <div className="mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Reviews</h1>
           <p className="mt-2 text-navy-muted">Moderate published and hidden reviews. Reviews are never deleted.</p>
-          <AdminNav />
 
           <div className="mt-6 flex flex-wrap gap-2">
             {FILTERS.map((item) => (
@@ -114,7 +112,7 @@ export function AdminReviewsPage() {
                       <td className="px-4 py-3 font-mono text-xs text-navy">{review.orderId.slice(0, 8)}</td>
                       <td className="px-4 py-3 text-sm text-navy-muted">{formatReviewMonth(review.createdAt)}</td>
                       <td className="px-4 py-3">
-                        <Button variant="secondary" onClick={() => navigate(`/admin/reviews/${review.id}`)}>
+                        <Button variant="secondary" onClick={() => navigate(`/reviews/${review.id}`)}>
                           View
                         </Button>
                       </td>

@@ -7,11 +7,12 @@ import { formatMoney, getSellerRevenue, sellerRowStats } from "../../lib/adminPl
 import { formatShortDate } from "../../lib/profile"
 import { SELLER_SUCCESS_FEE_RATE } from "../../lib/orders"
 import { publicSellerPath } from "../../lib/sellers"
+import { motodoPublicHref } from "../../lib/opsPaths"
 import { useSellerLive } from "../../lib/useSellerLive"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { useOrdersLive } from "../../lib/useOrdersLive"
 import { useReviewsLive } from "../../lib/useReviewsLive"
-import { AdminNav } from "../../components/admin/AdminNav"
+import { userFacingMessage } from "../../lib/userFacingError"
 import { RejectSellerModal } from "../../components/admin/RejectSellerModal"
 import { SellerStatusBadge } from "../../components/seller/SellerStatusBadge"
 import { Button } from "../../components/ui/Button"
@@ -63,7 +64,7 @@ function AdminSellerDetailInner() {
         <Container>
           <div className="mx-auto max-w-lg text-center">
             <h1 className="text-2xl font-bold text-navy">Seller not found</h1>
-            <Button className="mt-6" onClick={() => navigate("/admin/sellers")}>
+            <Button className="mt-6" onClick={() => navigate("/sellers")}>
               Back to sellers
             </Button>
           </div>
@@ -84,7 +85,7 @@ function AdminSellerDetailInner() {
       await approveSeller(sellerId, user.id)
       setMessage("Seller approved.")
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to approve seller.")
+      setMessage(userFacingMessage(error, "Something went wrong. Please try again."))
     } finally {
       setBusy(false)
     }
@@ -94,10 +95,9 @@ function AdminSellerDetailInner() {
     <main className="bg-white py-10 sm:py-14">
       <Container>
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">Admin</h1>
-          <AdminNav />
+          <h1 className="text-3xl font-bold tracking-tight text-navy">Seller</h1>
           <p className="mt-6 text-sm">
-            <Link to="/admin/sellers" className="font-medium text-brand hover:text-brand-hover">
+            <Link to="/sellers" className="font-medium text-brand hover:text-brand-hover">
               ← Sellers
             </Link>
           </p>
@@ -141,9 +141,14 @@ function AdminSellerDetailInner() {
                 <Row
                   label="Public store"
                   value={
-                    <Link to={publicSellerPath(seller.userId)} className="text-brand hover:text-brand-hover">
+                    <a
+                      href={motodoPublicHref(publicSellerPath(seller.userId))}
+                      className="text-brand hover:text-brand-hover"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       View public store
-                    </Link>
+                    </a>
                   }
                 />
               ) : null}

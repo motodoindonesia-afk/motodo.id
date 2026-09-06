@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:ritme": "vite --config vite.ritme.config.ts",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "build:ritme": "tsc -b && vite build --config vite.ritme.config.ts",
+    "preview": "vite preview",
+    "preview:ritme": "vite preview --config vite.ritme.config.ts --port 4174"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0",

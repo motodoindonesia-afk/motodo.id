@@ -40,6 +40,7 @@ export function authUserFromProfile(authUser: User, profile: MotodoProfile): Aut
     role: profile.accountType,
     privilege: profile.role,
     createdAt: profile.createdAt,
+    updatedAt: profile.updatedAt,
   }
 }
 

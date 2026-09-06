@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge"
 import { AuthInput } from "../../components/auth/AuthField"
 import { Button } from "../../components/ui/Button"
@@ -50,7 +49,6 @@ export function AdminOrdersPage() {
         <div className="mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Orders</h1>
           <p className="mt-2 text-navy-muted">Monitor marketplace transactions. Sellers remain responsible for status changes.</p>
-          <AdminNav />
 
           <div className="mt-6 flex flex-wrap gap-2">
             {FILTERS.map((item) => (
@@ -92,6 +90,7 @@ export function AdminOrdersPage() {
                     <th className="px-4 py-3">Seller Net</th>
                     <th className="px-4 py-3">Delivery</th>
                     <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Payment</th>
                     <th className="px-4 py-3">Date</th>
                     <th className="px-4 py-3">Actions</th>
                   </tr>
@@ -111,9 +110,10 @@ export function AdminOrdersPage() {
                       <td className="px-4 py-3">
                         <OrderStatusBadge status={order.status} />
                       </td>
+                      <td className="px-4 py-3 text-sm text-navy-muted">{order.paymentStatus ?? "pending"}</td>
                       <td className="px-4 py-3 text-sm text-navy-muted">{formatOrderDate(order.createdAt)}</td>
                       <td className="px-4 py-3">
-                        <Button variant="secondary" onClick={() => navigate(`/admin/orders/${order.id}`)}>
+                        <Button variant="secondary" onClick={() => navigate(`/orders/${order.id}`)}>
                           View
                         </Button>
                       </td>

@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { AdminNav } from "../../components/admin/AdminNav"
 import { AuthInput } from "../../components/auth/AuthField"
 import { Container } from "../../components/layout/Container"
 import { Button } from "../../components/ui/Button"
@@ -53,7 +52,6 @@ export function AdminListingsPage() {
         <div className="mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Listings</h1>
           <p className="mt-2 text-navy-muted">Inspect and moderate motorcycles across the marketplace.</p>
-          <AdminNav />
 
           <div className="mt-6 flex flex-wrap gap-2">
             {STATUS_FILTERS.map((item) => (
@@ -127,7 +125,7 @@ export function AdminListingsPage() {
                       <td className="px-4 py-3 text-sm text-navy-muted">{listingStatusLabel(listing.status)}</td>
                       <td className="px-4 py-3 text-sm text-navy-muted">{formatShortDate(listing.createdAt)}</td>
                       <td className="px-4 py-3">
-                        <Button variant="secondary" onClick={() => navigate(`/admin/listings/${listing.id}`)}>
+                        <Button variant="secondary" onClick={() => navigate(`/listings/${listing.id}`)}>
                           View
                         </Button>
                       </td>
