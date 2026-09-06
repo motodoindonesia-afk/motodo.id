@@ -1,4 +1,4 @@
-import { ChevronDown, Menu, ShoppingCart, X } from "lucide-react"
+import { ChevronDown, Menu, Search, ShoppingCart, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
@@ -11,19 +11,17 @@ import { useChatLive } from "../../lib/useChatLive"
 import { useNotificationsLive } from "../../lib/useNotificationsLive"
 import { UnreadBadge } from "../chat/UnreadBadge"
 import { navLinks, searchQuickLinks } from "../../data/site"
-import { Button } from "../ui/Button"
 import { SearchBar } from "../ui/SearchBar"
-import { TextLink } from "../ui/TextLink"
 import { Container } from "./Container"
 import { UtilityBar } from "./UtilityBar"
 import { MotodoLogoLockup } from "../brand/MotodoLogo"
-import { useT, type MessageKey } from "../../i18n"
+import { LanguageSwitcher, useT, type MessageKey } from "../../i18n"
 
 const NAV_KEYS: Record<string, MessageKey> = {
   "/browse": "nav.browse",
   "/#categories": "nav.categories",
-  "/sell": "nav.sell",
-  "/#about": "nav.about",
+  "/sell": "nav.sellMotorcycle",
+  "/#about": "footer.about",
 }
 
 const QUICK_KEYS: Record<string, MessageKey> = {
@@ -32,6 +30,12 @@ const QUICK_KEYS: Record<string, MessageKey> = {
   Sparepart: "quick.sparepart",
   Custom: "quick.custom",
 }
+
+const menuItemClass =
+  "flex min-h-11 w-full items-center text-[15px] font-medium text-navy hover:text-brand"
+
+const menuSecondaryClass =
+  "flex min-h-10 w-full items-center text-[14px] font-medium text-navy hover:text-brand"
 
 export function Header() {
   const t = useT()
@@ -48,6 +52,18 @@ export function Header() {
   const sellerUnread = user && sellerRegistered ? getUnreadCount(user.id, "seller") : 0
   const notificationUnread = user ? getUnreadNotificationCount(user.id) : 0
   const sellerHref = sellerRegistered ? "/seller/dashboard" : "/seller/register"
+
+  useEffect(() => {
+    function closeOnDesktop() {
+      if (window.matchMedia("(min-width: 769px)").matches) setOpen(false)
+    }
+    window.addEventListener("resize", closeOnDesktop)
+    return () => window.removeEventListener("resize", closeOnDesktop)
+  }, [])
+
+  function focusMobileSearch() {
+    document.getElementById("header-search-mobile")?.focus()
+  }
 
   function goToBrowse(query: string) {
     const trimmed = query.trim()
@@ -82,7 +98,173 @@ export function Header() {
         }
       />
 
-      <Container className="py-2.5">
+      <div className="min-[769px]:hidden">
+        <div className="flex h-14 min-w-0 items-center justify-between gap-2 px-4">
+          <Link
+            to="/"
+            aria-label="Motodo home"
+            className="min-w-0 shrink text-[21px] font-semibold leading-none tracking-tight text-brand"
+          >
+            motodo
+          </Link>
+          <div className="flex shrink-0 items-center gap-0.5">
+            <button
+              type="button"
+              className="flex size-11 items-center justify-center rounded-md text-navy hover:bg-brand-soft"
+              aria-label={t("common.search")}
+              onClick={focusMobileSearch}
+            >
+              <Search className="size-6" strokeWidth={1.75} />
+            </button>
+            <Link
+              to="/orders"
+              className="flex size-11 items-center justify-center rounded-md text-brand hover:bg-brand-soft"
+              aria-label={t("nav.cart")}
+            >
+              <ShoppingCart className="size-6" strokeWidth={1.75} />
+            </Link>
+            <button
+              type="button"
+              className="flex size-11 items-center justify-center rounded-md text-navy hover:bg-brand-soft"
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              onClick={() => setOpen((value) => !value)}
+            >
+              <span className="sr-only">{open ? t("nav.closeMenu") : t("nav.openMenu")}</span>
+              {open ? <X className="size-6" strokeWidth={1.75} /> : <Menu className="size-6" strokeWidth={1.75} />}
+            </button>
+          </div>
+        </div>
+
+        <div className="px-4 pb-2">
+          <SearchBar
+            id="header-search-mobile"
+            variant="market"
+            compact
+            placeholder={t("nav.searchPlaceholder")}
+            onSubmitSearch={goToBrowse}
+          />
+        </div>
+
+        <nav
+          className="flex gap-3 overflow-x-auto px-4 pb-2.5 text-[13px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          aria-label={t("nav.brands")}
+        >
+          {searchQuickLinks.map((link) => (
+            <Link key={link.label} to={link.href} className="shrink-0 whitespace-nowrap text-brand hover:text-brand-hover">
+              {QUICK_KEYS[link.label] ? t(QUICK_KEYS[link.label]) : link.label}
+            </Link>
+          ))}
+        </nav>
+
+        {open ? (
+          <div id="mobile-menu" className="border-t border-line px-4 py-2">
+            <nav aria-label={t("nav.mobile")}>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={menuItemClass}
+                  onClick={() => setOpen(false)}
+                >
+                  {NAV_KEYS[link.href] ? t(NAV_KEYS[link.href]) : link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="mt-1 border-t border-line pt-1">
+              {isAuthenticated && user ? (
+                <>
+                  <p className="px-0 py-2 text-[13px] font-semibold text-navy">{user.fullName}</p>
+                  <Link to="/profile" className={menuItemClass} onClick={() => setOpen(false)}>
+                    {t("nav.myProfile")}
+                  </Link>
+                  <Link to="/orders" className={menuItemClass} onClick={() => setOpen(false)}>
+                    {t("nav.myOrders")}
+                  </Link>
+                  <Link to="/messages" className={menuItemClass} onClick={() => setOpen(false)}>
+                    <span className="inline-flex items-center gap-2">
+                      {t("common.messages")}
+                      <UnreadBadge count={buyerUnread} />
+                    </span>
+                  </Link>
+                  {sellerRegistered ? (
+                    <>
+                      <Link to="/seller/dashboard" className={menuItemClass} onClick={() => setOpen(false)}>
+                        {t("nav.sellerDashboard")}
+                      </Link>
+                      {sellerApproved ? (
+                        <Link to="/seller/listings" className={menuItemClass} onClick={() => setOpen(false)}>
+                          {t("nav.listings")}
+                        </Link>
+                      ) : null}
+                      <Link to="/seller/orders" className={menuItemClass} onClick={() => setOpen(false)}>
+                        {t("nav.sellerOrders")}
+                      </Link>
+                      <Link to="/seller/messages" className={menuItemClass} onClick={() => setOpen(false)}>
+                        <span className="inline-flex items-center gap-2">
+                          {t("nav.sellerMessages")}
+                          <UnreadBadge count={sellerUnread} />
+                        </span>
+                      </Link>
+                      <Link to="/seller/profile" className={menuItemClass} onClick={() => setOpen(false)}>
+                        {t("nav.sellerProfile")}
+                      </Link>
+                      {sellerApproved ? (
+                        <Link to="/sell" className={menuItemClass} onClick={() => setOpen(false)}>
+                          {t("nav.sellMotorcycle")}
+                        </Link>
+                      ) : null}
+                    </>
+                  ) : (
+                    <Link to="/seller/register" className={menuItemClass} onClick={() => setOpen(false)}>
+                      {t("nav.becomeSeller")}
+                    </Link>
+                  )}
+                  <button type="button" className={menuItemClass} onClick={handleLogout}>
+                    {t("common.logout")}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className={menuItemClass} onClick={() => setOpen(false)}>
+                    {t("common.login")}
+                  </Link>
+                  <Link to="/signup" className={menuItemClass} onClick={() => setOpen(false)}>
+                    {t("common.signup")}
+                  </Link>
+                </>
+              )}
+            </div>
+
+            <div className="mt-1 border-t border-line pt-1">
+              <Link to="/notifications" className={menuSecondaryClass} onClick={() => setOpen(false)}>
+                <span className="inline-flex items-center gap-2">
+                  {t("common.notifications")}
+                  {notificationUnread > 0 ? <UnreadBadge count={notificationUnread} /> : null}
+                </span>
+              </Link>
+              <Link to="/#help" className={menuSecondaryClass} onClick={() => setOpen(false)}>
+                {t("nav.help")}
+              </Link>
+              <Link to={sellerHref} className={menuSecondaryClass} onClick={() => setOpen(false)}>
+                {t("nav.sellerCentre")}
+              </Link>
+              <Link to="/sell" className={menuSecondaryClass} onClick={() => setOpen(false)}>
+                {t("nav.startSelling")}
+              </Link>
+              <a href="/#app-store" className={menuSecondaryClass} onClick={() => setOpen(false)}>
+                {t("nav.downloadApp")}
+              </a>
+              <div className="flex min-h-10 items-center">
+                <LanguageSwitcher compact={false} tone="onLight" />
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <Container className="hidden py-2.5 min-[769px]:block">
         <div className="flex min-w-0 items-start gap-2 sm:gap-3">
           <Link
             to="/"
@@ -115,105 +297,8 @@ export function Header() {
           >
             <ShoppingCart className="size-6" strokeWidth={1.75} />
           </Link>
-
-          <button
-            type="button"
-            className="flex h-10 shrink-0 items-center rounded-lg p-1.5 text-navy lg:hidden"
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen((value) => !value)}
-          >
-            <span className="sr-only">{open ? t("nav.closeMenu") : t("nav.openMenu")}</span>
-            {open ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
         </div>
       </Container>
-
-      {open ? (
-        <div id="mobile-menu" className="border-t border-line px-5 py-4 lg:hidden">
-          <nav className="mt-3 grid gap-2" aria-label={t("nav.mobile")}>
-            {navLinks.map((link) => (
-              <TextLink key={link.href} href={link.href} className="text-ui" onClick={() => setOpen(false)}>
-                {NAV_KEYS[link.href] ? t(NAV_KEYS[link.href]) : link.label}
-              </TextLink>
-            ))}
-          </nav>
-          <div className="mt-3 grid gap-2">
-            {isAuthenticated && user ? (
-              <>
-                <p className="text-ui font-semibold text-navy">{user.fullName}</p>
-                <TextLink href="/profile" className="text-ui" onClick={() => setOpen(false)}>
-                  {t("nav.myProfile")}
-                </TextLink>
-                <TextLink href="/orders" className="text-ui" onClick={() => setOpen(false)}>
-                  {t("nav.myOrders")}
-                </TextLink>
-                <TextLink href="/messages" className="inline-flex items-center gap-2 text-ui" onClick={() => setOpen(false)}>
-                  {t("common.messages")}
-                  <UnreadBadge count={buyerUnread} />
-                </TextLink>
-                <TextLink href="/notifications" className="inline-flex items-center gap-2 text-ui" onClick={() => setOpen(false)}>
-                  {t("common.notifications")}
-                  <UnreadBadge count={notificationUnread} />
-                </TextLink>
-                {sellerRegistered ? (
-                  <>
-                    <TextLink href="/seller/dashboard" className="text-ui" onClick={() => setOpen(false)}>
-                      {t("nav.sellerDashboard")}
-                    </TextLink>
-                    {sellerApproved ? (
-                      <TextLink href="/seller/listings" className="text-ui" onClick={() => setOpen(false)}>
-                        {t("nav.listings")}
-                      </TextLink>
-                    ) : null}
-                    <TextLink href="/seller/orders" className="text-ui" onClick={() => setOpen(false)}>
-                      {t("nav.sellerOrders")}
-                    </TextLink>
-                    <TextLink
-                      href="/seller/messages"
-                      className="inline-flex items-center gap-2 text-ui"
-                      onClick={() => setOpen(false)}
-                    >
-                      {t("nav.sellerMessages")}
-                      <UnreadBadge count={sellerUnread} />
-                    </TextLink>
-                    <TextLink href="/seller/profile" className="text-ui" onClick={() => setOpen(false)}>
-                      {t("nav.sellerProfile")}
-                    </TextLink>
-                    {sellerApproved ? (
-                      <TextLink href="/sell" className="text-ui" onClick={() => setOpen(false)}>
-                        {t("nav.sellMotorcycle")}
-                      </TextLink>
-                    ) : null}
-                  </>
-                ) : (
-                  <TextLink href="/seller/register" className="text-ui" onClick={() => setOpen(false)}>
-                    {t("nav.becomeSeller")}
-                  </TextLink>
-                )}
-                <button type="button" className="text-left text-ui text-navy hover:text-brand" onClick={handleLogout}>
-                  {t("common.logout")}
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center gap-3">
-                <TextLink href="/login" onClick={() => setOpen(false)}>
-                  {t("common.login")}
-                </TextLink>
-                <Button
-                  className="flex-1 py-2 text-ui"
-                  onClick={() => {
-                    setOpen(false)
-                    navigate("/signup")
-                  }}
-                >
-                  {t("common.signup")}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
     </header>
   )
 }

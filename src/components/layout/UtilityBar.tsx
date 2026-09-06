@@ -22,7 +22,7 @@ export function UtilityBar({
   const t = useT()
 
   return (
-    <div className="bg-navy text-white">
+    <div className="hidden bg-navy text-white min-[769px]:block">
       <Container className="flex h-8 min-w-0 items-center justify-between gap-2 overflow-x-auto text-[11px] leading-none sm:gap-3 sm:text-meta lg:overflow-visible">
         <div className="flex shrink-0 items-center gap-2.5">
           <Link to={sellerHref} className="whitespace-nowrap hover:text-white/80">

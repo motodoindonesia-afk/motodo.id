@@ -13,6 +13,7 @@ type Props = {
   onSubmitSearch?: (value: string) => void
   size?: "sm" | "md" | "lg"
   variant?: "pill" | "market"
+  compact?: boolean
 }
 
 export function SearchBar({
@@ -25,6 +26,7 @@ export function SearchBar({
   onSubmitSearch,
   size = "md",
   variant = "pill",
+  compact = false,
 }: Props) {
   const t = useT()
   const resolvedPlaceholder = placeholder ?? t("browse.searchDefault")
@@ -47,7 +49,10 @@ export function SearchBar({
         className={cn(
           "relative min-w-0",
           market &&
-            "flex w-full overflow-hidden rounded-xl border border-line bg-surface focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20",
+            cn(
+              "flex w-full overflow-hidden border border-line bg-surface focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20",
+              compact ? "rounded-lg" : "rounded-xl",
+            ),
         )}
       >
         {market ? null : (
@@ -67,7 +72,10 @@ export function SearchBar({
           className={cn(
             "w-full min-w-0 text-navy placeholder:text-navy-muted/80 focus:outline-none [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
             market
-              ? "h-10 min-w-0 w-full flex-1 border-0 bg-transparent px-3 text-ui focus:ring-0"
+              ? cn(
+                  "min-w-0 w-full flex-1 border-0 bg-transparent px-3 focus:ring-0",
+                  compact ? "h-11 text-[14px]" : "h-10 text-ui",
+                )
               : cn(
                   "rounded-full border border-transparent bg-surface pl-10 pr-4 focus:border-brand/30 focus:ring-2 focus:ring-brand/20",
                   size === "lg" ? "h-12 text-sm" : size === "sm" ? "h-9 text-ui" : "h-10 text-sm",
@@ -77,7 +85,10 @@ export function SearchBar({
         {market ? (
           <button
             type="submit"
-            className="flex w-10 shrink-0 items-center justify-center bg-brand text-white hover:bg-brand-hover"
+            className={cn(
+              "flex shrink-0 items-center justify-center bg-brand text-white hover:bg-brand-hover",
+              compact ? "h-11 w-11" : "w-10",
+            )}
             aria-label={t("common.search")}
           >
             <Search className="size-4" aria-hidden="true" />
