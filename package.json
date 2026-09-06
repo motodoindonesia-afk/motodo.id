@@ -8,6 +8,7 @@
     "dev:ritme": "vite --config vite.ritme.config.ts",
     "build": "tsc -b && vite build",
     "build:ritme": "tsc -b && vite build --config vite.ritme.config.ts",
+    "deploy:ritme": "npx wrangler deploy --config wrangler.ritme.jsonc",
     "preview": "vite preview",
     "preview:ritme": "vite preview --config vite.ritme.config.ts --port 4174"
   },

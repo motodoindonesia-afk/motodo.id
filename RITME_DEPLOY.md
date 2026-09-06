@@ -29,24 +29,33 @@ Suggested settings:
 
 - Framework / build: Vite
 - Build command: `npm run build:ritme`
-- Output directory: `dist-ritme`
+- Deploy command: `npx wrangler deploy --config wrangler.ritme.jsonc`
+- Output directory: `dist-ritme` (also set in `wrangler.ritme.jsonc`)
 - Production branch: choose explicitly in the Cloudflare dashboard (do not retarget the Motodo Worker)
 - Custom domain: `ritme.motodo.id`
 
 SPA fallback (required so `/dashboard`, `/sellers`, etc. work on refresh):
 
-- Use Static Assets `not_found_handling = "single-page-application"`, **or**
-- The Ritme build emits `_redirects` with `/*    /index.html   200`
+- `wrangler.ritme.jsonc` sets `assets.not_found_handling` to `single-page-application`
+- The Ritme build also emits `_redirects` with `/*    /index.html   200`
 
-An example Wrangler file is in `ritme/wrangler.toml.example`. Copy it into a dedicated Cloudflare project. Do not place a live `wrangler.toml` in the Motodo Worker.
+Do not use a root `wrangler.jsonc` / `wrangler.toml`. Those default names would be auto-detected and could deploy Motodo's `dist/` instead of Ritme.
 
-Example deploy (from this repo, after a Ritme build), only for the Ritme project:
+Ritme Worker config in this repo: `wrangler.ritme.jsonc` (Worker name `ritme-motodo`, assets `./dist-ritme`).
+
+Example deploy (from this repo, after `npm run build:ritme`), only for the Ritme project:
 
 ```
-npx wrangler deploy --config /path/to/ritme-worker-wrangler.toml
+npx wrangler deploy --config wrangler.ritme.jsonc
 ```
 
-If Cloudflare builds from GitHub, set the Ritme project build command and output directory as above. Leave the Motodo project on `npm run build` / `dist`.
+Or:
+
+```
+npm run deploy:ritme
+```
+
+If Cloudflare builds from GitHub, set the Ritme project **build command** to `npm run build:ritme` and the **deploy command** to `npx wrangler deploy --config wrangler.ritme.jsonc`. Leave the Motodo project on `npm run build` / `dist` and Worker `motodo-homepage`.
 
 ## Public environment variables
 
