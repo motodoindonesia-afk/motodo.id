@@ -11,9 +11,13 @@ const OPTIONS: { value: Locale; key: "lang.indonesia" | "lang.english" }[] = [
 export function LanguageSwitcher({
   compact = true,
   tone = "onDark",
+  align = "end",
+  variant = "dropdown",
 }: {
   compact?: boolean
   tone?: "onDark" | "onLight"
+  align?: "start" | "end"
+  variant?: "dropdown" | "list"
 }) {
   const { locale, setLocale, t } = useLanguage()
   const [open, setOpen] = useState(false)
@@ -36,8 +40,35 @@ export function LanguageSwitcher({
 
   const current = OPTIONS.find((item) => item.value === locale) ?? OPTIONS[0]
 
+  if (variant === "list") {
+    return (
+      <div role="listbox" aria-label={t("lang.select")}>
+        {OPTIONS.map((option) => {
+          const selected = option.value === locale
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="option"
+              aria-selected={selected}
+              className={`flex min-h-10 w-full items-center gap-2 text-left text-[14px] font-medium hover:text-brand ${selected ? "text-brand" : "text-navy"}`}
+              onClick={() => setLocale(option.value)}
+            >
+              {option.value === "id" ? (
+                <Globe className="size-3.5 shrink-0" aria-hidden="true" />
+              ) : (
+                <span className="size-3.5 shrink-0" aria-hidden="true" />
+              )}
+              <span>{t(option.key)}</span>
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative min-w-0" ref={ref}>
       <button
         type="button"
         className={
@@ -58,7 +89,7 @@ export function LanguageSwitcher({
         <ul
           role="listbox"
           aria-label={t("lang.select")}
-          className="absolute right-0 z-40 mt-1 min-w-[11.5rem] overflow-hidden rounded-lg border border-line bg-white py-1 text-navy shadow-sm"
+          className={`absolute z-50 mt-1 min-w-[11.5rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-line bg-white py-1 text-navy shadow-sm ${align === "start" ? "left-0" : "right-0"}`}
         >
           {OPTIONS.map((option) => {
             const selected = option.value === locale

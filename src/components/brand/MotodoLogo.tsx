@@ -78,7 +78,6 @@ export function MotodoLogo({
 
 export function MotodoLogoLockup({
   className,
-  markClassName,
   stackedClassName,
 }: {
   className?: string
@@ -87,8 +86,7 @@ export function MotodoLogoLockup({
 }) {
   return (
     <span className={cn("inline-flex text-brand", className)}>
-      <MotodoLogo className={cn("hidden h-[52px] w-[108px] sm:block", stackedClassName)} />
-      <MotodoMark className={cn("size-8 sm:hidden", markClassName)} />
+      <MotodoLogo className={stackedClassName ?? "h-[52px] w-[108px]"} />
     </span>
   )
 }

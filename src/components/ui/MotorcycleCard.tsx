@@ -44,7 +44,7 @@ export function MotorcycleCard({
     hideQuantity || listing.status === "sold" ? null : availableQuantityLabel(locale, units)
 
   const media = (
-    <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-surface">
+    <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-surface max-[769px]:aspect-auto max-[769px]:h-[160px]">
       <img
         src={listing.image}
         alt={listing.name}
@@ -56,14 +56,14 @@ export function MotorcycleCard({
 
   const body = (
     <div className="flex min-h-0 flex-1 flex-col px-2.5 py-2 sm:px-3">
-      <h3 className="h-[calc(1.35em*2)] overflow-hidden text-card-title font-semibold leading-[1.35] text-navy [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+      <h3 className="h-[calc(1.35em*2)] overflow-hidden text-card-title font-semibold leading-[1.35] text-navy max-[769px]:text-[13px] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
         {listing.name}
       </h3>
-      <p className="mt-0.5 shrink-0 text-price font-bold leading-[1.25] text-brand">{listing.price}</p>
+      <p className="mt-0.5 shrink-0 text-price font-bold leading-[1.25] text-brand max-[769px]:text-[16px]">{listing.price}</p>
       {hideQuantity ? null : (
-        <p className="mt-0.5 min-h-[1.4em] shrink-0 truncate text-meta text-navy-muted">{quantityLabel ?? "\u00a0"}</p>
+        <p className="mt-0.5 min-h-[1.4em] shrink-0 truncate text-meta text-navy-muted max-[769px]:text-[11px]">{quantityLabel ?? "\u00a0"}</p>
       )}
-      <p className="mt-1 min-h-[1.4em] shrink-0 truncate text-meta text-navy-muted">{meta || "\u00a0"}</p>
+      <p className="mt-1 min-h-[1.4em] shrink-0 truncate text-meta text-navy-muted max-[769px]:text-[11px]">{meta || "\u00a0"}</p>
       {footer ? <div className="mt-1.5 shrink-0">{footer}</div> : null}
     </div>
   )
@@ -76,7 +76,7 @@ export function MotorcycleCard({
   )
 
   return (
-    <article className="group relative flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card transition-colors hover:border-brand/25">
+    <article className="group relative flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card transition-colors hover:border-brand/25 max-[769px]:rounded-xl">
       {href ? (
         <Link
           to={href}

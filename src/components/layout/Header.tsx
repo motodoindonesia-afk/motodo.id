@@ -103,9 +103,9 @@ export function Header() {
           <Link
             to="/"
             aria-label="Motodo home"
-            className="min-w-0 shrink text-[21px] font-semibold leading-none tracking-tight text-brand"
+            className="flex h-10 shrink-0 items-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            motodo
+            <MotodoLogoLockup stackedClassName="h-10 w-[83px]" />
           </Link>
           <div className="flex shrink-0 items-center gap-0.5">
             <button
@@ -147,11 +147,15 @@ export function Header() {
         </div>
 
         <nav
-          className="flex gap-3 overflow-x-auto px-4 pb-2.5 text-[13px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           aria-label={t("nav.brands")}
         >
           {searchQuickLinks.map((link) => (
-            <Link key={link.label} to={link.href} className="shrink-0 whitespace-nowrap text-brand hover:text-brand-hover">
+            <Link
+              key={link.label}
+              to={link.href}
+              className="shrink-0 whitespace-nowrap rounded-full bg-surface px-2.5 py-[6px] text-[13px] font-medium leading-none text-brand hover:text-brand-hover"
+            >
               {QUICK_KEYS[link.label] ? t(QUICK_KEYS[link.label]) : link.label}
             </Link>
           ))}
@@ -256,9 +260,7 @@ export function Header() {
               <a href="/#app-store" className={menuSecondaryClass} onClick={() => setOpen(false)}>
                 {t("nav.downloadApp")}
               </a>
-              <div className="flex min-h-10 items-center">
-                <LanguageSwitcher compact={false} tone="onLight" />
-              </div>
+              <LanguageSwitcher variant="list" />
             </div>
           </div>
         ) : null}
