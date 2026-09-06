@@ -22,3 +22,5 @@ This first version is the homepage only, using mock listings. Authentication, li
 
 - **Supabase:** copy `.env.example` to `.env.local` and add a client under `src/lib/` when you are ready.
 - **Cloudflare:** `npm run build` outputs a static `dist/` folder, which can be published to Cloudflare Pages without extra setup in this version.
+
+Ritme deployment setup
