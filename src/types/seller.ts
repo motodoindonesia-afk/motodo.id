@@ -33,9 +33,10 @@ export type SellerProfile = {
   rejectionReason?: string
   reviewedAt?: string
   reviewedBy?: string
+  isDemo?: boolean
 }
 
 export type SellerProfileInput = Omit<
   SellerProfile,
-  "id" | "status" | "createdAt" | "rejectionReason" | "reviewedAt" | "reviewedBy"
+  "id" | "status" | "createdAt" | "rejectionReason" | "reviewedAt" | "reviewedBy" | "isDemo"
 >

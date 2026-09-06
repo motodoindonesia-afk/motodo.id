@@ -74,36 +74,36 @@ export function BrowsePage() {
   }
 
   return (
-    <main className="bg-white pb-16 sm:pb-20">
-      <Container className="pt-10 sm:pt-12">
+    <main className="bg-white pb-10 sm:pb-12">
+      <Container className="pt-6 sm:pt-8">
         <div className="max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy sm:text-4xl">
+          <h1 className="text-page font-bold tracking-tight text-navy sm:text-[1.5rem]">
             Browse Motorcycles
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-navy-muted sm:text-lg">
+          <p className="mt-1.5 text-ui leading-relaxed text-navy-muted">
             Find your next custom & premium motorcycle.
           </p>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-4">
           <SearchBar
             id="browse-search"
             className="max-w-2xl"
-            size="lg"
+            size="sm"
             value={filters.query}
             onChange={(query) => updateFilters({ ...filters, query })}
           />
         </div>
 
-        <div className="mt-8 lg:mt-10 lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-10">
+        <div className="mt-5 lg:mt-6 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
           <div className="hidden lg:block">
             <FilterSidebar filters={filters} onChange={updateFilters} onClear={clearFilters} />
           </div>
 
           <div>
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-navy">
+                <p className="text-ui font-medium text-navy">
                   {formatMotorcycleCount(filtered.length)}
                 </p>
                 <Button
@@ -115,7 +115,7 @@ export function BrowsePage() {
                   Filters
                 </Button>
               </div>
-              <label className="flex items-center gap-2 text-sm text-navy-muted">
+              <label className="flex items-center gap-2 text-ui text-navy-muted">
                 <span className="shrink-0">Sort</span>
                 <select
                   value={sort}
@@ -123,7 +123,7 @@ export function BrowsePage() {
                     setSort(event.target.value as SortOption)
                     setPage(1)
                   }}
-                  className="h-10 min-w-[190px] rounded-lg border border-transparent bg-surface px-3 text-sm text-navy focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20"
+                  className="h-9 min-w-[180px] rounded-lg border border-transparent bg-surface px-3 text-ui text-navy focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20"
                 >
                   {SORT_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -135,9 +135,9 @@ export function BrowsePage() {
             </div>
 
             {paged.total === 0 ? (
-              <div className="rounded-2xl bg-surface px-6 py-16 text-center">
-                <h2 className="text-xl font-bold text-navy">No motorcycles found</h2>
-                <p className="mt-2 text-sm text-navy-muted sm:text-base">
+              <div className="rounded-xl bg-surface px-5 py-10 text-center">
+                <h2 className="text-section font-bold text-navy">No motorcycles found</h2>
+                <p className="mt-1.5 text-ui text-navy-muted">
                   Try adjusting your search or filters.
                 </p>
                 {hasActiveFilters(filters) ? (
@@ -148,7 +148,7 @@ export function BrowsePage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {paged.items.map((listing) => (
                     <MotorcycleCard
                       key={listing.id}

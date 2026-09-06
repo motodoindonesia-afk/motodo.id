@@ -21,12 +21,12 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Props) {
   const pages = pageItems(currentPage, totalPages)
 
   return (
-    <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Pagination">
+    <nav className="mt-6 flex items-center justify-center gap-1.5" aria-label="Pagination">
       <button
         type="button"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        className="rounded-lg px-3 py-2 text-sm font-medium text-navy hover:text-brand disabled:cursor-not-allowed disabled:text-navy-muted/50"
+        className="rounded-lg px-2.5 py-1.5 text-ui font-medium text-navy hover:text-brand disabled:cursor-not-allowed disabled:text-navy-muted/50"
       >
         Previous
       </button>
@@ -44,7 +44,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Props) {
               aria-current={page === currentPage ? "page" : undefined}
               onClick={() => onPageChange(page)}
               className={cn(
-                "min-w-9 rounded-lg px-3 py-2 text-sm font-medium",
+                "min-w-8 rounded-lg px-2.5 py-1.5 text-ui font-medium",
                 page === currentPage
                   ? "bg-brand text-white"
                   : "text-navy hover:bg-surface",
@@ -59,7 +59,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Props) {
         type="button"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        className="rounded-lg px-3 py-2 text-sm font-medium text-navy hover:text-brand disabled:cursor-not-allowed disabled:text-navy-muted/50"
+        className="rounded-lg px-2.5 py-1.5 text-ui font-medium text-navy hover:text-brand disabled:cursor-not-allowed disabled:text-navy-muted/50"
       >
         Next
       </button>

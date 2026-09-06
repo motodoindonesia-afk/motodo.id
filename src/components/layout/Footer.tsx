@@ -1,28 +1,52 @@
 import { Mail } from "lucide-react"
+import { Link } from "react-router-dom"
 import { Container } from "./Container"
 
-const companyLinks = [
-  { label: "About Us", href: "#about" },
-  { label: "Community", href: "#community" },
-  { label: "Articles & Education", href: "#articles" },
-  { label: "Privacy Policy", href: "#privacy" },
+const motodoLinks = [
+  { label: "Tentang Kami", href: "/#about" },
+  { label: "Komunitas", href: "/#community" },
+  { label: "Artikel & Edukasi", href: "/#articles" },
+  { label: "Kebijakan Privasi", href: "/#privacy" },
+  { label: "Syarat & Ketentuan", href: "/#terms" },
+  { label: "Pusat Bantuan", href: "/#help" },
 ] as const
 
-const serviceLinks = [
-  { label: "Sell on Motodo", href: "#sell" },
-  { label: "Motodo Premium", href: "#premium" },
-  { label: "Terms of Service", href: "#terms" },
-  { label: "Help Center", href: "#help" },
+const sellerLinks = [
+  { label: "Mulai Berjualan", href: "/sell" },
+  { label: "Seller Centre", href: "/seller/register" },
+  { label: "Panduan Penjual", href: "/#help" },
+  { label: "Biaya & Komisi", href: "/#premium" },
+  { label: "Kebijakan Penjual", href: "/#terms" },
+  { label: "Hubungi Tim Kami", href: "mailto:care@motodo.id" },
 ] as const
 
-function FooterLink({ href, children }: { href: string; children: string }) {
+const linkClass =
+  "text-[13px] font-normal leading-6 text-navy-muted transition-colors hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+
+function FooterHeading({ children }: { children: string }) {
+  return <p className="text-[13px] font-normal text-navy">{children}</p>
+}
+
+function FooterLink({ href, children, id }: { href: string; children: string; id?: string }) {
+  const className = linkClass
+  if (href.startsWith("mailto:")) {
+    return (
+      <a id={id} href={href} className={className}>
+        {children}
+      </a>
+    )
+  }
+  if (href.startsWith("/#") || href.startsWith("#")) {
+    return (
+      <a id={id} href={href} className={className}>
+        {children}
+      </a>
+    )
+  }
   return (
-    <a
-      href={href}
-      className="text-[15px] leading-6 text-navy hover:text-navy/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
-    >
+    <Link id={id} to={href} className={className}>
       {children}
-    </a>
+    </Link>
   )
 }
 
@@ -72,58 +96,54 @@ export function Footer() {
   return (
     <footer id="contact" className="border-t border-line bg-white">
       <Container>
-        <div className="grid gap-12 py-14 sm:py-16 lg:grid-cols-12 lg:gap-10 lg:py-[72px]">
-          <div className="lg:col-span-4">
-            <p className="text-[22px] font-bold leading-none tracking-tight text-navy">
-              motodo.id
+        <div className="grid gap-8 py-10 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 sm:py-12 lg:grid-cols-[minmax(0,1.15fr)_repeat(3,minmax(0,1fr))] lg:gap-0 lg:py-14">
+          <div className="lg:pr-8">
+            <p className="text-[13px] font-normal leading-none text-navy">motodo.id</p>
+            <p className="mt-3 max-w-[260px] text-[13px] font-normal leading-6 text-navy-muted">
+              Custom & Premium Motorcycles Marketplace in Indonesia.
             </p>
-            <p className="mt-4 max-w-[240px] text-[15px] leading-6 text-navy">
-              Custom & Premium Motorcycles
-              <br />
-              Marketplace in Indonesia.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-2.5">
+            <div id="app-store" className="mt-5 flex flex-wrap gap-2">
               <AppStoreBadge />
               <GooglePlayBadge />
             </div>
+            <p className="mt-6 text-[13px] font-normal text-navy-muted">© 2026 Motodo. All rights reserved.</p>
           </div>
 
-          <nav className="lg:col-span-5" aria-label="Footer">
-            <p className="text-[15px] font-bold text-navy">motodo.id</p>
-            <div className="mt-5 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10">
-              <ul className="flex flex-col gap-3.5">
-                {companyLinks.map((link) => (
-                  <li key={link.label}>
-                    <FooterLink href={link.href}>{link.label}</FooterLink>
-                  </li>
-                ))}
-              </ul>
-              <ul className="flex flex-col gap-3.5">
-                {serviceLinks.map((link) => (
-                  <li key={link.label}>
-                    <FooterLink href={link.href}>{link.label}</FooterLink>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <nav className="lg:border-l lg:border-line lg:px-8" aria-label="Motodo">
+            <FooterHeading>Motodo</FooterHeading>
+            <ul className="mt-4 flex flex-col gap-2.5">
+              {motodoLinks.map((link) => (
+                <li key={link.label} id={link.label === "Pusat Bantuan" ? "help" : undefined}>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
+                </li>
+              ))}
+            </ul>
           </nav>
 
-          <div className="lg:col-span-3">
-            <p className="text-[15px] font-bold text-navy">Contact Us</p>
-            <p className="mt-5 text-[15px] leading-6 text-navy">Get in touch with our team:</p>
+          <nav className="lg:border-l lg:border-line lg:px-8" aria-label="Untuk Penjual">
+            <FooterHeading>Untuk Penjual</FooterHeading>
+            <ul className="mt-4 flex flex-col gap-2.5">
+              {sellerLinks.map((link) => (
+                <li key={link.label}>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="lg:border-l lg:border-line lg:pl-8">
+            <FooterHeading>Hubungi Kami</FooterHeading>
+            <p className="mt-4 max-w-[240px] text-[13px] font-normal leading-6 text-navy-muted">
+              Punya pertanyaan? Hubungi tim kami melalui email berikut:
+            </p>
             <a
               href="mailto:care@motodo.id"
-              className="mt-4 inline-flex items-center gap-2.5 text-[15px] font-semibold text-navy hover:text-navy/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+              className="mt-3 inline-flex items-center gap-2 text-[13px] font-normal text-navy hover:text-navy/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
             >
-              <Mail className="size-4 shrink-0 stroke-[1.5]" aria-hidden="true" />
+              <Mail className="size-3 shrink-0 stroke-[1.5] text-navy-muted" aria-hidden="true" />
               care@motodo.id
             </a>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-line py-5 text-[13px] text-navy-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 motodo.id. All rights reserved.</p>
-          <p>Indonesia</p>
         </div>
       </Container>
     </footer>

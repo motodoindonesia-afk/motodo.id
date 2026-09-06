@@ -51,6 +51,7 @@ export type MotorcycleListing = {
   status: SellerListingStatus
   createdAt: string
   updatedAt: string
+  isDemo?: boolean
 }
 
-export type MotorcycleListingInput = Omit<MotorcycleListing, "id" | "createdAt" | "updatedAt">
+export type MotorcycleListingInput = Omit<MotorcycleListing, "id" | "createdAt" | "updatedAt" | "isDemo">

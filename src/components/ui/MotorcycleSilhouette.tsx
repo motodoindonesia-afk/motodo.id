@@ -23,7 +23,7 @@ export function MotorcycleSilhouette({ variant }: Props) {
   return (
     <svg
       viewBox="0 0 72 42"
-      className="h-10 w-16 text-navy"
+      className="h-8 w-14 text-navy"
       fill="none"
       aria-hidden="true"
     >

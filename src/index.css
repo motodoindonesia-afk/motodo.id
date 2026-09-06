@@ -11,6 +11,20 @@
   --color-brand-hover: #2560d4;
   --color-surface: #eef3f8;
   --color-line: #e4ebf2;
+  --color-brand-soft: #e8f1ff;
+
+  --text-page: 1.375rem;
+  --text-page--line-height: 1.25;
+  --text-section: 1.125rem;
+  --text-section--line-height: 1.3;
+  --text-card-title: 0.875rem;
+  --text-card-title--line-height: 1.35;
+  --text-price: 1.0625rem;
+  --text-price--line-height: 1.25;
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1.4;
+  --text-ui: 0.8125rem;
+  --text-ui--line-height: 1.4;
 }
 
 html {
@@ -19,13 +33,14 @@ html {
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 0;
   background: #ffffff;
   color: var(--color-navy);
   font-family: var(--font-sans);
 }
 
 #root {
+  min-width: 0;
   min-height: 100vh;
 }
 

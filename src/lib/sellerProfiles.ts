@@ -20,6 +20,7 @@ type SellerProfileRow = {
   rejection_reason: string | null
   created_at: string
   updated_at: string
+  is_demo?: boolean
 }
 
 type SellerProfileRowWithOwner = SellerProfileRow & {
@@ -75,6 +76,7 @@ export function mapSellerProfileRow(row: SellerProfileRowWithOwner, hints?: Owne
     status: isStatus(row.seller_status) ? row.seller_status : "pending",
     createdAt: row.created_at,
     rejectionReason: row.rejection_reason?.trim() || undefined,
+    isDemo: row.is_demo === true,
   }
 }
 

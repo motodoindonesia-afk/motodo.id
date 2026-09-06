@@ -17,7 +17,7 @@ type Props = {
 }
 
 function FieldLabel({ children }: { children: string }) {
-  return <p className="text-sm font-semibold text-navy">{children}</p>
+  return <p className="text-ui font-semibold text-navy">{children}</p>
 }
 
 function NumberField({
@@ -35,7 +35,7 @@ function NumberField({
 }) {
   return (
     <label className="block">
-      <span className="text-xs text-navy-muted">{label}</span>
+      <span className="text-meta text-navy-muted">{label}</span>
       <input
         id={id}
         type="text"
@@ -43,7 +43,7 @@ function NumberField({
         value={value}
         placeholder={placeholder}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
-        className="mt-1.5 h-10 w-full rounded-lg border border-transparent bg-surface px-3 text-sm text-navy placeholder:text-navy-muted/80 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20"
+        className="mt-1 h-9 w-full rounded-lg border border-transparent bg-surface px-3 text-ui text-navy placeholder:text-navy-muted/80 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20"
       />
     </label>
   )
@@ -71,17 +71,17 @@ export function FilterSidebar({
   }
 
   return (
-    <aside className="space-y-8">
+    <aside className="space-y-5">
       {showHeading ? (
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base font-bold text-navy">Filters</h2>
-          <Button variant="text" className="px-0 py-0 text-sm text-brand hover:text-brand-hover" onClick={onClear}>
+          <h2 className="text-ui font-bold text-navy">Filters</h2>
+          <Button variant="text" className="px-0 py-0 text-ui text-brand hover:text-brand-hover" onClick={onClear}>
             Clear All Filters
           </Button>
         </div>
       ) : (
         <div className="flex justify-end">
-          <Button variant="text" className="px-0 py-0 text-sm text-brand hover:text-brand-hover" onClick={onClear}>
+          <Button variant="text" className="px-0 py-0 text-ui text-brand hover:text-brand-hover" onClick={onClear}>
             Clear All Filters
           </Button>
         </div>
@@ -93,7 +93,7 @@ export function FilterSidebar({
         </legend>
         <div className="space-y-2.5">
           {MOTORCYCLE_CATEGORIES.map((category) => (
-            <label key={category} className="flex cursor-pointer items-center gap-2.5 text-sm text-navy">
+            <label key={category} className="flex cursor-pointer items-center gap-2 text-ui text-navy">
               <input
                 type="checkbox"
                 checked={filters.categories.includes(category)}
@@ -156,7 +156,7 @@ export function FilterSidebar({
         </legend>
         <div className="space-y-2.5">
           {LOCATION_FILTERS.map((location) => (
-            <label key={location} className="flex cursor-pointer items-center gap-2.5 text-sm text-navy">
+            <label key={location} className="flex cursor-pointer items-center gap-2 text-ui text-navy">
               <input
                 type="checkbox"
                 checked={filters.locations.includes(location)}

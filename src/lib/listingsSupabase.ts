@@ -43,6 +43,7 @@ type ListingRow = {
   status: string
   created_at: string
   updated_at: string
+  is_demo?: boolean
   listing_images?: ListingImageRow[] | null
 }
 
@@ -201,6 +202,7 @@ export function mapListingRow(row: ListingRow): MotorcycleListing {
     status: isStatus(row.status) ? row.status : "draft",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    isDemo: row.is_demo === true,
   }
 }
 

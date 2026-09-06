@@ -1,7 +1,8 @@
 import { Hero } from "./Hero"
 import { CategoryGrid } from "./CategoryGrid"
+import { FlashSale } from "./FlashSale"
+import { BestSellers } from "./BestSellers"
 import { FeaturedListings } from "./FeaturedListings"
-import { SellerCta } from "./SellerCta"
 
 export function HomePage() {
   return (
@@ -15,8 +16,9 @@ export function HomePage() {
       <main id="top">
         <Hero />
         <CategoryGrid />
+        <FlashSale />
+        <BestSellers />
         <FeaturedListings />
-        <SellerCta />
         <section id="about" className="sr-only">
           MOTODO.ID is a marketplace for custom and premium motorcycles in Indonesia.
         </section>
@@ -24,3 +26,4 @@ export function HomePage() {
     </>
   )
 }
+

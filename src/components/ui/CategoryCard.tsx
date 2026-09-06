@@ -10,10 +10,10 @@ export function CategoryCard({ category }: Props) {
   return (
     <Link
       to={`/browse?category=${encodeURIComponent(category.name)}`}
-      className="flex min-w-[140px] flex-col items-center rounded-xl bg-surface px-4 py-6 text-center transition-transform hover:-translate-y-0.5 hover:ring-1 hover:ring-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:min-w-0"
+      className="flex min-w-[120px] flex-col items-center rounded-lg bg-surface px-3 py-4 text-center transition-colors hover:ring-1 hover:ring-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:min-w-0"
     >
       <MotorcycleSilhouette variant={category.variant} />
-      <span className="mt-4 text-sm font-semibold text-navy">{category.name}</span>
+      <span className="mt-2.5 text-ui font-semibold text-navy">{category.name}</span>
     </Link>
   )
 }
