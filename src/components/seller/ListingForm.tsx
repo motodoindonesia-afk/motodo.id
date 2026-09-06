@@ -205,7 +205,7 @@ export function ListingForm({ profile, listing, mode = "create", onDraftSaved, o
             label="Quantity"
             htmlFor="listing-quantity"
             error={errors.quantity}
-            hint="Number of units available"
+            hint="Total units in stock. Pending orders reserve inventory for buyers."
           >
             <AuthInput
               id="listing-quantity"

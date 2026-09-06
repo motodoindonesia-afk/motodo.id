@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext"
 import { roleLabel } from "../lib/auth"
 import { formatMemberSince, roleDescription } from "../lib/profile"
 import { deleteListing, getListingsBySeller } from "../lib/listings"
-import { getSellerProfile, sellerStatusHeading } from "../lib/seller"
+import { getSellerProfile, isSellerProfilesReady, sellerStatusHeading } from "../lib/seller"
 import { isAdmin } from "../lib/admin"
 import { useSellerLive } from "../lib/useSellerLive"
 import { useListingsLive } from "../lib/useListingsLive"
@@ -93,7 +93,7 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
 }
 
 export function ProfilePage() {
-  const { user, logout, updateProfile } = useAuth()
+  const { user, profile, logout, updateProfile, loading } = useAuth()
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
   const [fullName, setFullName] = useState(user?.fullName ?? "")
@@ -101,8 +101,20 @@ export function ProfilePage() {
   const [success, setSuccess] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<MotorcycleListing | null>(null)
   useListingsLive()
+  useSellerLive()
+
+  if (loading || !isSellerProfilesReady()) {
+    return (
+      <main className="bg-white py-16">
+        <p className="text-center text-sm text-navy-muted">Loading...</p>
+      </main>
+    )
+  }
 
   if (!user) return null
+  const displayName = profile?.fullName ?? user.fullName
+  const accountType = profile?.accountType ?? user.role
+  const privilegeLabel = profile?.role === "admin" ? "Admin" : "User"
   const sellerListings = getListingsBySeller(user.id)
   const sellerProfile = getSellerProfile(user.id)
 
@@ -111,21 +123,26 @@ export function ProfilePage() {
     navigate("/login", { replace: true })
   }
 
-  function saveProfile() {
+  async function saveProfile() {
     if (!fullName.trim()) {
       setError("Full name is required.")
       setSuccess("")
       return
     }
-    const next = updateProfile({ fullName: fullName.trim() })
-    if (!next) {
-      setError("Unable to update your profile.")
+    try {
+      const next = await updateProfile({ fullName: fullName.trim() })
+      if (!next) {
+        setError("Unable to update your profile.")
+        setSuccess("")
+        return
+      }
+      setEditing(false)
+      setError("")
+      setSuccess("Profile updated.")
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "Unable to update your profile.")
       setSuccess("")
-      return
     }
-    setEditing(false)
-    setError("")
-    setSuccess("Profile updated.")
   }
 
   return (
@@ -137,10 +154,11 @@ export function ProfilePage() {
 
           <section className="mt-8 rounded-2xl border border-line bg-white px-5 py-6 sm:px-6">
             <dl className="space-y-4">
-              <InfoRow label="Full Name" value={user.fullName} />
+              <InfoRow label="Full Name" value={displayName} />
               <InfoRow label="Email" value={user.email} />
-              <InfoRow label="Account Type" value={roleLabel(user.role)} />
-              <InfoRow label="Member Since" value={formatMemberSince(user.createdAt)} />
+              <InfoRow label="Account Type" value={roleLabel(accountType)} />
+              <InfoRow label="Role" value={privilegeLabel} />
+              <InfoRow label="Member Since" value={formatMemberSince(profile?.createdAt ?? user.createdAt)} />
             </dl>
           </section>
 
@@ -164,14 +182,14 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-navy">Account Type</p>
-                    <p className="mt-1 text-sm text-navy-muted">{roleLabel(user.role)}</p>
+                    <p className="mt-1 text-sm text-navy-muted">{roleLabel(accountType)}</p>
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <Button onClick={saveProfile}>Save</Button>
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        setFullName(user.fullName)
+                    setFullName(displayName)
                         setEditing(false)
                         setError("")
                       }}
@@ -183,9 +201,10 @@ export function ProfilePage() {
               ) : (
                 <>
                   <dl className="space-y-4">
-                    <InfoRow label="Full Name" value={user.fullName} />
+                    <InfoRow label="Full Name" value={displayName} />
                     <InfoRow label="Email" value={user.email} />
-                    <InfoRow label="Account Type" value={roleLabel(user.role)} />
+                    <InfoRow label="Account Type" value={roleLabel(accountType)} />
+                    <InfoRow label="Role" value={privilegeLabel} />
                   </dl>
                   {success ? (
                     <p className="mt-4 text-sm text-brand" role="status">
@@ -195,7 +214,7 @@ export function ProfilePage() {
                   <Button
                     className="mt-6"
                     onClick={() => {
-                      setFullName(user.fullName)
+                      setFullName(displayName)
                       setEditing(true)
                       setSuccess("")
                     }}
@@ -210,8 +229,19 @@ export function ProfilePage() {
           <section className="mt-8">
             <h2 className="text-xl font-bold text-navy">Account Type</h2>
             <div className="mt-4 rounded-2xl border border-line bg-surface px-5 py-5 sm:px-6">
-              <p className="text-sm font-semibold text-navy">{roleLabel(user.role)}</p>
-              <p className="mt-1 text-sm leading-relaxed text-navy-muted">{roleDescription(user.role)}</p>
+              <p className="text-sm font-semibold text-navy">{roleLabel(accountType)}</p>
+              <p className="mt-1 text-sm leading-relaxed text-navy-muted">{roleDescription(accountType)}</p>
+            </div>
+          </section>
+
+          <section className="mt-8">
+            <h2 className="text-xl font-bold text-navy">Orders</h2>
+            <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
+              <p className="text-sm text-navy-muted">View motorcycles you have ordered.</p>
+              <p className="mt-2 text-sm text-navy-muted">You can review a motorcycle after your order is completed.</p>
+              <Button className="mt-4" onClick={() => navigate("/orders")}>
+                My Orders
+              </Button>
             </div>
           </section>
 
@@ -225,7 +255,7 @@ export function ProfilePage() {
             </div>
           </section>
 
-          <SellerCenter userId={user.id} isSellerRole={user.role === "seller"} />
+          <SellerCenter userId={user.id} isSellerRole={accountType === "seller"} />
 
           {isAdmin(user) ? (
             <section className="mt-8">

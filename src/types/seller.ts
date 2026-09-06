@@ -26,6 +26,8 @@ export type SellerProfile = {
   instagram?: string
   website?: string
   description: string
+  businessHours?: string
+  sellerFleetAvailable: boolean
   status: SellerStatus
   createdAt: string
   rejectionReason?: string

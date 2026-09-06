@@ -7,6 +7,7 @@ type Props = {
   id?: string
   value?: string
   defaultValue?: string
+  placeholder?: string
   onChange?: (value: string) => void
   onSubmitSearch?: (value: string) => void
   size?: "md" | "lg"
@@ -17,6 +18,7 @@ export function SearchBar({
   id = "motorcycle-search",
   value,
   defaultValue,
+  placeholder = "Search motorcycles...",
   onChange,
   onSubmitSearch,
   size = "md",
@@ -42,7 +44,7 @@ export function SearchBar({
           id={id}
           name="q"
           type="search"
-          placeholder="Search motorcycles..."
+          placeholder={placeholder}
           {...(value !== undefined ? { value } : { defaultValue })}
           onChange={(event) => onChange?.(event.target.value)}
           className={cn(

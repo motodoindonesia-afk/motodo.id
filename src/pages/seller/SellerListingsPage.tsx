@@ -10,6 +10,7 @@ import {
   markListingAsSold,
   type SellerListingSort,
 } from "../../lib/listings"
+import { SellerNav } from "../../components/seller/SellerNav"
 import { useListingsLive } from "../../lib/useListingsLive"
 import type { MotorcycleListing, SellerListingStatus } from "../../types/sellerListing"
 import { ConfirmListingModal } from "../../components/seller/ConfirmListingModal"
@@ -62,6 +63,7 @@ export function SellerListingsPage() {
             </div>
             <Button onClick={() => navigate("/seller/listings/new")}>Add Motorcycle</Button>
           </div>
+          <SellerNav approved />
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="Total Listings" value={counts.total} />

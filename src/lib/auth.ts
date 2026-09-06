@@ -17,6 +17,7 @@ function normalizeUser(value: Partial<AuthUser> | null | undefined): AuthUser | 
     fullName: value.fullName,
     email: value.email,
     role: value.role,
+    phone: typeof value.phone === "string" ? value.phone : undefined,
     createdAt: isValidCreatedAt(value.createdAt) ? value.createdAt : new Date().toISOString(),
   }
 }
@@ -112,7 +113,7 @@ export function logout() {
   writeSession(null)
 }
 
-export function updateCurrentUser(patch: Partial<Pick<AuthUser, "fullName" | "role">>): AuthUser | null {
+export function updateCurrentUser(patch: Partial<Pick<AuthUser, "fullName" | "role" | "phone">>): AuthUser | null {
   const current = getCurrentUser()
   if (!current) return null
   const next = normalizeUser({ ...current, ...patch })
@@ -123,6 +124,10 @@ export function updateCurrentUser(patch: Partial<Pick<AuthUser, "fullName" | "ro
 
 export function getUserById(id: string): AuthUser | null {
   return readUsers().find((user) => user.id === id) ?? null
+}
+
+export function listUsers(): AuthUser[] {
+  return [...readUsers()].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
 export function displayName(user: AuthUser) {

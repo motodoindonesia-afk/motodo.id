@@ -13,7 +13,35 @@ import type {
 } from "../types/sellerListing"
 import { LISTING_CITIES, LISTING_CONDITIONS, LISTING_FUELS, LISTING_TRANSMISSIONS } from "../types/sellerListing"
 import { getSellerProfile } from "./seller"
-import { formatIDR, formatMileageKm, normalizeQuantity } from "./listingForm"
+import { createNotification } from "./notifications"
+import { coerceListingQuantity, formatIDR, formatMileageKm, normalizeQuantity } from "./listingForm"
+import { getAvailableStock, INVENTORY_RESERVATION_MIGRATION_KEY } from "./inventory"
+import { isSupabaseConfigured } from "./supabase"
+import { getSellerListingCard, isListingsHydrated, peekCachedListing, peekCachedListings, putCachedListing } from "./listingsSupabase"
+import {
+  adminSetListingStatusRemote,
+  createListingRemote,
+  deleteListingRemote,
+  ensureRemoteListing,
+  updateListingRemote,
+  updateListingStatusRemote,
+} from "./listingsSupabase"
+
+export function isListingsReady() {
+  return isListingsHydrated()
+}
+
+export {
+  getPublicActiveListings,
+  getMyListings,
+  getListingByIdForSeller,
+  uploadListingImage,
+  deleteListingImage,
+  reorderListingImages,
+  markListingSold,
+  markListingActive,
+  ensureRemoteListing,
+} from "./listingsSupabase"
 
 export const LISTINGS_STORAGE_KEY = "motodo.listings"
 export const LISTINGS_UPDATED_EVENT = "motodo:listings-updated"
@@ -144,7 +172,7 @@ function normalizeListing(value: Partial<MotorcycleListing>): MotorcycleListing 
     description: typeof value.description === "string" ? value.description : "",
     images: value.images.filter((item): item is string => typeof item === "string" && item.length > 0).slice(0, 10),
     status: value.status,
-    quantity: normalizeQuantity(value.quantity),
+    quantity: coerceListingQuantity(value.quantity),
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
   }
@@ -178,8 +206,51 @@ export function ensureSeededListings() {
   const existing = readListings()
   const ids = new Set(existing.map((item) => item.id))
   const extras = seedListings().filter((item) => !ids.has(item.id))
-  if (extras.length === 0) return
-  writeListings([...existing, ...extras])
+  if (extras.length !== 0) writeListings([...existing, ...extras])
+  migrateDeductedPendingOrdersOntoListingStock()
+}
+
+/** Old placeOrder deducted listing.quantity immediately. Add those units back once so quantity is total stock. */
+function migrateDeductedPendingOrdersOntoListingStock() {
+  try {
+    if (localStorage.getItem(INVENTORY_RESERVATION_MIGRATION_KEY)) return
+    localStorage.setItem(INVENTORY_RESERVATION_MIGRATION_KEY, "1")
+    const raw = localStorage.getItem("motodo_orders")
+    if (!raw) return
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return
+    const nextOrders: Record<string, unknown>[] = []
+    let changedOrders = false
+    for (const item of parsed) {
+      if (!item || typeof item !== "object") {
+        nextOrders.push(item as Record<string, unknown>)
+        continue
+      }
+      const order = item as Record<string, unknown>
+      const status = order.status
+      const listingId = typeof order.listingId === "string" ? order.listingId : ""
+      const quantity = coerceListingQuantity(order.quantity)
+      const alreadyRestored = Boolean(order.inventoryRestored)
+      if (
+        listingId &&
+        quantity >= 1 &&
+        !alreadyRestored &&
+        (status === "pending" || status === "confirmed")
+      ) {
+        applyListingInventoryChange(listingId, quantity)
+        nextOrders.push({ ...order, inventoryRestored: true })
+        changedOrders = true
+      } else {
+        nextOrders.push(order)
+      }
+    }
+    if (changedOrders) {
+      localStorage.setItem("motodo_orders", JSON.stringify(nextOrders))
+      window.dispatchEvent(new Event("motodo:orders-updated"))
+    }
+  } catch {
+    return
+  }
 }
 
 function migrateMissingQuantity() {
@@ -200,12 +271,14 @@ function migrateMissingQuantity() {
 }
 
 export function getListings(): MotorcycleListing[] {
+  if (isSupabaseConfigured()) return peekCachedListings()
   ensureSeededListings()
   migrateMissingQuantity()
   return readListings().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 }
 
 export function getListingById(id: string): MotorcycleListing | null {
+  if (isSupabaseConfigured()) return peekCachedListing(id) ?? null
   return getListings().find((item) => item.id === id) ?? null
 }
 
@@ -214,6 +287,7 @@ export function getListingsBySeller(sellerId: string): MotorcycleListing[] {
 }
 
 export async function createListing(input: MotorcycleListingInput): Promise<MotorcycleListing> {
+  if (isSupabaseConfigured()) return createListingRemote(input)
   await delay()
   const now = new Date().toISOString()
   const listing: MotorcycleListing = {
@@ -233,6 +307,7 @@ export async function createListing(input: MotorcycleListingInput): Promise<Moto
 }
 
 export async function updateListing(listing: MotorcycleListing, sellerId: string): Promise<MotorcycleListing> {
+  if (isSupabaseConfigured()) return updateListingRemote(listing, sellerId)
   await delay()
   const current = getListingById(listing.id)
   if (!current) throw new Error("Listing not found.")
@@ -254,6 +329,7 @@ export async function updateListing(listing: MotorcycleListing, sellerId: string
 }
 
 export async function deleteListing(id: string, sellerId: string): Promise<boolean> {
+  if (isSupabaseConfigured()) return deleteListingRemote(id, sellerId)
   await delay()
   const current = getListingById(id)
   if (!current || current.sellerId !== sellerId) return false
@@ -278,17 +354,224 @@ async function setListingStatus(
   sellerId: string,
   status: SellerListingStatus,
 ): Promise<MotorcycleListing | null> {
+  if (isSupabaseConfigured()) {
+    const current = peekCachedListing(id) ?? (await ensureRemoteListing(id))
+    if (!current || current.sellerId !== sellerId) return null
+    if (status === "active") {
+      const seller = getSellerProfile(sellerId)
+      if (!seller || seller.status !== "approved") return null
+      if (current.quantity < 1) return null
+    }
+    return updateListingStatusRemote(id, status)
+  }
   await delay()
   const current = getListingById(id)
   if (!current || current.sellerId !== sellerId) return null
+  if (status === "active") {
+    const seller = getSellerProfile(sellerId)
+    if (!seller || seller.status !== "approved") return null
+    if (getAvailableStock(current) < 1) return null
+  }
   const next: MotorcycleListing = {
     ...current,
     status,
-    quantity: status === "active" ? normalizeQuantity(current.quantity) : current.quantity,
     updatedAt: new Date().toISOString(),
   }
   writeListings(readListings().map((item) => (item.id === id ? next : item)))
+  notifyInventoryEvents(current, next)
+  if (current.status !== next.status && next.status !== "sold") {
+    createNotification({
+      userId: next.sellerId,
+      type: "listing_status",
+      title: "Listing Updated",
+      message: `Your ${next.name} listing is now ${listingStatusLabel(next.status).toLowerCase()}.`,
+      relatedId: next.id,
+      relatedType: "listing",
+    })
+  }
   return next
+}
+
+function parseCatalogMileage(value: string) {
+  const digits = value.replace(/[^\d]/g, "")
+  return digits ? Number(digits) : 0
+}
+
+function listingFromCatalog(catalog: CatalogListing): MotorcycleListing {
+  const now = new Date().toISOString()
+  return {
+    id: catalog.id,
+    sellerId: catalog.sellerId,
+    name: catalog.name,
+    brand: catalog.brand ?? "",
+    model: catalog.model ?? catalog.name,
+    category: catalog.category,
+    price: Math.round(catalog.priceValue),
+    condition: isCondition(catalog.condition) && catalog.condition ? catalog.condition : "Very Good",
+    year: catalog.year,
+    mileage: parseCatalogMileage(catalog.mileage),
+    engine: catalog.engine,
+    transmission: catalog.transmission === "Automatic" ? "Automatic" : "Manual",
+    fuel: "Petrol",
+    color: catalog.color,
+    city: catalog.location,
+    location: catalog.location,
+    showroomAddress: "",
+    description: catalog.description,
+    images: catalog.images.length > 0 ? catalog.images : catalog.image ? [catalog.image] : [],
+    status: catalog.status === "sold" ? "sold" : catalog.status === "draft" ? "draft" : "active",
+    quantity: coerceListingQuantity(catalog.quantity),
+    createdAt: catalog.listedAt || now,
+    updatedAt: now,
+  }
+}
+
+export function listAllListingsForAdmin(): MotorcycleListing[] {
+  if (isSupabaseConfigured()) return peekCachedListings()
+  const stored = getListings()
+  const storedIds = new Set(stored.map((item) => item.id))
+  const catalogOnly = motorcycleListings
+    .filter((item) => !storedIds.has(item.id))
+    .map((item) => listingFromCatalog(item))
+  return [...stored, ...catalogOnly].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
+export function getListingForAdmin(listingId: string): MotorcycleListing | null {
+  if (isSupabaseConfigured()) return peekCachedListing(listingId) ?? null
+  const stored = getListingById(listingId)
+  if (stored) return stored
+  const catalog = motorcycleListings.find((item) => item.id === listingId)
+  return catalog ? listingFromCatalog(catalog) : null
+}
+
+export function adminSetListingStatus(
+  listingId: string,
+  status: Extract<SellerListingStatus, "active" | "draft">,
+): MotorcycleListing | null {
+  if (isSupabaseConfigured()) {
+    const current = peekCachedListing(listingId)
+    if (!current) return null
+    if (status === "active" && current.quantity < 1) return null
+    const next: MotorcycleListing = { ...current, status, updatedAt: new Date().toISOString() }
+    putCachedListing(next)
+    void adminSetListingStatusRemote(listingId, status)
+    return next
+  }
+  let current = getListingById(listingId)
+  if (!current) {
+    const catalog = motorcycleListings.find((item) => item.id === listingId)
+    if (!catalog) return null
+    current = listingFromCatalog(catalog)
+    writeListings([current, ...readListings()])
+  }
+  if (status === "active" && getAvailableStock(current) < 1) return null
+  const next: MotorcycleListing = {
+    ...current,
+    sellerId: current.sellerId,
+    status,
+    updatedAt: new Date().toISOString(),
+  }
+  writeListings(readListings().map((item) => (item.id === listingId ? next : item)))
+  return next
+}
+
+export function ensureStoredListingForInventory(listingId: string): MotorcycleListing | null {
+  if (isSupabaseConfigured()) return peekCachedListing(listingId) ?? null
+  const stored = getListingById(listingId)
+  if (stored) return stored
+  const catalog = motorcycleListings.find((item) => item.id === listingId)
+  if (!catalog) return null
+  const listing = listingFromCatalog(catalog)
+  writeListings([listing, ...readListings()])
+  return listing
+}
+
+export function applyListingInventoryChange(listingId: string, delta: number): MotorcycleListing | null {
+  if (isSupabaseConfigured()) return peekCachedListing(listingId) ?? null
+  const current = ensureStoredListingForInventory(listingId)
+  if (!current) return null
+  const nextQuantity = current.quantity + delta
+  if (nextQuantity < 0) return null
+  const tentative: MotorcycleListing = {
+    ...current,
+    quantity: nextQuantity,
+    updatedAt: new Date().toISOString(),
+  }
+  const available = getAvailableStock(tentative)
+  let status = current.status
+  if (status !== "draft") {
+    if (available <= 0) status = "sold"
+    else if (status === "sold" && available > 0) status = "active"
+  }
+  const next: MotorcycleListing = {
+    ...tentative,
+    status,
+  }
+  writeListings(readListings().map((item) => (item.id === listingId ? next : item)))
+  notifyInventoryEvents(current, next)
+  return next
+}
+
+/** Update sold/active from purchasable stock without changing total quantity. */
+export function syncListingAvailability(listingId: string): MotorcycleListing | null {
+  if (isSupabaseConfigured()) return getListingById(listingId)
+  const current = getListingById(listingId)
+  if (!current || current.status === "draft") return current
+  const available = getAvailableStock(current)
+  const status: SellerListingStatus = available <= 0 ? "sold" : "active"
+  if (status === current.status) return current
+  const next: MotorcycleListing = {
+    ...current,
+    status,
+    updatedAt: new Date().toISOString(),
+  }
+  writeListings(readListings().map((item) => (item.id === listingId ? next : item)))
+  notifyInventoryEvents(current, next)
+  return next
+}
+
+function notifyInventoryEvents(
+  previous: MotorcycleListing,
+  next: MotorcycleListing,
+) {
+  if (next.status === "sold" && previous.status === "active") {
+    createNotification({
+      userId: next.sellerId,
+      type: "listing_sold",
+      title: "Motorcycle Sold",
+      message: `Your ${next.name} is now sold out.`,
+      relatedId: next.id,
+      relatedType: "listing",
+      unique: true,
+    })
+  }
+  const previousAvailable = getAvailableStock(previous)
+  const nextAvailable = getAvailableStock(next)
+  if (next.status === "active" && nextAvailable > 0 && nextAvailable <= 2 && previousAvailable > 2) {
+    createNotification({
+      userId: next.sellerId,
+      type: "listing_low_inventory",
+      title: "Low Inventory",
+      message: `Only ${nextAvailable} ${nextAvailable === 1 ? "unit" : "units"} of ${next.name} remain.`,
+      relatedId: next.id,
+      relatedType: "listing",
+      unique: true,
+    })
+  }
+}
+
+export function getListingPickupDetails(listingId: string) {
+  const stored = getListingById(listingId)
+  const seller = stored ? getSellerProfile(stored.sellerId) : null
+  const catalog = motorcycleListings.find((item) => item.id === listingId)
+  return {
+    businessName: seller?.businessName || catalog?.seller.name || "",
+    city: stored?.city || seller?.city || catalog?.seller.location || "",
+    address: stored?.showroomAddress || seller?.showroomAddress || "",
+    location: stored
+      ? [stored.location, stored.city].filter(Boolean).join(", ")
+      : catalog?.location || catalog?.seller.location || "",
+  }
 }
 
 export function listingStatusLabel(status: SellerListingStatus) {
@@ -301,6 +584,8 @@ export function toCatalogListing(listing: MotorcycleListing, profile?: SellerPro
   const cover = listing.images[0] ?? ""
   const area = [listing.location, listing.city].filter(Boolean).join(", ")
   const seller = profile ?? getSellerProfile(listing.sellerId)
+  const card = getSellerListingCard(listing.sellerId)
+  const catalog = motorcycleListings.find((item) => item.id === listing.id)
   return {
     id: listing.id,
     sellerId: listing.sellerId,
@@ -319,33 +604,57 @@ export function toCatalogListing(listing: MotorcycleListing, profile?: SellerPro
     color: listing.color || "—",
     description: listing.description,
     seller: {
-      name: seller?.businessName ?? "Motodo Seller",
-      location: seller?.city ?? listing.city,
-      memberSince: seller ? String(new Date(seller.createdAt).getFullYear()) : "2026",
-      verified: seller?.status === "approved",
+      name: seller?.businessName || card?.businessName || catalog?.seller.name || "Motodo Seller",
+      location: seller?.city || card?.city || catalog?.seller.location || listing.city,
+      memberSince: seller
+        ? String(new Date(seller.createdAt).getFullYear())
+        : card
+          ? String(new Date(card.createdAt).getFullYear())
+          : catalog?.seller.memberSince || "2026",
+      verified: seller ? seller.status === "approved" : Boolean(card) || Boolean(catalog?.seller.verified),
     },
     listedAt: listing.createdAt,
     status: listing.status,
-    quantity: listing.quantity,
+    quantity: getAvailableStock(listing),
     condition: listing.condition || undefined,
     brand: listing.brand || undefined,
     model: listing.model || undefined,
   }
 }
 
+function sellerMayPublish(sellerId: string) {
+  const seller = getSellerProfile(sellerId)
+  if (!seller) return true
+  return seller.status === "approved"
+}
+
 export function getPublicListings(): CatalogListing[] {
-  const published = getListings()
-    .filter((item) => item.status === "active")
+  if (isSupabaseConfigured()) {
+    return peekCachedListings()
+      .filter((item) => item.status === "active" && getAvailableStock(item) > 0 && sellerMayPublish(item.sellerId))
+      .map((item) => toCatalogListing(item))
+  }
+  const stored = getListings()
+  const storedIds = new Set(stored.map((item) => item.id))
+  const published = stored
+    .filter((item) => item.status === "active" && getAvailableStock(item) > 0 && sellerMayPublish(item.sellerId))
     .map((item) => toCatalogListing(item))
-  const publishedIds = new Set(published.map((item) => item.id))
-  const mocks = motorcycleListings.filter((item) => !publishedIds.has(item.id))
+  const mocks = motorcycleListings.filter((item) => !storedIds.has(item.id))
   return [...published, ...mocks]
 }
 
 export function getPublicListingById(id: string): CatalogListing | undefined {
+  if (isSupabaseConfigured()) {
+    const stored = peekCachedListing(id)
+    if (!stored) return undefined
+    if (stored.status === "draft") return undefined
+    if (!sellerMayPublish(stored.sellerId)) return undefined
+    return toCatalogListing(stored)
+  }
   const stored = getListingById(id)
   if (stored) {
     if (stored.status === "draft") return undefined
+    if (!sellerMayPublish(stored.sellerId)) return undefined
     return toCatalogListing(stored)
   }
   return motorcycleListings.find((item) => item.id === id)
@@ -382,6 +691,24 @@ export function getSellerListingCounts(sellerId: string) {
     draft: listings.filter((item) => item.status === "draft").length,
     sold: listings.filter((item) => item.status === "sold").length,
   }
+}
+
+export function getSellerAvailableUnits(sellerId: string) {
+  return getListingsBySeller(sellerId)
+    .filter((item) => item.status === "active")
+    .reduce((total, item) => total + getAvailableStock(item), 0)
+}
+
+export function getSellerLowInventoryListings(sellerId: string) {
+  return getListingsBySeller(sellerId).filter((item) => {
+    if (item.status !== "active") return false
+    const available = getAvailableStock(item)
+    return available > 0 && available <= 2
+  })
+}
+
+export function getSellerSoldOutListings(sellerId: string) {
+  return getListingsBySeller(sellerId).filter((item) => item.status === "sold" || getAvailableStock(item) === 0)
 }
 
 export type SellerListingSort = "newest" | "oldest" | "price-asc" | "price-desc"

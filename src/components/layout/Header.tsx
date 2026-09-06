@@ -4,11 +4,14 @@ import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { displayName } from "../../lib/auth"
 import { isAdmin } from "../../lib/admin"
-import { getSellerProfile } from "../../lib/seller"
+import { getSellerProfile, isSellerProfilesReady } from "../../lib/seller"
 import { getUnreadCount } from "../../lib/chat"
+import { getUnreadNotificationCount } from "../../lib/notifications"
 import { useSellerLive } from "../../lib/useSellerLive"
 import { useChatLive } from "../../lib/useChatLive"
+import { useNotificationsLive } from "../../lib/useNotificationsLive"
 import { UnreadBadge } from "../chat/UnreadBadge"
+import { NotificationBell } from "../notifications/NotificationBell"
 import { navLinks } from "../../data/site"
 import { Button } from "../ui/Button"
 import { SearchBar } from "../ui/SearchBar"
@@ -21,12 +24,14 @@ export function Header() {
   const { user, isAuthenticated, logout } = useAuth()
   useSellerLive()
   useChatLive()
-  const sellerProfile = user ? getSellerProfile(user.id) : null
+  useNotificationsLive()
+  const sellerProfile = user && isSellerProfilesReady() ? getSellerProfile(user.id) : null
   const sellerRegistered = Boolean(sellerProfile)
   const sellerApproved = sellerProfile?.status === "approved"
   const showAdmin = isAdmin(user)
   const buyerUnread = user ? getUnreadCount(user.id, "buyer") : 0
   const sellerUnread = user && sellerRegistered ? getUnreadCount(user.id, "seller") : 0
+  const notificationUnread = user ? getUnreadNotificationCount(user.id) : 0
 
   function goToBrowse(query: string) {
     const trimmed = query.trim()
@@ -65,12 +70,19 @@ export function Header() {
           {isAuthenticated && user ? (
             <>
               <Link
+                to="/orders"
+                className="text-sm font-medium text-navy hover:text-brand"
+              >
+                Orders
+              </Link>
+              <Link
                 to="/messages"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-navy hover:text-brand"
               >
                 Messages
                 <UnreadBadge count={buyerUnread} />
               </Link>
+              <NotificationBell />
               <AccountMenu
                 name={displayName(user)}
                 sellerRegistered={sellerRegistered}
@@ -123,9 +135,16 @@ export function Header() {
                 <TextLink href="/profile" className="py-1" onClick={() => setOpen(false)}>
                   My Profile
                 </TextLink>
+                <TextLink href="/orders" className="py-1" onClick={() => setOpen(false)}>
+                  My Orders
+                </TextLink>
                 <TextLink href="/messages" className="inline-flex items-center gap-2 py-1" onClick={() => setOpen(false)}>
                   Messages
                   <UnreadBadge count={buyerUnread} />
+                </TextLink>
+                <TextLink href="/notifications" className="inline-flex items-center gap-2 py-1" onClick={() => setOpen(false)}>
+                  Notifications
+                  <UnreadBadge count={notificationUnread} />
                 </TextLink>
                 {showAdmin ? (
                   <TextLink href="/admin" className="py-1" onClick={() => setOpen(false)}>
@@ -137,6 +156,14 @@ export function Header() {
                     <TextLink href="/seller/dashboard" className="py-1" onClick={() => setOpen(false)}>
                       Seller Dashboard
                     </TextLink>
+                    {sellerApproved ? (
+                      <TextLink href="/seller/listings" className="py-1" onClick={() => setOpen(false)}>
+                        Listings
+                      </TextLink>
+                    ) : null}
+                    <TextLink href="/seller/orders" className="py-1" onClick={() => setOpen(false)}>
+                      Seller Orders
+                    </TextLink>
                     <TextLink
                       href="/seller/messages"
                       className="inline-flex items-center gap-2 py-1"
@@ -144,6 +171,9 @@ export function Header() {
                     >
                       Seller Messages
                       <UnreadBadge count={sellerUnread} />
+                    </TextLink>
+                    <TextLink href="/seller/profile" className="py-1" onClick={() => setOpen(false)}>
+                      Seller Profile
                     </TextLink>
                     {sellerApproved ? (
                       <TextLink href="/sell" className="py-1" onClick={() => setOpen(false)}>
@@ -236,6 +266,13 @@ function AccountMenu({
             My Profile
           </Link>
           <Link
+            to="/orders"
+            className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+            onClick={() => setOpen(false)}
+          >
+            My Orders
+          </Link>
+          <Link
             to="/messages"
             className="flex items-center justify-between gap-2 px-4 py-2 text-sm text-navy hover:bg-surface"
             onClick={() => setOpen(false)}
@@ -261,6 +298,22 @@ function AccountMenu({
               >
                 Seller Dashboard
               </Link>
+              {sellerApproved ? (
+                <Link
+                  to="/seller/listings"
+                  className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+                  onClick={() => setOpen(false)}
+                >
+                  Listings
+                </Link>
+              ) : null}
+              <Link
+                to="/seller/orders"
+                className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+                onClick={() => setOpen(false)}
+              >
+                Seller Orders
+              </Link>
               <Link
                 to="/seller/messages"
                 className="flex items-center justify-between gap-2 px-4 py-2 text-sm text-navy hover:bg-surface"
@@ -268,6 +321,13 @@ function AccountMenu({
               >
                 <span>Seller Messages</span>
                 <UnreadBadge count={sellerUnread} />
+              </Link>
+              <Link
+                to="/seller/profile"
+                className="block px-4 py-2 text-sm text-navy hover:bg-surface"
+                onClick={() => setOpen(false)}
+              >
+                Seller Profile
               </Link>
               {sellerApproved ? (
                 <Link

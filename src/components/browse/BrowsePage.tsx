@@ -11,7 +11,7 @@ import {
 } from "../../lib/browse"
 import { getPublicListings } from "../../lib/listings"
 import { useListingsLive } from "../../lib/useListingsLive"
-import { SORT_OPTIONS, type BrowseFilters, type SortOption } from "../../types/marketplace"
+import { SORT_OPTIONS, MOTORCYCLE_CATEGORIES, type BrowseFilters, type MotorcycleCategory, type SortOption } from "../../types/marketplace"
 import { Container } from "../layout/Container"
 import { Button } from "../ui/Button"
 import { MotorcycleCard } from "../ui/MotorcycleCard"
@@ -19,12 +19,21 @@ import { SearchBar } from "../ui/SearchBar"
 import { FilterSidebar } from "./FilterSidebar"
 import { Pagination } from "./Pagination"
 
+function parseCategoryParam(value: string | null): MotorcycleCategory | null {
+  if (!value) return null
+  return (MOTORCYCLE_CATEGORIES as readonly string[]).includes(value) ? (value as MotorcycleCategory) : null
+}
+
 export function BrowsePage() {
   const listingVersion = useListingsLive()
   const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState<BrowseFilters>({
     ...emptyBrowseFilters,
     query: searchParams.get("q") ?? "",
+    categories: (() => {
+      const category = parseCategoryParam(searchParams.get("category"))
+      return category ? [category] : []
+    })(),
   })
   const [sort, setSort] = useState<SortOption>("newest")
   const [page, setPage] = useState(1)
@@ -32,7 +41,12 @@ export function BrowsePage() {
 
   useEffect(() => {
     const query = searchParams.get("q") ?? ""
-    setFilters((current) => ({ ...current, query }))
+    const category = parseCategoryParam(searchParams.get("category"))
+    setFilters((current) => ({
+      ...current,
+      query,
+      categories: category ? [category] : current.categories,
+    }))
     setPage(1)
   }, [searchParams])
 

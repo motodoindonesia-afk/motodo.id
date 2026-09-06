@@ -1,15 +1,32 @@
 import type { ChatMessage, Conversation, ConversationListingContext } from "../types/chat"
 import type { MotorcycleListing as CatalogListing } from "../types/marketplace"
 import { getUserById } from "./auth"
-import { formatAvailableQuantity, normalizeQuantity } from "./listingForm"
+import { coerceListingQuantity, formatAvailableQuantity } from "./listingForm"
 import { getListingById, getPublicListingById, toCatalogListing } from "./listings"
 import { getSellerProfile } from "./seller"
+import { createNotification } from "./notifications"
+import { isSupabaseConfigured } from "./supabase"
+import {
+  ensureMessagesRemote,
+  isChatHydrated,
+  markMessagesReadRemote,
+  peekCachedConversation,
+  peekCachedConversations,
+  peekCachedMessages,
+  sendMessageRemote,
+  startConversationRemote,
+  subscribeToMessages,
+} from "./chatSupabase"
 
 export const CONVERSATIONS_STORAGE_KEY = "motodo_conversations"
 export const CHAT_MESSAGES_STORAGE_KEY = "motodo_chat_messages"
 export const CHAT_UPDATED_EVENT = "motodo:chat-updated"
 
 export const INITIAL_BUYER_MESSAGE = "Hi, I'm interested in this motorcycle. Is it still available?"
+
+export function isChatReady() {
+  return isChatHydrated()
+}
 
 function notifyChatUpdated() {
   window.dispatchEvent(new Event(CHAT_UPDATED_EVENT))
@@ -99,10 +116,12 @@ function sortByLatest(conversations: Conversation[]) {
 }
 
 export function getConversations(): Conversation[] {
+  if (isSupabaseConfigured()) return peekCachedConversations()
   return sortByLatest(readConversations())
 }
 
 export function getConversation(id: string): Conversation | null {
+  if (isSupabaseConfigured()) return peekCachedConversation(id) ?? null
   return readConversations().find((item) => item.id === id) ?? null
 }
 
@@ -128,6 +147,7 @@ export function canAccessConversation(conversation: Conversation | null, userId:
 }
 
 export function getMessages(conversationId: string): ChatMessage[] {
+  if (isSupabaseConfigured()) return peekCachedMessages(conversationId)
   return readMessages()
     .filter((item) => item.conversationId === conversationId)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
@@ -145,6 +165,15 @@ function catalogFromStored(listingId: string): CatalogListing | undefined {
 }
 
 export function getConversationListingContext(conversation: Conversation): ConversationListingContext {
+  if (!conversation.listingId) {
+    return {
+      name: conversation.listingName,
+      price: "",
+      image: conversation.listingImage,
+      quantity: 1,
+      status: "missing",
+    }
+  }
   const live = getPublicListingById(conversation.listingId) ?? catalogFromStored(conversation.listingId)
   if (!live) {
     return {
@@ -159,7 +188,7 @@ export function getConversationListingContext(conversation: Conversation): Conve
     name: live.name,
     price: live.price,
     image: live.image || conversation.listingImage,
-    quantity: normalizeQuantity(live.quantity),
+    quantity: coerceListingQuantity(live.quantity),
     status: live.status === "sold" ? "sold" : "active",
   }
 }
@@ -173,7 +202,7 @@ export function getConversationCounterpartyName(conversation: Conversation, view
       "Seller"
     )
   }
-  return getUserById(conversation.buyerId)?.fullName ?? "Buyer"
+  return getUserById(conversation.buyerId)?.fullName ?? conversation.buyerName ?? "Buyer"
 }
 
 export function formatAvailableForChat(quantity?: number) {
@@ -224,6 +253,31 @@ function appendMessage(conversation: Conversation, input: Omit<ChatMessage, "id"
   return { conversation: nextConversation, message }
 }
 
+function notifyChatMessage(conversation: Conversation, senderId: string, senderRole: "buyer" | "seller") {
+  const listingName = conversation.listingName
+  if (senderRole === "buyer") {
+    const name = getUserById(senderId)?.fullName ?? "A buyer"
+    createNotification({
+      userId: conversation.sellerId,
+      type: "new_message",
+      title: "New Message",
+      message: `${name} sent you a message about ${listingName}.`,
+      relatedId: conversation.id,
+      relatedType: "conversation",
+    })
+    return
+  }
+  const garage = getSellerProfile(senderId)?.businessName ?? "The seller"
+  createNotification({
+    userId: conversation.buyerId,
+    type: "new_message",
+    title: "New Message",
+    message: `${garage} replied to your message about ${listingName}.`,
+    relatedId: conversation.id,
+    relatedType: "conversation",
+  })
+}
+
 export function createConversation(listing: CatalogListing, buyerId: string): Conversation {
   const existing = findConversation(listing.id, buyerId, listing.sellerId)
   if (existing) return existing
@@ -245,10 +299,27 @@ export function createConversation(listing: CatalogListing, buyerId: string): Co
   return conversation
 }
 
-export function startBuyerConversation(
+export async function startBuyerConversation(
   listing: CatalogListing,
   buyerId: string,
-): { conversation: Conversation; created: boolean } | { error: "self" | "not_found" } {
+): Promise<{ conversation: Conversation; created: boolean } | { error: "self" | "not_found" }> {
+  if (isSupabaseConfigured()) {
+    try {
+      const started = await startConversationRemote(listing.id)
+      if (started.created) {
+        await sendMessageRemote(started.conversation.id, INITIAL_BUYER_MESSAGE)
+      }
+      return {
+        conversation: peekCachedConversation(started.conversation.id) ?? started.conversation,
+        created: started.created,
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : ""
+      if (message.includes("self_chat") || message.toLowerCase().includes("cannot message yourself")) return { error: "self" }
+      return { error: "not_found" }
+    }
+  }
+
   const live = getPublicListingById(listing.id) ?? catalogFromStored(listing.id)
   if (!live) return { error: "not_found" }
   if (live.sellerId === buyerId) return { error: "self" }
@@ -262,10 +333,17 @@ export function startBuyerConversation(
     message: INITIAL_BUYER_MESSAGE,
     read: false,
   })
+  notifyChatMessage(conversation, buyerId, "buyer")
   return { conversation: getConversation(conversation.id) ?? conversation, created: true }
 }
 
-export function sendMessage(conversationId: string, senderId: string, text: string): ChatMessage | null {
+export async function sendMessage(conversationId: string, senderId: string, text: string): Promise<ChatMessage | null> {
+  if (isSupabaseConfigured()) {
+    const message = text.trim()
+    if (!message) return null
+    return sendMessageRemote(conversationId, message)
+  }
+
   const message = text.trim()
   if (!message) return null
   const conversation = getConversation(conversationId)
@@ -273,16 +351,27 @@ export function sendMessage(conversationId: string, senderId: string, text: stri
   const senderRole =
     conversation.buyerId === senderId ? "buyer" : conversation.sellerId === senderId ? "seller" : null
   if (!senderRole) return null
-  return appendMessage(conversation, {
+  const result = appendMessage(conversation, {
     conversationId,
     senderId,
     senderRole,
     message,
     read: false,
-  }).message
+  })
+  notifyChatMessage(conversation, senderId, senderRole)
+  return result.message
 }
 
-export function markConversationAsRead(conversationId: string, userId: string) {
+export async function markConversationAsRead(conversationId: string, userId: string) {
+  if (isSupabaseConfigured()) {
+    try {
+      await markMessagesReadRemote(conversationId)
+    } catch {
+      return
+    }
+    return
+  }
+
   const conversation = getConversation(conversationId)
   if (!conversation) return
   const asBuyer = conversation.buyerId === userId
@@ -314,6 +403,16 @@ export function markConversationAsRead(conversationId: string, userId: string) {
   )
 }
 
+export function subscribeOpenConversation(conversationId: string) {
+  if (!isSupabaseConfigured()) return () => undefined
+  return subscribeToMessages(conversationId)
+}
+
+export async function ensureConversationMessages(conversationId: string) {
+  if (!isSupabaseConfigured()) return getMessages(conversationId)
+  return ensureMessagesRemote(conversationId)
+}
+
 export function subscribeChatUpdates(onChange: () => void) {
   function handleStorage(event: StorageEvent) {
     if (event.key === CONVERSATIONS_STORAGE_KEY || event.key === CHAT_MESSAGES_STORAGE_KEY || event.key === null) {
@@ -329,10 +428,10 @@ export function subscribeChatUpdates(onChange: () => void) {
 }
 
 /** Dev-only helper. Not used by the app UI. Call from the console while developing. */
-export function seedDevConversations(buyerId: string, sellerId: string, listing: CatalogListing) {
+export async function seedDevConversations(buyerId: string, sellerId: string, listing: CatalogListing) {
   if (buyerId === sellerId) return null
-  const started = startBuyerConversation({ ...listing, sellerId }, buyerId)
+  const started = await startBuyerConversation({ ...listing, sellerId }, buyerId)
   if ("error" in started) return started
-  sendMessage(started.conversation.id, sellerId, "Yes, it is still available. Would you like to visit the showroom?")
+  await sendMessage(started.conversation.id, sellerId, "Yes, it is still available. Would you like to visit the showroom?")
   return started.conversation.id
 }

@@ -2,7 +2,9 @@ import { Heart, Share2, ShieldCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { getPublicListingById, getRelatedPublicListings } from "../../lib/listings"
-import { formatAvailableQuantity } from "../../lib/listingForm"
+import { isSupabaseConfigured } from "../../lib/supabase"
+import { ensureRemoteListing } from "../../lib/listingsSupabase"
+import { coerceListingQuantity, formatAvailableQuantity } from "../../lib/listingForm"
 import { startBuyerConversation } from "../../lib/chat"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { useAuth } from "../../context/AuthContext"
@@ -11,17 +13,28 @@ import { MotorcycleCard } from "../ui/MotorcycleCard"
 import { Container } from "../layout/Container"
 import { ContactSellerModal } from "./ContactSellerModal"
 import { ImageGallery } from "./ImageGallery"
+import { ListingReviewsSection } from "../reviews/ListingReviewsSection"
+import { CompactRating } from "../reviews/CompactRating"
+import { getListingRatingSummary, getSellerRatingSummary } from "../../lib/reviews"
+import { useReviewsLive } from "../../lib/useReviewsLive"
+import { publicSellerPath } from "../../lib/sellers"
 
 export function MotorcycleDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
   useListingsLive()
+  useReviewsLive()
   const listing = id ? getPublicListingById(id) : undefined
   const [saved, setSaved] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
   const [shareNote, setShareNote] = useState("")
   const [chatNote, setChatNote] = useState("")
+
+  useEffect(() => {
+    if (!id || !isSupabaseConfigured() || listing) return
+    void ensureRemoteListing(id)
+  }, [id, listing])
 
   useEffect(() => {
     setSaved(false)
@@ -41,14 +54,14 @@ export function MotorcycleDetailPage() {
     window.setTimeout(() => setShareNote(""), 2500)
   }
 
-  function handleChatSeller() {
+  async function handleChatSeller() {
     if (!listing) return
     if (!isAuthenticated) {
       navigate(`/login?next=${encodeURIComponent(`/motorcycles/${listing.id}`)}`)
       return
     }
     if (!user) return
-    const started = startBuyerConversation(listing, user.id)
+    const started = await startBuyerConversation(listing, user.id)
     if ("error" in started) {
       if (started.error === "self") {
         setChatNote("You cannot chat with yourself about your own listing.")
@@ -57,7 +70,7 @@ export function MotorcycleDetailPage() {
       }
       return
     }
-    navigate(`/messages/${started.conversation.id}`)
+    navigate(`/messages/${started.conversation.id}`, { replace: true })
   }
 
   if (!listing) {
@@ -79,8 +92,26 @@ export function MotorcycleDetailPage() {
     )
   }
 
-  const related = getRelatedPublicListings(listing, 4)
-  const gallery = listing.images.length > 0 ? listing.images : [listing.image]
+  const currentListing = listing
+  const related = getRelatedPublicListings(currentListing, 4)
+  const gallery = currentListing.images.length > 0 ? currentListing.images : [currentListing.image]
+  const available = currentListing.status === "sold" ? 0 : coerceListingQuantity(currentListing.quantity)
+  const soldOut = currentListing.status === "sold" || available <= 0
+  const isOwnListing = Boolean(user && currentListing.sellerId === user.id)
+  const buyDisabled = soldOut || currentListing.status === "draft" || isOwnListing
+
+  function handleBuyNow() {
+    if (!isAuthenticated) {
+      navigate(`/login?next=${encodeURIComponent(`/checkout/${currentListing.id}`)}`)
+      return
+    }
+    if (isOwnListing) {
+      setChatNote("You cannot purchase your own listing.")
+      return
+    }
+    if (buyDisabled) return
+    navigate(`/checkout/${currentListing.id}`)
+  }
 
   return (
     <main className="bg-white pb-16 sm:pb-20">
@@ -116,24 +147,34 @@ export function MotorcycleDetailPage() {
           <div>
             <div className="flex items-start justify-between gap-4">
               <div>
-                {listing.status === "sold" ? (
-                  <p className="text-xs font-semibold uppercase tracking-wide text-navy">SOLD</p>
+                {soldOut ? (
+                  <p className="text-xs font-semibold uppercase tracking-wide text-navy">SOLD OUT</p>
                 ) : null}
                 <h1 className="mt-1 text-3xl font-bold tracking-tight text-navy sm:text-[2rem]">
                   {listing.name}
                 </h1>
                 <p className="mt-2 text-2xl font-semibold text-brand">{listing.price}</p>
-                {listing.status === "sold" ? null : (
+                <div className="mt-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-navy-muted">Motorcycle Rating</p>
+                  <CompactRating
+                    average={getListingRatingSummary(listing.id).average}
+                    count={getListingRatingSummary(listing.id).count}
+                    emptyLabel="No reviews yet."
+                  />
+                </div>
+                {soldOut ? (
+                  <p className="mt-2 text-sm font-medium text-navy">SOLD OUT</p>
+                ) : (
                   <p className="mt-2 text-sm text-navy-muted">{formatAvailableQuantity(listing.quantity)}</p>
                 )}
                 <p className="mt-3 text-sm text-navy-muted">
                   {listing.year} · {listing.location} · {listing.category}
                 </p>
-                {listing.status === "sold" ? (
+                {soldOut ? (
                   <p className="mt-3 text-sm text-navy-muted">This motorcycle is no longer available.</p>
                 ) : null}
               </div>
-              {listing.status === "sold" ? null : (
+              {soldOut ? null : (
                 <button
                   type="button"
                   aria-pressed={saved}
@@ -146,17 +187,25 @@ export function MotorcycleDetailPage() {
               )}
             </div>
 
-            {listing.status === "sold" ? (
+            {soldOut ? (
               <div className="mt-7 rounded-2xl border border-line bg-surface px-5 py-4">
-                <p className="text-sm font-semibold text-navy">SOLD</p>
+                <p className="text-sm font-semibold text-navy">SOLD OUT</p>
                 <p className="mt-1 text-sm text-navy-muted">This motorcycle has already been sold.</p>
-                <Button className="mt-4" onClick={handleChatSeller}>
-                  Chat Seller
-                </Button>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <Button className="flex-1 px-5 py-3" disabled>
+                    Buy Now
+                  </Button>
+                  <Button variant="secondary" className="flex-1 px-5 py-3" onClick={handleChatSeller}>
+                    Chat Seller
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Button className="flex-1 px-5 py-3" onClick={handleChatSeller}>
+                <Button className="flex-1 px-5 py-3" disabled={buyDisabled} onClick={handleBuyNow}>
+                  Buy Now
+                </Button>
+                <Button variant="secondary" className="flex-1 px-5 py-3" onClick={handleChatSeller}>
                   Chat Seller
                 </Button>
                 <Button variant="secondary" className="flex-1 px-5 py-3" onClick={() => setContactOpen(true)}>
@@ -168,6 +217,11 @@ export function MotorcycleDetailPage() {
                 </Button>
               </div>
             )}
+            {isOwnListing ? (
+              <p className="mt-2 text-sm text-navy" role="status">
+                You cannot purchase your own listing.
+              </p>
+            ) : null}
             {chatNote ? (
               <p className="mt-2 text-sm text-navy" role="status">
                 {chatNote}
@@ -183,7 +237,12 @@ export function MotorcycleDetailPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-navy-muted">Seller</p>
-                  <p className="mt-1 text-base font-semibold text-navy">{listing.seller.name}</p>
+                  <Link
+                    to={publicSellerPath(listing.sellerId)}
+                    className="mt-1 inline-block text-base font-semibold text-navy hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    {listing.seller.name}
+                  </Link>
                   {listing.seller.verified ? (
                     <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-navy">
                       <ShieldCheck className="size-4 text-brand" aria-hidden="true" />
@@ -192,6 +251,14 @@ export function MotorcycleDetailPage() {
                   ) : (
                     <p className="mt-2 text-sm text-navy-muted">Seller</p>
                   )}
+                  <div className="mt-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-navy-muted">Seller Rating</p>
+                    <CompactRating
+                      average={getSellerRatingSummary(listing.sellerId).average}
+                      count={getSellerRatingSummary(listing.sellerId).count}
+                      emptyLabel="No seller reviews yet."
+                    />
+                  </div>
                 </div>
               </div>
               <dl className="mt-4 space-y-2 text-sm">
@@ -204,11 +271,9 @@ export function MotorcycleDetailPage() {
                   <dd className="font-medium text-navy">{listing.seller.memberSince}</dd>
                 </div>
               </dl>
-              {listing.status === "sold" ? null : (
-                <Button className="mt-5 w-full" onClick={handleChatSeller}>
-                  Chat Seller
-                </Button>
-              )}
+              <Button className="mt-5 w-full" onClick={handleChatSeller}>
+                Chat Seller
+              </Button>
             </div>
 
             <p className="mt-4 text-xs leading-relaxed text-navy-muted">
@@ -247,6 +312,8 @@ export function MotorcycleDetailPage() {
             {listing.description}
           </p>
         </section>
+
+        <ListingReviewsSection listingId={listing.id} />
 
         {related.length > 0 ? (
           <section className="mt-12 sm:mt-16">

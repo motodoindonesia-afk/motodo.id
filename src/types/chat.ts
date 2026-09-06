@@ -7,6 +7,7 @@ export type Conversation = {
   buyerId: string
   listingName: string
   listingImage?: string
+  buyerName?: string
   lastMessage: string
   lastMessageAt: string
   unreadForBuyer: number

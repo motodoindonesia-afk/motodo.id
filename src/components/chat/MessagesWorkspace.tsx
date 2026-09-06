@@ -11,6 +11,8 @@ import {
 import { useChatLive } from "../../lib/useChatLive"
 import { ConversationList } from "./ConversationList"
 import { ChatThread } from "./ChatThread"
+import { getSellerProfile } from "../../lib/seller"
+import { SellerNav } from "../seller/SellerNav"
 import { Button } from "../ui/Button"
 import { Container } from "../layout/Container"
 import { cn } from "../../lib/cn"
@@ -29,10 +31,22 @@ export function MessagesWorkspace({ role }: Props) {
   const allowed = Boolean(userId && canAccessConversation(selected, userId, role))
 
   useEffect(() => {
-    if (conversationId && allowed && userId) markConversationAsRead(conversationId, userId)
+    if (conversationId && allowed && userId) {
+      void markConversationAsRead(conversationId, userId)
+    }
   }, [conversationId, userId, allowed, version])
 
-  if (!user) return null
+  if (!user) {
+    return (
+      <main className="bg-white py-10 sm:py-14">
+        <Container>
+          <div className="mx-auto max-w-lg text-center">
+            <h1 className="text-2xl font-bold text-navy">Loading messages…</h1>
+          </div>
+        </Container>
+      </main>
+    )
+  }
 
   const conversations = role === "buyer" ? getBuyerConversations(user.id) : getSellerConversations(user.id)
   const listHref = role === "buyer" ? "/messages" : "/seller/messages"
@@ -61,13 +75,20 @@ export function MessagesWorkspace({ role }: Props) {
         <p className="mt-2 text-navy-muted">
           {role === "seller" ? "Conversations with buyers about your listings." : "Conversations with sellers about motorcycles."}
         </p>
+        {role === "seller" ? <SellerNav approved={getSellerProfile(user.id)?.status === "approved"} /> : null}
 
         {conversations.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-line px-5 py-12 text-center">
-            <p className="text-base font-semibold text-navy">No messages yet.</p>
-            <p className="mt-2 text-sm text-navy-muted">Start a conversation with a seller to ask about a motorcycle.</p>
-            <Button className="mt-6" onClick={() => navigate("/browse")}>
-              Browse Motorcycles
+            <p className="text-base font-semibold text-navy">
+              {role === "seller" ? "No buyer messages yet." : "No messages yet."}
+            </p>
+            <p className="mt-2 text-sm text-navy-muted">
+              {role === "seller"
+                ? "Buyers who enquire about your motorcycles will appear here."
+                : "Start a conversation with a seller to ask about a motorcycle."}
+            </p>
+            <Button className="mt-6" onClick={() => navigate(role === "seller" ? "/seller/listings" : "/browse")}>
+              {role === "seller" ? "View Listings" : "Browse Motorcycles"}
             </Button>
           </div>
         ) : (

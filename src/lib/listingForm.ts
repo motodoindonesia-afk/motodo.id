@@ -44,7 +44,7 @@ export function emptyListingForm(profile?: SellerProfile | null, listing?: Motor
     brand: listing?.brand ?? "",
     model: listing?.model ?? "",
     price: listing?.price ? String(listing.price) : "",
-    quantity: String(listing?.quantity && listing.quantity >= 1 ? listing.quantity : 1),
+    quantity: listing ? String(coerceListingQuantity(listing.quantity)) : "1",
     condition: listing?.condition ?? "",
     year: listing?.year ? String(listing.year) : "",
     mileage: listing ? String(listing.mileage) : "",
@@ -81,9 +81,26 @@ export function normalizeQuantity(value: unknown) {
   return 1
 }
 
+/** Missing quantity defaults to 1. Zero is valid remaining inventory. */
+export function coerceListingQuantity(value: unknown) {
+  if (typeof value === "number" && Number.isInteger(value) && value >= 0) return value
+  if (typeof value === "string") {
+    const parsed = parseQuantityInput(value)
+    if (Number.isInteger(parsed) && parsed >= 0) return parsed
+  }
+  return 1
+}
+
 export function formatAvailableQuantity(quantity?: number) {
-  const units = normalizeQuantity(quantity)
+  const units = coerceListingQuantity(quantity)
+  if (units <= 0) return "SOLD OUT"
   return units === 1 ? "Available: 1 unit" : `Available: ${units} units`
+}
+
+export function unitsLeftMessage(available: number) {
+  if (available <= 0) return "This motorcycle is no longer available."
+  if (available === 1) return "Only 1 unit left"
+  return `Only ${available} units left`
 }
 
 export function formatIDR(value: number) {

@@ -3,11 +3,23 @@ import { Navigate, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { createSellerProfile, getSellerProfile, resubmitSellerProfile } from "../../lib/seller"
 import type { SellerFormValues } from "../../lib/sellerForm"
+import { SellerDataGate } from "../../components/seller/SellerDataGate"
 import { SellerRegistrationForm } from "../../components/seller/SellerRegistrationForm"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
 
 export function SellerRegisterPage() {
+  const { user } = useAuth()
+
+  if (!user) return null
+  return (
+    <SellerDataGate>
+      <SellerRegisterInner />
+    </SellerDataGate>
+  )
+}
+
+function SellerRegisterInner() {
   const { user, updateProfile } = useAuth()
   const navigate = useNavigate()
   const [submitted, setSubmitted] = useState(false)
@@ -35,13 +47,14 @@ export function SellerRegisterPage() {
       instagram: values.instagram.trim() || undefined,
       website: values.website.trim() || undefined,
       description: values.description.trim(),
+      sellerFleetAvailable: existing?.sellerFleetAvailable ?? false,
     }
     if (existing?.status === "rejected") {
       await resubmitSellerProfile(user.id, payload)
     } else {
       await createSellerProfile(payload)
     }
-    updateProfile({ fullName: values.fullName.trim(), role: "seller" })
+    updateProfile({ fullName: values.fullName.trim(), role: "seller" }).catch(() => undefined)
     setSubmitted(true)
   }
 

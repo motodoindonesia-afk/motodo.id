@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { ShieldCheck } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
+import { getAvailableStock } from "../../lib/inventory"
 import { emptyListingForm, formatAvailableQuantity, formatIDR, validateListingForm } from "../../lib/listingForm"
 import { canManageListing, getListingById, publishListing, toCatalogListing } from "../../lib/listings"
 import { getSellerProfile } from "../../lib/seller"
@@ -50,7 +51,7 @@ export function SellerListingPreviewPage() {
     ["Condition", catalog.condition ?? "—"],
     ["Brand", catalog.brand ?? "—"],
     ["Model", catalog.model ?? "—"],
-    ["Quantity", String(listing.quantity)],
+    ["Quantity", String(getAvailableStock(listing))],
   ]
 
   async function handlePublish() {
@@ -60,7 +61,10 @@ export function SellerListingPreviewPage() {
       return
     }
     const published = await publishListing(listingId, sellerId)
-    if (!published) return
+    if (!published) {
+      navigate("/seller/dashboard")
+      return
+    }
     navigate("/seller/listings", { state: { published: true } })
   }
 
@@ -89,7 +93,7 @@ export function SellerListingPreviewPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-navy">{catalog.name}</h1>
             <p className="mt-2 text-2xl font-semibold text-brand">{formatIDR(listing.price)}</p>
-            <p className="mt-2 text-sm text-navy-muted">{formatAvailableQuantity(listing.quantity)}</p>
+            <p className="mt-2 text-sm text-navy-muted">{formatAvailableQuantity(getAvailableStock(listing))}</p>
             <p className="mt-3 text-sm text-navy-muted">
               {catalog.year} · {catalog.mileage} · {catalog.location} · {catalog.category}
             </p>

@@ -2,11 +2,13 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { Link } from "react-router-dom"
 import type { ChatMessage, Conversation } from "../../types/chat"
 import {
+  ensureConversationMessages,
   formatAvailableForChat,
   formatMessageTime,
   getConversationListingContext,
   getMessages,
   sendMessage,
+  subscribeOpenConversation,
 } from "../../lib/chat"
 import { useChatLive } from "../../lib/useChatLive"
 import { Button } from "../ui/Button"
@@ -24,27 +26,40 @@ export function ChatThread({ conversation, userId, backHref }: Props) {
   const listing = getConversationListingContext(conversation)
   const [draft, setDraft] = useState("")
   const [error, setError] = useState("")
+  const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const isBuyerMessage = (message: ChatMessage) => message.senderRole === "buyer"
+
+  useEffect(() => {
+    void ensureConversationMessages(conversation.id)
+    return subscribeOpenConversation(conversation.id)
+  }, [conversation.id])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" })
   }, [messages.length, conversation.id])
 
-  function handleSend(event?: FormEvent) {
+  async function handleSend(event?: FormEvent) {
     event?.preventDefault()
     const text = draft.trim()
     if (!text) {
       setError("Enter a message before sending.")
       return
     }
-    const saved = sendMessage(conversation.id, userId, text)
-    if (!saved) {
-      setError("Unable to send this message.")
-      return
+    setSending(true)
+    try {
+      const saved = await sendMessage(conversation.id, userId, text)
+      if (!saved) {
+        setError("Unable to send this message.")
+        return
+      }
+      setDraft("")
+      setError("")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to send this message.")
+    } finally {
+      setSending(false)
     }
-    setDraft("")
-    setError("")
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -135,7 +150,9 @@ export function ChatThread({ conversation, userId, backHref }: Props) {
             placeholder="Type a message..."
             className="min-h-11 w-full resize-none rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-navy placeholder:text-navy-muted/80 focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20"
           />
-          <Button type="submit">Send</Button>
+          <Button type="submit" disabled={sending}>
+            {sending ? "Sending..." : "Send"}
+          </Button>
         </div>
         {error ? (
           <p className="mt-2 text-sm text-red-700" role="alert">

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { formatAvailableQuantity, formatIDR } from "../../lib/listingForm"
+import { listingStockSummary } from "../../lib/inventory"
 import {
   canManageListing,
   deleteListing,
@@ -45,6 +46,7 @@ export function SellerListingViewPage() {
 
   const profile = getSellerProfile(user.id)
   const catalog = toCatalogListing(listing, profile)
+  const stock = listingStockSummary(listing)
   const gallery = catalog.images.length > 0 ? catalog.images : catalog.image ? [catalog.image] : []
   const specs = [
     ["Year", String(catalog.year || "—")],
@@ -60,7 +62,9 @@ export function SellerListingViewPage() {
     ["Brand", catalog.brand ?? "—"],
     ["Model", catalog.model ?? "—"],
     ["Status", listingStatusLabel(listing.status)],
-    ["Quantity", String(listing.quantity)],
+    ["Stock", String(stock.total)],
+    ["Reserved", String(stock.reserved)],
+    ["Available", String(stock.available)],
   ]
 
   return (
@@ -85,7 +89,7 @@ export function SellerListingViewPage() {
             </p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-navy">{catalog.name}</h1>
             <p className="mt-2 text-2xl font-semibold text-brand">{formatIDR(listing.price)}</p>
-            <p className="mt-2 text-sm text-navy-muted">{formatAvailableQuantity(listing.quantity)}</p>
+            <p className="mt-2 text-sm text-navy-muted">{formatAvailableQuantity(stock.available)}</p>
             <p className="mt-3 text-sm text-navy-muted">
               {catalog.year} · {catalog.mileage} · {catalog.location} · {catalog.category}
             </p>
@@ -96,10 +100,13 @@ export function SellerListingViewPage() {
                   Mark as Sold
                 </Button>
               ) : null}
-              {listing.status === "sold" ? (
+              {listing.status === "sold" && stock.available >= 1 ? (
                 <Button variant="secondary" onClick={() => setActiveOpen(true)}>
                   Mark as Active
                 </Button>
+              ) : null}
+              {listing.status === "sold" && stock.available < 1 ? (
+                <p className="text-sm text-navy-muted">Increase quantity before making this listing active again.</p>
               ) : null}
               <Button
                 variant="secondary"

@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom"
 import type { MotorcycleListing } from "../../types/sellerListing"
-import { formatAvailableQuantity, formatIDR } from "../../lib/listingForm"
+import { formatIDR } from "../../lib/listingForm"
 import { listingStatusLabel } from "../../lib/listings"
+import { listingStockSummary } from "../../lib/inventory"
 import { formatShortDate } from "../../lib/profile"
 import { Button } from "../ui/Button"
 import { cn } from "../../lib/cn"
@@ -17,6 +18,7 @@ export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive 
   const navigate = useNavigate()
   const cover = listing.images[0]
   const place = [listing.location, listing.city].filter(Boolean).join(", ")
+  const stock = listingStockSummary(listing)
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-line p-4 sm:flex-row sm:items-center">
@@ -42,7 +44,11 @@ export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive 
           </span>
         </div>
         <p className="mt-1 text-sm font-semibold text-brand">{formatIDR(listing.price)}</p>
-        <p className="mt-1 text-xs text-navy-muted">{formatAvailableQuantity(listing.quantity)}</p>
+        <p className="mt-1 text-xs text-navy-muted">
+          {stock.available <= 0 ? "SOLD OUT" : `Available: ${stock.available}`}
+          {stock.reserved > 0 ? ` · Reserved: ${stock.reserved}` : ""}
+          {` · Stock: ${stock.total}`}
+        </p>
         <p className="mt-1 text-xs text-navy-muted">
           {listing.year || "—"}
           {place ? ` · ${place}` : ""} · {formatShortDate(listing.createdAt)}
@@ -65,7 +71,7 @@ export function SellerListingCard({ listing, onDelete, onMarkSold, onMarkActive 
             Mark as Sold
           </Button>
         ) : null}
-        {listing.status === "sold" && onMarkActive ? (
+        {listing.status === "sold" && stock.available >= 1 && onMarkActive ? (
           <Button variant="secondary" onClick={() => onMarkActive(listing)}>
             Mark as Active
           </Button>
