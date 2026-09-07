@@ -16,6 +16,7 @@ import {
   calculateSubtotal,
   isListingPurchasable,
   listingAvailableQuantity,
+  orderPublicRef,
   OrderError,
   placeOrder,
   validateCheckoutQuantity,
@@ -141,8 +142,8 @@ export function CheckoutPage() {
         deliveryNotes: deliveryNotes.trim(),
         paymentMethod,
       })
-      setPlacedOrderId(order.id)
-      navigate(`/orders/${order.id}`, { replace: true, state: { placed: true } })
+      setPlacedOrderId(orderPublicRef(order))
+      navigate(`/orders/${orderPublicRef(order)}`, { replace: true, state: { placed: true } })
     } catch (error) {
       placingRef.current = false
       setSubmitting(false)

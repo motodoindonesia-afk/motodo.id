@@ -13,7 +13,7 @@ import {
   getSellerLowInventoryListings,
   listAllListingsForAdmin,
 } from "./listings"
-import { getBuyerOrders, getOrders, getSellerOrderCounts, getSellerOrders } from "./orders"
+import { getBuyerOrders, getOrders, getSellerOrderCounts, getSellerOrders, orderPublicRef } from "./orders"
 import { calculateAverageRating, formatAverageRating, getAllReviews, getReviewPublicName } from "./reviews"
 import { getSellerProfile, getSellerStats, listSellerProfiles } from "./seller"
 
@@ -214,14 +214,14 @@ export function getRecentActivity(limit = 12): AdminActivity[] {
       id: `order-new-${order.id}`,
       label: `New order created for ${order.listingName}`,
       at: order.createdAt,
-      href: `/orders/${order.id}`,
+      href: `/orders/${orderPublicRef(order)}`,
     })
     if (order.status === "completed") {
       events.push({
         id: `order-done-${order.id}`,
         label: `Order completed for ${order.listingName}`,
         at: order.updatedAt,
-        href: `/orders/${order.id}`,
+        href: `/orders/${orderPublicRef(order)}`,
       })
     }
   }

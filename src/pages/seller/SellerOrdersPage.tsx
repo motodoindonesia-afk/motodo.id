@@ -6,7 +6,7 @@ import { Container } from "../../components/layout/Container"
 import { getSellerProfile } from "../../lib/seller"
 import { SellerNav } from "../../components/seller/SellerNav"
 import { formatIDR } from "../../lib/listingForm"
-import { formatOrderDate, getSellerOrders } from "../../lib/orders"
+import { formatOrderDate, getSellerOrders, orderPublicRef } from "../../lib/orders"
 import { useT, type Translate } from "../../i18n"
 import type { DeliveryMethod } from "../../types/order"
 
@@ -53,10 +53,10 @@ export function SellerOrdersPage() {
                   key={order.id}
                   type="button"
                   className="rounded-2xl border border-line p-4 text-left"
-                  onClick={() => navigate(`/seller/orders/${order.id}`)}
+                  onClick={() => navigate(`/seller/orders/${orderPublicRef(order)}`)}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-navy">{order.id}</p>
+                    <p className="text-sm font-semibold text-navy">{orderPublicRef(order)}</p>
                     <OrderStatusBadge status={order.status} />
                   </div>
                   <p className="mt-2 font-medium text-navy">{order.listingName}</p>

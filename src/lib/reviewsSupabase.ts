@@ -92,7 +92,8 @@ function isStatus(value: string): value is ReviewStatus {
 export function mapReviewRow(row: ReviewRow): Review {
   return {
     id: row.id,
-    orderId: row.order_number || row.order_id,
+    orderId: row.order_id,
+    orderNumber: row.order_number,
     listingId: row.listing_id,
     sellerId: row.seller_id,
     buyerId: row.buyer_id,
@@ -110,6 +111,7 @@ export function mapReviewRow(row: ReviewRow): Review {
 function rememberReview(review: Review) {
   reviewCache.set(review.id, review)
   reviewByOrder.set(review.orderId, review.id)
+  if (review.orderNumber) reviewByOrder.set(review.orderNumber, review.id)
   notifyReviewsUpdated()
 }
 

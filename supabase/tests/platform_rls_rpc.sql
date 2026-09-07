@@ -1,0 +1,37 @@
+-- Motodo platform RLS/RPC test scenarios (Phase 1 foundation).
+-- Not executed by npm test. Run later against a dedicated Supabase branch with test users.
+-- Do not run against production.
+--
+-- A. Buyer
+--    - SELECT active public listings (including is_demo showcase rows)
+--    - cannot UPDATE another profile
+--    - cannot UPDATE another seller's listing
+--    - create_order on a real (is_demo=false) in-stock listing succeeds
+--    - create_order with qty > available raises INSUFFICIENT_STOCK
+--    - create_order on is_demo listing raises DEMO_LISTING_NOT_FOR_SALE
+--    - cannot UPDATE orders rows (RPC only)
+--    - start_conversation / send_message only as participant
+--    - create_review only on own completed order
+--
+-- B. Seller
+--    - UPDATE own listings
+--    - cannot UPDATE another seller's listings
+--    - UPDATE quantity below reserved raises QUANTITY_BELOW_RESERVED
+--    - approve_seller_profile raises FORBIDDEN
+--
+-- C. Admin
+--    - approve_seller_profile / reject_seller_profile succeed
+--    - complete_order still requires confirmed status (INVALID_ORDER_STATE otherwise)
+--
+-- D. Concurrency
+--    - two create_order calls on last unit: one INSUFFICIENT_STOCK (listing row lock)
+--
+-- E. Notifications
+--    - cannot UPDATE another user's notifications
+--    - mark_notification_read on someone else's id raises NOTIFICATION_NOT_FOUND
+--
+-- Expected Motodo codes (details/hint and "CODE: " message prefix):
+-- UNAUTHORIZED, FORBIDDEN, LISTING_NOT_FOUND, LISTING_UNAVAILABLE, INSUFFICIENT_STOCK,
+-- DEMO_LISTING_NOT_FOR_SALE, QUANTITY_BELOW_RESERVED, INVALID_ORDER_STATE, ORDER_NOT_FOUND,
+-- SELF_CONVERSATION, CONVERSATION_NOT_FOUND, MESSAGE_NOT_ALLOWED, REVIEW_NOT_ALLOWED,
+-- NOTIFICATION_NOT_FOUND, SELLER_NOT_APPROVED.

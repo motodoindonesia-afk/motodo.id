@@ -4,7 +4,7 @@ import { OrderStatusBadge } from "../components/orders/OrderStatusBadge"
 import { Button } from "../components/ui/Button"
 import { Container } from "../components/layout/Container"
 import { formatIDR } from "../lib/listingForm"
-import { formatOrderDate, getBuyerOrders } from "../lib/orders"
+import { formatOrderDate, getBuyerOrders, orderPublicRef } from "../lib/orders"
 import { getReviewByOrderId } from "../lib/reviews"
 import { useOrdersLive } from "../lib/useOrdersLive"
 import { useReviewsLive } from "../lib/useReviewsLive"
@@ -56,7 +56,7 @@ export function OrdersPage() {
                   type="button"
                   className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-4 text-left shadow-card sm:flex-row sm:items-center"
                   onClick={() =>
-                    navigate(order.status === "completed" ? `/orders/${order.id}#review` : `/orders/${order.id}`)
+                    navigate(order.status === "completed" ? `/orders/${orderPublicRef(order)}#review` : `/orders/${orderPublicRef(order)}`)
                   }
                 >
                   <div className="h-36 w-full overflow-hidden rounded-xl bg-surface sm:h-24 sm:w-36 sm:shrink-0">
@@ -69,7 +69,7 @@ export function OrdersPage() {
                       <p className="font-semibold text-navy">{order.listingName}</p>
                       <OrderStatusBadge status={order.status} />
                     </div>
-                    <p className="mt-1 text-xs text-navy-muted">{order.id}</p>
+                    <p className="mt-1 text-xs text-navy-muted">{orderPublicRef(order)}</p>
                     <p className="mt-2 text-sm text-navy">
                       {t("orders.quantity", { count: order.quantity })} · {formatIDR(order.buyerTotal)}
                     </p>

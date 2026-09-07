@@ -7,7 +7,10 @@ export type OrderStatus = "pending" | "confirmed" | "completed" | "cancelled"
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded"
 
 export type Order = {
+  /** Database primary key (orders.id). */
   id: string
+  /** Human-readable MTD-XXXXXXXX (orders.order_number). Used in web URLs. */
+  orderNumber: string
   listingId: string
   sellerId: string
   buyerId: string

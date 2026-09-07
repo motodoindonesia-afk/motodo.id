@@ -6,7 +6,7 @@ import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
 import { cn } from "../../lib/cn"
 import { formatMoney, getAllOrders, sellerBusinessName } from "../../lib/adminPlatform"
-import { deliveryMethodLabel, formatOrderDate } from "../../lib/orders"
+import { deliveryMethodLabel, formatOrderDate, orderPublicRef } from "../../lib/orders"
 import { useOrdersLive } from "../../lib/useOrdersLive"
 import { useSellerLive } from "../../lib/useSellerLive"
 import type { OrderStatus } from "../../types/order"
@@ -36,7 +36,7 @@ export function AdminOrdersPage() {
     return orders.filter((order) => {
       if (status !== "all" && order.status !== status) return false
       if (!needle) return true
-      return [order.id, order.listingName, order.buyerName, sellerBusinessName(order.sellerId)]
+      return [order.id, order.orderNumber, order.listingName, order.buyerName, sellerBusinessName(order.sellerId)]
         .join(" ")
         .toLowerCase()
         .includes(needle)
@@ -98,7 +98,7 @@ export function AdminOrdersPage() {
                 <tbody>
                   {visible.map((order) => (
                     <tr key={order.id} className="border-t border-line">
-                      <td className="px-4 py-3 font-mono text-xs text-navy">{order.id.slice(0, 8)}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-navy">{orderPublicRef(order)}</td>
                       <td className="px-4 py-3 text-sm text-navy">{order.listingName}</td>
                       <td className="px-4 py-3 text-sm text-navy-muted">{order.buyerName}</td>
                       <td className="px-4 py-3 text-sm text-navy-muted">{sellerBusinessName(order.sellerId)}</td>
@@ -113,7 +113,7 @@ export function AdminOrdersPage() {
                       <td className="px-4 py-3 text-sm text-navy-muted">{order.paymentStatus ?? "pending"}</td>
                       <td className="px-4 py-3 text-sm text-navy-muted">{formatOrderDate(order.createdAt)}</td>
                       <td className="px-4 py-3">
-                        <Button variant="secondary" onClick={() => navigate(`/orders/${order.id}`)}>
+                        <Button variant="secondary" onClick={() => navigate(`/orders/${orderPublicRef(order)}`)}>
                           View
                         </Button>
                       </td>

@@ -20,8 +20,11 @@ export type Notification = {
   type: NotificationType
   title: string
   message: string
+  /** Platform resource id (notifications.entity_id). */
   relatedId?: string
+  /** Platform resource type (notifications.entity_type). */
   relatedType?: NotificationRelatedType
+  /** Web SPA path only. Native clients must use relatedType + relatedId. */
   link?: string
   read: boolean
   createdAt: string

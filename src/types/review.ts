@@ -2,7 +2,10 @@ export type ReviewStatus = "published" | "hidden"
 
 export type Review = {
   id: string
+  /** orders.id UUID. */
   orderId: string
+  /** orders.order_number. */
+  orderNumber?: string
   listingId: string
   sellerId: string
   buyerId: string

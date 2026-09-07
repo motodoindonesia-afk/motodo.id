@@ -15,7 +15,7 @@ import { LISTING_CITIES, LISTING_CONDITIONS, LISTING_FUELS, LISTING_TRANSMISSION
 import { getSellerProfile } from "./seller"
 import { createNotification } from "./notifications"
 import { coerceListingQuantity, formatIDR, formatMileageKm, normalizeQuantity } from "./listingForm"
-import { getAvailableStock, INVENTORY_RESERVATION_MIGRATION_KEY } from "./inventory"
+import { getAvailableStock, getReservedQuantityForListing, INVENTORY_RESERVATION_MIGRATION_KEY } from "./inventory"
 import { isSupabaseConfigured } from "./supabase"
 import { getSellerListingCard, isListingsHydrated, peekCachedListing, peekCachedListings, putCachedListing } from "./listingsSupabase"
 import {
@@ -320,6 +320,10 @@ export async function updateListing(listing: MotorcycleListing, sellerId: string
     images: listing.images.slice(0, 10),
     quantity: normalizeQuantity(listing.quantity),
   }
+  const reserved = getReservedQuantityForListing(listing.id)
+  if (next.quantity < reserved) {
+    throw new Error("Quantity cannot be lower than units already reserved by pending or confirmed orders.")
+  }
   try {
     writeListings(readListings().map((item) => (item.id === listing.id ? next : item)))
   } catch {
@@ -492,6 +496,7 @@ export function applyListingInventoryChange(listingId: string, delta: number): M
   if (!current) return null
   const nextQuantity = current.quantity + delta
   if (nextQuantity < 0) return null
+  if (nextQuantity < getReservedQuantityForListing(listingId)) return null
   const tentative: MotorcycleListing = {
     ...current,
     quantity: nextQuantity,
@@ -619,6 +624,7 @@ export function toCatalogListing(listing: MotorcycleListing, profile?: SellerPro
     condition: listing.condition || undefined,
     brand: listing.brand || undefined,
     model: listing.model || undefined,
+    isDemo: listing.isDemo,
   }
 }
 

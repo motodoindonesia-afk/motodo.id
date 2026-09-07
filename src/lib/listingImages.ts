@@ -1,6 +1,8 @@
 /**
- * Temporary local image handling for listing photos.
- * Replace with Supabase Storage uploads when the backend is connected.
+ * Browser-only listing photo resize for the Motodo web client.
+ * Native apps should compress locally, then upload to Storage.
+ * Bucket listing-images: public read; writes require listings/{listing_id}/… ownership.
+ * MIME/size: storage.buckets.allowed_mime_types + file_size_limit when the project supports those columns.
  */
 
 const MAX_EDGE = 1280

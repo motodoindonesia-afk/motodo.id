@@ -54,6 +54,7 @@ export function normalizeReview(value: Partial<Review>): Review | null {
   return {
     id: value.id,
     orderId: value.orderId,
+    orderNumber: typeof value.orderNumber === "string" ? value.orderNumber : undefined,
     listingId: value.listingId,
     sellerId: value.sellerId,
     buyerId: value.buyerId,
@@ -136,7 +137,7 @@ export async function setReviewStatus(reviewId: string, status: ReviewStatus): P
 
 export function getReviewByOrderId(orderId: string): Review | null {
   if (isSupabaseConfigured()) return peekCachedReviewByOrder(orderId) ?? null
-  return readReviews().find((item) => item.orderId === orderId) ?? null
+  return readReviews().find((item) => item.orderId === orderId || item.orderNumber === orderId) ?? null
 }
 
 export function hasReviewedOrder(orderId: string) {
@@ -258,6 +259,7 @@ export async function createReview(input: CreateReviewInput): Promise<Review> {
   const review: Review = {
     id: crypto.randomUUID(),
     orderId: order.id,
+    orderNumber: order.orderNumber,
     listingId: order.listingId,
     sellerId: order.sellerId,
     buyerId: order.buyerId,

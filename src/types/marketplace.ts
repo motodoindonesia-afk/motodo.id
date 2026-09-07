@@ -1,3 +1,7 @@
+import type { ListingStatus } from "./listing"
+
+export type { ListingStatus }
+
 export const MOTORCYCLE_CATEGORIES = [
   "Harley-Davidson",
   "Triumph",
@@ -36,10 +40,11 @@ export type MotorcycleSeller = {
   verified: boolean
 }
 
-export const LISTING_STATUSES = ["active", "draft", "sold"] as const
-
-export type ListingStatus = (typeof LISTING_STATUSES)[number]
-
+/**
+ * Public catalog DTO for browse/home/detail cards.
+ * Not the database listing: `price` is formatted text; `priceValue` is the numeric price.
+ * Canonical domain listing is `Listing` in listing.ts (`price: number`).
+ */
 export type MotorcycleListing = {
   id: string
   sellerId: string
@@ -64,6 +69,7 @@ export type MotorcycleListing = {
   condition?: string
   brand?: string
   model?: string
+  isDemo?: boolean
 }
 
 export type Category = {

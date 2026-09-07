@@ -22,6 +22,7 @@ import {
   getSellerOrderCounts,
   getSellerOrders,
   getSellerRevenueSummary,
+  orderPublicRef,
 } from "../../lib/orders"
 import { formatChatTime, getConversationCounterpartyName, getSellerConversations } from "../../lib/chat"
 import { useChatLive } from "../../lib/useChatLive"
@@ -176,11 +177,11 @@ export function SellerDashboardPage() {
                 {recentOrders.map((order) => (
                   <li key={order.id}>
                     <Link
-                      to={`/seller/orders/${order.id}`}
+                      to={`/seller/orders/${orderPublicRef(order)}`}
                       className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-navy">{order.id}</p>
+                        <p className="text-sm font-semibold text-navy">{orderPublicRef(order)}</p>
                         <p className="mt-1 truncate text-sm text-navy">{order.listingName}</p>
                         <p className="mt-1 text-xs text-navy-muted">
                           {order.buyerName || t("orders.buyer")} · {t("orders.quantity", { count: order.quantity })} ·{" "}

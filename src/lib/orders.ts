@@ -15,6 +15,8 @@ import { createNotification } from "./notifications"
 import { getAvailableStock, listingStockSummary } from "./inventory"
 import { getSellerProfile, isSellerFleetAvailable } from "./seller"
 import { userFacingMessage } from "./userFacingError"
+import { isListingEligibleForSale } from "./platform/demoInventory"
+import { generateOrderNumber, isUuid, orderMatchesRef, orderPublicRef } from "./platform/orderIdentity"
 import { isSupabaseConfigured } from "./supabase"
 import {
   createOrderRemote,
@@ -91,15 +93,25 @@ function isDiscountType(value: unknown): value is DiscountType {
   return value === "percentage" || value === "fixed"
 }
 
-function generateOrderId() {
-  const raw = crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()
-  return `MTD-${raw}`
-}
+export { orderPublicRef }
 
 export function normalizeOrder(value: Partial<Order>): Order | null {
-  if (!value.id || !value.listingId || !value.sellerId || !value.buyerId) return null
+  if (!value.listingId || !value.sellerId || !value.buyerId) return null
   if (typeof value.listingName !== "string") return null
   if (typeof value.createdAt !== "string" || typeof value.updatedAt !== "string") return null
+  const orderNumber =
+    typeof value.orderNumber === "string" && value.orderNumber.trim()
+      ? value.orderNumber.trim()
+      : typeof value.id === "string" && value.id.startsWith("MTD-")
+        ? value.id
+        : ""
+  const id =
+    typeof value.id === "string" && isUuid(value.id)
+      ? value.id
+      : typeof value.id === "string" && value.id && !value.id.startsWith("MTD-")
+        ? value.id
+        : orderNumber
+  if (!id || !orderNumber) return null
 
   const unitPrice = typeof value.unitPrice === "number" ? money(value.unitPrice) : 0
   const quantity = coerceListingQuantity(value.quantity) || 1
@@ -120,7 +132,8 @@ export function normalizeOrder(value: Partial<Order>): Order | null {
       : calculateSellerNetAmount(buyerTotal, sellerSuccessFeeAmount)
 
   return {
-    id: value.id,
+    id,
+    orderNumber,
     listingId: value.listingId,
     sellerId: value.sellerId,
     buyerId: value.buyerId,
@@ -185,7 +198,7 @@ export function getOrders(): Order[] {
 
 export function getOrderById(id: string): Order | null {
   if (isSupabaseConfigured()) return peekCachedOrder(id) ?? null
-  return readOrders().find((item) => item.id === id) ?? null
+  return readOrders().find((item) => orderMatchesRef(item, id)) ?? null
 }
 
 export function getBuyerOrders(buyerId: string): Order[] {
@@ -251,7 +264,15 @@ export function listingAvailableQuantity(listing: CatalogListing) {
 
 export function isListingPurchasable(listing: CatalogListing | undefined) {
   if (!listing) return false
-  if (listing.status === "draft" || listing.status === "sold") return false
+  const stored = getListingById(listing.id)
+  if (
+    !isListingEligibleForSale({
+      isDemo: stored?.isDemo ?? listing.isDemo,
+      status: stored?.status ?? listing.status,
+    })
+  ) {
+    return false
+  }
   return listingAvailableQuantity(listing) > 0
 }
 
@@ -325,7 +346,8 @@ export async function placeOrder(input: PlaceOrderInput): Promise<Order> {
   validateQuantity(quantity, liveAvailable)
 
   const order: Order = {
-    id: generateOrderId(),
+    id: crypto.randomUUID(),
+    orderNumber: generateOrderNumber(),
     listingId: listing.id,
     sellerId: listing.sellerId,
     buyerId: input.buyerId,
@@ -408,12 +430,12 @@ export async function updateSellerOrderStatus(orderId: string, sellerId: string,
     next = { ...next, inventoryRestored: true }
   }
 
-  writeOrders(readOrders().map((item) => (item.id === orderId ? next : item)))
+  writeOrders(readOrders().map((item) => (orderMatchesRef(item, orderId) ? next : item)))
 
   if (nextStatus === "completed" && order.inventoryRestored) {
     const consumed = applyListingInventoryChange(order.listingId, -order.quantity)
     if (!consumed) {
-      writeOrders(readOrders().map((item) => (item.id === orderId ? order : item)))
+      writeOrders(readOrders().map((item) => (orderMatchesRef(item, orderId) ? order : item)))
       throw new OrderError("Unable to complete this order because inventory is inconsistent.")
     }
   }

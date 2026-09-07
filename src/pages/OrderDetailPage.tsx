@@ -11,6 +11,7 @@ import {
   canBuyerViewOrder,
   formatOrderDate,
   getOrderById,
+  orderPublicRef,
 } from "../lib/orders"
 import { useLanguage, type Translate } from "../i18n"
 import type { DeliveryMethod, PaymentMethod, PaymentStatus } from "../types/order"
@@ -114,7 +115,7 @@ export function OrderDetailPage() {
             {placed ? t("orders.placed") : t("orders.details")}
           </h1>
           <p className="mt-2 text-sm text-navy-muted">
-            {t("orders.orderNumberLabel")} <span className="font-medium text-navy">{order.id}</span>
+            {t("orders.orderNumberLabel")} <span className="font-medium text-navy">{orderPublicRef(order)}</span>
           </p>
           <div className="mt-3">
             <OrderStatusBadge status={order.status} />

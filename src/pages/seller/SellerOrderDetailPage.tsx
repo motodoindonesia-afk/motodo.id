@@ -10,6 +10,7 @@ import {
   canSellerViewOrder,
   formatOrderDate,
   getOrderById,
+  orderPublicRef,
   OrderError,
   SELLER_SUCCESS_FEE_RATE,
   updateSellerOrderStatus,
@@ -103,7 +104,7 @@ export function SellerOrderDetailPage() {
           <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.orderInfo")}</h1>
           <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
             <dl className="space-y-2 text-sm">
-              <Row label={t("seller.orderId")} value={order.id} />
+              <Row label={t("seller.orderId")} value={orderPublicRef(order)} />
               <Row label={t("seller.date")} value={formatOrderDate(order.createdAt)} />
               <div className="flex justify-between gap-4">
                 <dt className="text-navy-muted">{t("orders.status")}</dt>

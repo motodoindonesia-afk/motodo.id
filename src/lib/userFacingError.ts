@@ -1,7 +1,9 @@
 /**
  * Maps PostgREST / Postgres / GoTrue errors to copy that is safe to show in the UI.
- * Known Motodo RPC messages (plain English RAISE EXCEPTION) are kept.
+ * Machine-readable Motodo codes live in details/hint / "CODE: " prefix (see platform/errors.ts).
  */
+
+import { MotodoError, motodoErrorCode, stripMotodoCodePrefix } from "./platform/errors"
 
 const TECHNICAL = [
   "pgrst",
@@ -64,7 +66,9 @@ function looksTechnical(message: string) {
 }
 
 export function userFacingMessage(error: unknown, fallback: string): string {
-  const raw = rawMessage(error)
+  const code = motodoErrorCode(error)
+  const raw = stripMotodoCodePrefix(rawMessage(error))
+  if (code && raw && !looksTechnical(raw)) return raw
   if (!raw) return fallback
   const alias = ALIASES[raw.toLowerCase()]
   if (alias) return alias
@@ -73,5 +77,7 @@ export function userFacingMessage(error: unknown, fallback: string): string {
 }
 
 export function throwUserFacing(error: unknown, fallback: string): never {
-  throw new Error(userFacingMessage(error, fallback))
+  throw new MotodoError(userFacingMessage(error, fallback), motodoErrorCode(error))
 }
+
+export { MotodoError, motodoErrorCode }

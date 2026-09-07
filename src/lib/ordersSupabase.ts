@@ -93,10 +93,11 @@ function isPaymentStatus(value: string): value is PaymentStatus {
 }
 
 export function mapOrderRow(row: OrderRow): Order | null {
-  if (!row.order_number || !row.listing_id || !row.seller_id || !row.buyer_id) return null
+  if (!row.id || !row.order_number || !row.listing_id || !row.seller_id || !row.buyer_id) return null
   const feeRate = typeof row.seller_fee_rate === "string" ? Number(row.seller_fee_rate) : row.seller_fee_rate
   return {
-    id: row.order_number,
+    id: row.id,
+    orderNumber: row.order_number,
     listingId: row.listing_id,
     sellerId: row.seller_id,
     buyerId: row.buyer_id,
@@ -127,10 +128,10 @@ export function mapOrderRow(row: OrderRow): Order | null {
   }
 }
 
-function rememberOrder(order: Order, uuid?: string) {
+function rememberOrder(order: Order) {
   orderCache.set(order.id, order)
-  if (uuid) orderIdIndex.set(uuid, order.id)
   orderIdIndex.set(order.id, order.id)
+  orderIdIndex.set(order.orderNumber, order.id)
   notifyOrdersUpdated()
 }
 
@@ -150,7 +151,7 @@ function firstOrderRow(data: unknown): OrderRow | null {
 async function afterOrderMutation(row: OrderRow) {
   const order = mapOrderRow(row)
   if (!order) throw new Error("Unable to read order.")
-  rememberOrder(order, row.id)
+  rememberOrder(order)
   await refreshListingStock([row.listing_id])
   if (order.status === "completed") {
     const listing = await getListingByIdRemote(row.listing_id)
@@ -169,9 +170,7 @@ export async function hydrateOrders() {
   for (const row of rows) {
     const order = mapOrderRow(row)
     if (!order) continue
-    orderCache.set(order.id, order)
-    orderIdIndex.set(row.id, order.id)
-    orderIdIndex.set(order.id, order.id)
+    rememberOrder(order)
   }
   const listingIds = [...new Set(rows.map((row) => row.listing_id))]
   if (listingIds.length > 0) await refreshListingStock(listingIds)

@@ -9,6 +9,7 @@ import {
   deliveryMethodLabel,
   formatOrderDate,
   getOrderById,
+  orderPublicRef,
   paymentMethodLabel,
   SELLER_SUCCESS_FEE_RATE,
 } from "../../lib/orders"
@@ -58,7 +59,7 @@ export function AdminOrderDetailPage() {
             </Link>
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-bold text-navy">Order {order.id.slice(0, 8)}</h2>
+            <h2 className="text-2xl font-bold text-navy">Order {orderPublicRef(order)}</h2>
             <OrderStatusBadge status={order.status} />
           </div>
           <p className="mt-2 text-sm text-navy-muted">Admin can view this order. Sellers update status from Seller Orders.</p>
@@ -67,7 +68,7 @@ export function AdminOrderDetailPage() {
             <section className="rounded-2xl border border-line px-5 py-6">
               <h3 className="text-lg font-bold text-navy">Order Information</h3>
               <dl className="mt-4 space-y-3">
-                <Row label="Order ID" value={<span className="font-mono text-xs">{order.id}</span>} />
+                <Row label="Order ID" value={<span className="font-mono text-xs">{orderPublicRef(order)}</span>} />
                 <Row label="Created Date" value={formatOrderDate(order.createdAt)} />
                 <Row label="Updated Date" value={formatOrderDate(order.updatedAt)} />
                 <Row label="Status" value={<OrderStatusBadge status={order.status} />} />

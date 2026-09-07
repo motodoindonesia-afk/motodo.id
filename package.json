@@ -10,7 +10,8 @@
     "build:ritme": "tsc -b && vite build --config vite.ritme.config.ts",
     "deploy:ritme": "npx wrangler deploy --config wrangler.ritme.jsonc",
     "preview": "vite preview",
-    "preview:ritme": "vite preview --config vite.ritme.config.ts --port 4174"
+    "preview:ritme": "vite preview --config vite.ritme.config.ts --port 4174",
+    "test": "vitest run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0",
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^6.1.0",
     "tailwindcss": "^4.1.13",
     "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   }
 }
