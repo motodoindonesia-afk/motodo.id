@@ -1,38 +1,32 @@
 import { Link, useNavigate } from "react-router-dom"
+import {
+  MessageCircle,
+  Package,
+  Plus,
+  ShoppingBag,
+  Store,
+} from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
-import { SellerNav } from "../../components/seller/SellerNav"
-import { SellerStatusBadge } from "../../components/seller/SellerStatusBadge"
+import { SellerCenterLayout } from "../../components/seller/SellerCenterLayout"
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge"
-import { UnreadBadge } from "../../components/chat/UnreadBadge"
 import { Button } from "../../components/ui/Button"
 import { ViewAllLink } from "../../components/ui/ViewAllLink"
-import { Container } from "../../components/layout/Container"
-import { listingStockSummary } from "../../lib/inventory"
 import { formatIDR } from "../../lib/listingForm"
-import {
-  getListingsBySeller,
-  getSellerAvailableUnits,
-  getSellerListingCounts,
-  getSellerLowInventoryListings,
-  getSellerSoldOutListings,
-} from "../../lib/listings"
+import { getListingsBySeller, getSellerListingCounts } from "../../lib/listings"
 import { getSellerProfile } from "../../lib/seller"
-import {
-  formatOrderDate,
-  getSellerOrderCounts,
-  getSellerOrders,
-  getSellerRevenueSummary,
-  orderPublicRef,
-} from "../../lib/orders"
-import { formatChatTime, getConversationCounterpartyName, getSellerConversations } from "../../lib/chat"
+import { publicSellerPath } from "../../lib/sellers"
+import { formatOrderDate, getSellerOrderCounts, getSellerOrders, getSellerRevenueSummary, orderPublicRef } from "../../lib/orders"
+import { getUnreadCount } from "../../lib/chat"
+import { getSellerRatingSummary } from "../../lib/reviews"
 import { useChatLive } from "../../lib/useChatLive"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { useOrdersLive } from "../../lib/useOrdersLive"
 import { useSellerLive } from "../../lib/useSellerLive"
-import { getSellerRatingSummary } from "../../lib/reviews"
 import { useReviewsLive } from "../../lib/useReviewsLive"
 import { CompactRating } from "../../components/reviews/CompactRating"
 import { useLanguage } from "../../i18n"
+import { cn } from "../../lib/cn"
 
 export function SellerDashboardPage() {
   const { user } = useAuth()
@@ -51,370 +45,257 @@ export function SellerDashboardPage() {
   const approved = profile.status === "approved"
   const sellerId = user.id
   const listingCounts = getSellerListingCounts(sellerId)
-  const listings = getListingsBySeller(sellerId).slice(0, 5)
-  const availableUnits = getSellerAvailableUnits(sellerId)
-  const lowInventory = getSellerLowInventoryListings(sellerId)
-  const soldOut = getSellerSoldOutListings(sellerId)
+  const listings = getListingsBySeller(sellerId).slice(0, 4)
   const orderCounts = getSellerOrderCounts(sellerId)
-  const recentOrders = getSellerOrders(sellerId).slice(0, 5)
+  const recentOrders = getSellerOrders(sellerId).slice(0, 3)
+  const unread = getUnreadCount(sellerId, "seller")
+  const rating = getSellerRatingSummary(sellerId)
   const allTime = getSellerRevenueSummary(sellerId, "all")
   const thisMonth = getSellerRevenueSummary(sellerId, "month")
-  const conversations = getSellerConversations(sellerId).slice(0, 5)
-  const unread = conversations.reduce((total, item) => total + item.unreadForSeller, 0)
+  const hasPerformance = allTime.countedCount > 0 || thisMonth.countedCount > 0
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-5xl">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight text-navy">{t("nav.sellerDashboard")}</h1>
-            <SellerStatusBadge
-              status={profile.status}
-              label={approved ? t("listing.verifiedSeller") : undefined}
-            />
-          </div>
-          <SellerNav approved={approved} />
-
-          <section className="mt-8 rounded-2xl border border-line px-5 py-6 sm:px-6" aria-labelledby="verification-heading">
-            <h2 id="verification-heading" className="text-lg font-bold text-navy">
-              {t("seller.verification")}
-            </h2>
+    <SellerCenterLayout>
+      <div className="space-y-3">
+        {profile.status !== "approved" ? (
+          <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
             {profile.status === "pending" ? (
               <>
-                <p className="mt-3 font-medium text-navy">{t("seller.pendingReview")}</p>
-                <p className="mt-2 text-sm leading-relaxed text-navy-muted">
-                  {t("seller.pendingBody")}
-                </p>
-                <p className="mt-3 text-sm text-navy-muted">
-                  {t("seller.pendingCannot")}
-                </p>
+                <p className="text-[14px] font-semibold text-navy">{t("seller.pendingReview")}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-navy-muted">{t("seller.pendingCannot")}</p>
               </>
-            ) : null}
-            {profile.status === "rejected" ? (
+            ) : (
               <>
-                <p className="mt-3 font-medium text-navy">{t("seller.rejectedTitle")}</p>
+                <p className="text-[14px] font-semibold text-navy">{t("seller.rejectedTitle")}</p>
                 {profile.rejectionReason ? (
-                  <p className="mt-2 text-sm leading-relaxed text-navy">{profile.rejectionReason}</p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-navy">{profile.rejectionReason}</p>
                 ) : null}
-                <Button className="mt-4" onClick={() => navigate("/seller/register")}>
+                <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/register")}>
                   {t("profile.editRegistration")}
                 </Button>
               </>
-            ) : null}
-            {approved ? (
-              <p className="mt-3 font-medium text-navy">{t("seller.verifiedAccount")}</p>
-            ) : null}
-          </section>
-
-          <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">{t("listing.sellerRating")}</h2>
-            <div className="mt-3">
-              <CompactRating
-                average={getSellerRatingSummary(sellerId).average}
-                count={getSellerRatingSummary(sellerId).count}
-                emptyLabel={t("review.noSellerYet")}
-              />
-            </div>
-            <Button className="mt-4" variant="secondary" onClick={() => navigate("/seller/reviews")}>
-              {t("seller.viewAllReviews")}
-            </Button>
-          </section>
-
-          <section className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label={t("seller.activeListings")} value={listingCounts.active} />
-            <StatCard label={t("seller.draftListings")} value={listingCounts.draft} />
-            <StatCard label={t("seller.soldListings")} value={listingCounts.sold} />
-            <StatCard label={t("seller.totalOrders")} value={orderCounts.total} />
-          </section>
-
-          <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label={t("seller.pendingOrders")} value={orderCounts.pending} />
-            <StatCard label={t("seller.confirmedOrders")} value={orderCounts.confirmed} />
-            <StatCard label={t("seller.completedOrders")} value={orderCounts.completed} />
-            <StatCard label={t("seller.cancelledOrders")} value={orderCounts.cancelled} />
-          </section>
-
-          <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">{t("seller.transactionSummary")}</h2>
-            <p className="mt-1 text-sm text-navy-muted">{t("seller.allTime")}</p>
-            <dl className="mt-4 space-y-2 text-sm">
-              <MoneyRow label={t("seller.gross")} value={formatIDR(allTime.gross)} />
-              <MoneyRow label={t("seller.fee")} value={`-${formatIDR(allTime.fee)}`} />
-              <MoneyRow label={t("seller.net")} value={formatIDR(allTime.net)} strong />
-            </dl>
-            <p className="mt-3 text-xs text-navy-muted">
-              {t("seller.feeNote")}
-            </p>
-            {allTime.pendingCount > 0 ? (
-              <p className="mt-3 text-sm text-navy-muted">
-                {t("seller.pendingRevenue", { count: allTime.pendingCount, amount: formatIDR(allTime.pendingValue) })}
-              </p>
-            ) : null}
-            <div className="mt-5 border-t border-line pt-5">
-              <p className="text-sm font-semibold text-navy">{t("seller.thisMonth")}</p>
-              <dl className="mt-3 space-y-2 text-sm">
-                <MoneyRow label={t("seller.gross")} value={formatIDR(thisMonth.gross)} />
-                <MoneyRow label={t("seller.fee")} value={`-${formatIDR(thisMonth.fee)}`} />
-                <MoneyRow label={t("seller.net")} value={formatIDR(thisMonth.net)} />
-              </dl>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-bold text-navy">{t("seller.recentOrders")}</h2>
-              <ViewAllLink href="/seller/orders">{t("seller.viewAllOrders")}</ViewAllLink>
-            </div>
-            {recentOrders.length === 0 ? (
-              <div className="mt-6 text-center">
-                <p className="text-sm text-navy-muted">{t("orders.empty")}</p>
-                <Button className="mt-4" onClick={() => navigate(approved ? "/seller/listings" : "/seller/profile")}>
-                  {t("chat.viewListings")}
-                </Button>
-              </div>
-            ) : (
-              <ul className="mt-4 divide-y divide-line">
-                {recentOrders.map((order) => (
-                  <li key={order.id}>
-                    <Link
-                      to={`/seller/orders/${orderPublicRef(order)}`}
-                      className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-navy">{orderPublicRef(order)}</p>
-                        <p className="mt-1 truncate text-sm text-navy">{order.listingName}</p>
-                        <p className="mt-1 text-xs text-navy-muted">
-                          {order.buyerName || t("orders.buyer")} · {t("orders.quantity", { count: order.quantity })} ·{" "}
-                          {formatOrderDate(order.createdAt)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-                        <p className="text-sm font-semibold text-navy">{formatIDR(order.buyerTotal)}</p>
-                        <OrderStatusBadge status={order.status} />
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
             )}
           </section>
+        ) : null}
 
-          <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-navy">{t("seller.recentMessages")}</h2>
-                <UnreadBadge count={unread} />
-              </div>
-              <ViewAllLink href="/seller/messages">{t("seller.viewAllMessages")}</ViewAllLink>
-            </div>
-            {conversations.length === 0 ? (
-              <div className="mt-6 text-center">
-                <p className="text-sm text-navy-muted">{t("chat.emptySeller")}</p>
-                <Button className="mt-4" onClick={() => navigate("/seller/messages")}>
-                  {t("seller.messages")}
+        <section className="rounded-2xl border border-line bg-white p-4 shadow-card min-[1024px]:p-5">
+          <h1 className="text-[20px] font-semibold tracking-tight text-navy">{t("seller.welcome")}</h1>
+          <p className="mt-1 text-[14px] text-navy-muted">{t("seller.welcomeBody")}</p>
+          <p className="mt-2 truncate text-[13px] font-medium text-navy">{profile.businessName}</p>
+        </section>
+
+        <section className="grid grid-cols-2 gap-2 min-[1024px]:grid-cols-5 min-[1024px]:gap-2.5">
+          <ActionCard
+            icon={Plus}
+            label={t("seller.addMotor")}
+            disabled={!approved}
+            onClick={() => navigate("/seller/listings/new")}
+          />
+          <ActionCard
+            icon={Package}
+            label={t("seller.manageProducts")}
+            disabled={!approved}
+            onClick={() => navigate("/seller/listings")}
+          />
+          <ActionCard icon={ShoppingBag} label={t("seller.viewOrders")} onClick={() => navigate("/seller/orders")} />
+          <ActionCard icon={MessageCircle} label={t("seller.openMessages")} onClick={() => navigate("/seller/messages")} />
+          <ActionCard
+            icon={Store}
+            label={t("seller.visitStore")}
+            disabled={!approved}
+            onClick={() => navigate(publicSellerPath(user.id))}
+            className="col-span-2 min-[1024px]:col-span-1"
+          />
+        </section>
+        {!approved ? <p className="text-[12px] text-navy-muted">{t("seller.unlockHint")}</p> : null}
+
+        <section>
+          <h2 className="mb-2 text-[13px] font-semibold tracking-wide text-navy-muted uppercase">{t("seller.importantToday")}</h2>
+          <div className="grid grid-cols-2 gap-2 min-[1024px]:grid-cols-4">
+            <MetricCard to="/seller/orders" label={t("seller.newOrders")} value={orderCounts.pending} />
+            <MetricCard to="/seller/messages" label={t("seller.unreadMessages")} value={unread} />
+            <MetricCard to={approved ? "/seller/listings" : undefined} label={t("seller.activeProducts")} value={listingCounts.active} />
+            <MetricCard to="/seller/reviews" label={t("seller.reviewsMetric")} value={rating.count} />
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+          <div className="flex items-end justify-between gap-3">
+            <h2 className="text-[16px] font-semibold text-navy">{t("seller.myProducts")}</h2>
+            {approved && listings.length > 0 ? (
+              <ViewAllLink href="/seller/listings">{t("seller.manageListings")}</ViewAllLink>
+            ) : null}
+          </div>
+          {listings.length === 0 ? (
+            <div className="mt-3 py-3 text-center">
+              <p className="text-[14px] font-medium text-navy">{t("seller.noMotors")}</p>
+              <p className="mt-1 text-[13px] text-navy-muted">{t("seller.addFirstHint")}</p>
+              {approved ? (
+                <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/listings/new")}>
+                  {t("seller.addMotor")}
                 </Button>
-              </div>
-            ) : (
-              <ul className="mt-4 divide-y divide-line">
-                {conversations.map((conversation) => (
-                  <li key={conversation.id}>
-                    <Link
-                      to={`/seller/messages/${conversation.id}`}
-                      className="flex items-start justify-between gap-3 py-4"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-navy">
-                          {getConversationCounterpartyName(conversation, sellerId)}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs text-navy-muted">{conversation.listingName}</p>
-                        <p className="mt-1 truncate text-sm text-navy-muted">
-                          {conversation.lastMessage || t("chat.noMessagesYet")}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        <p className="text-xs text-navy-muted">{formatChatTime(conversation.lastMessageAt)}</p>
-                        <UnreadBadge count={conversation.unreadForSeller} />
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-bold text-navy">{t("seller.yourListings")}</h2>
-              <div className="flex flex-wrap gap-3">
-                {approved ? (
-                  <>
-                    <ViewAllLink href="/seller/listings">{t("seller.manageListings")}</ViewAllLink>
-                    <Button onClick={() => navigate("/seller/listings/new")}>{t("profile.addMotorcycle")}</Button>
-                  </>
-                ) : null}
-              </div>
+              ) : (
+                <p className="mt-2 text-[13px] text-navy-muted">{t("seller.listingAfterApprove")}</p>
+              )}
             </div>
-            {listings.length === 0 ? (
-              <div className="mt-6 text-center">
-                <p className="text-sm text-navy-muted">{t("seller.noListed")}</p>
-                {approved ? (
-                  <Button className="mt-4" onClick={() => navigate("/seller/listings/new")}>
-                    {t("seller.addFirst")}
-                  </Button>
-                ) : (
-                  <p className="mt-2 text-sm text-navy-muted">{t("seller.listingAfterApprove")}</p>
-                )}
-              </div>
-            ) : (
-              <ul className="mt-4 grid gap-4">
-                {listings.map((listing) => (
-                  <li key={listing.id} className="flex flex-col gap-3 rounded-xl border border-line p-3 sm:flex-row sm:items-center">
-                    <div className="h-28 w-full overflow-hidden rounded-lg bg-surface sm:h-20 sm:w-28 sm:shrink-0">
+          ) : (
+            <ul className="mt-3 divide-y divide-line">
+              {listings.map((listing) => (
+                <li key={listing.id}>
+                  <Link
+                    to={approved ? `/seller/listings/${listing.id}` : "/seller/dashboard"}
+                    className="flex gap-3 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    <span className="size-14 shrink-0 overflow-hidden rounded-lg bg-surface sm:size-16">
                       {listing.images[0] ? (
                         <img src={listing.images[0]} alt="" className="h-full w-full object-cover" />
                       ) : null}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-navy">{listing.name || t("seller.untitled")}</p>
-                      <p className="mt-1 text-sm font-medium text-brand">{formatIDR(listing.price)}</p>
-                      <p className="mt-1 text-xs text-navy-muted">
-                        {(() => {
-                          const stock = listingStockSummary(listing)
-                          if (stock.available <= 0 || listing.status === "sold") return t("listing.soldOut")
-                          return `${t("seller.availableCount", { count: stock.available })}${stock.reserved > 0 ? ` · ${t("seller.reserved", { count: stock.reserved })}` : ""}`
-                        })()}{" "}
-                        · {listing.status === "active" ? t("seller.statusActive") : listing.status === "sold" ? t("seller.statusSold") : t("seller.statusDraft")}
-                      </p>
-                    </div>
-                    {approved ? (
-                      <div className="flex gap-2">
-                        <Button variant="secondary" onClick={() => navigate(`/seller/listings/${listing.id}`)}>
-                          {t("seller.view")}
-                        </Button>
-                        <Button variant="secondary" onClick={() => navigate(`/seller/listings/${listing.id}/edit`)}>
-                          {t("common.edit")}
-                        </Button>
-                      </div>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="truncate text-[14px] font-medium text-navy">{listing.name || t("seller.untitled")}</span>
+                        <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-navy">
+                          {listing.status === "active"
+                            ? t("seller.statusActive")
+                            : listing.status === "sold"
+                              ? t("seller.statusSold")
+                              : t("seller.statusDraft")}
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block text-[13px] font-semibold text-brand">{formatIDR(listing.price)}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-          <section className="mt-6 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-line px-5 py-6 sm:px-6">
-              <h2 className="text-lg font-bold text-navy">{t("seller.inventory")}</h2>
-              <p className="mt-3 text-2xl font-bold text-navy">{t("seller.unitsAvailable", { count: availableUnits })}</p>
-              <p className="mt-2 text-sm text-navy-muted">{t("seller.purchasableHint")}</p>
-            </div>
-            <div className="rounded-2xl border border-line px-5 py-6 sm:px-6">
-              <h2 className="text-lg font-bold text-navy">{t("seller.lowInventory")}</h2>
-              {lowInventory.length === 0 ? (
-                <p className="mt-3 text-sm text-navy-muted">{t("seller.noLow")}</p>
-              ) : (
-                <ul className="mt-3 space-y-3">
-                  {lowInventory.map((listing) => (
-                    <li key={listing.id} className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium text-navy">{listing.name}</p>
-                        <p className="text-xs text-navy-muted">
-                          {listingStockSummary(listing).available === 1
-                            ? t("seller.remainingOne")
-                            : t("seller.remainingMany", { count: listingStockSummary(listing).available })}{" "}
-                          · {formatIDR(listing.price)}
-                        </p>
-                      </div>
-                      {approved ? (
-                        <Button variant="secondary" onClick={() => navigate(`/seller/listings/${listing.id}/edit`)}>
-                          {t("seller.editListing")}
-                        </Button>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
+        <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+          <div className="flex items-end justify-between gap-3">
+            <h2 className="text-[16px] font-semibold text-navy">{t("seller.recentOrders")}</h2>
+            {recentOrders.length > 0 ? <ViewAllLink href="/seller/orders">{t("seller.viewAllOrders")}</ViewAllLink> : null}
+          </div>
+          {recentOrders.length === 0 ? (
+            <p className="mt-3 py-3 text-center text-[14px] text-navy-muted">{t("seller.noOrdersYet")}</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-line">
+              {recentOrders.map((order) => (
+                <li key={order.id}>
+                  <Link
+                    to={`/seller/orders/${orderPublicRef(order)}`}
+                    className="flex gap-3 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="truncate text-[14px] font-medium text-navy">{order.listingName}</span>
+                        <OrderStatusBadge status={order.status} />
+                      </span>
+                      <span className="mt-0.5 block text-[12px] text-navy-muted">{orderPublicRef(order)}</span>
+                      <span className="mt-0.5 block text-[12px] text-navy-muted">{formatOrderDate(order.createdAt)}</span>
+                    </span>
+                    <span className="shrink-0 text-[13px] font-semibold text-navy">{formatIDR(order.buyerTotal)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-          {soldOut.length > 0 ? (
-            <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-              <h2 className="text-lg font-bold text-navy">{t("listing.soldOut")}</h2>
-              <ul className="mt-3 space-y-2">
-                {soldOut.slice(0, 5).map((listing) => (
-                  <li key={listing.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                    <span className="text-navy">{listing.name}</span>
-                    <span className="text-navy-muted">{t("listing.soldOut")}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+        <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+          <h2 className="text-[16px] font-semibold text-navy">{t("seller.myStore")}</h2>
+          <p className="mt-2 text-[15px] font-semibold text-navy">{profile.businessName}</p>
+          {profile.city ? <p className="mt-0.5 text-[13px] text-navy-muted">{profile.city}</p> : null}
+          <p className="mt-1 text-[13px] text-navy-muted">{t("seller.listingCount", { count: listingCounts.total })}</p>
+          {rating.count > 0 ? (
+            <div className="mt-2">
+              <CompactRating average={rating.average} count={rating.count} emptyLabel="" />
+            </div>
           ) : null}
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            {approved ? (
+              <Button className="h-10 px-4 py-2 text-[14px]" onClick={() => navigate(publicSellerPath(user.id))}>
+                {t("seller.visitStore")}
+              </Button>
+            ) : (
+              <p className="text-[12px] text-navy-muted">{t("seller.storeNotPublic")}</p>
+            )}
+            <Button variant="secondary" className="h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/profile/edit")}>
+              {t("seller.editStoreProfile")}
+            </Button>
+          </div>
+        </section>
 
-          <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">{t("seller.quickActions")}</h2>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Button disabled={!approved} onClick={() => navigate("/seller/listings/new")}>
-                {t("seller.addMotorcyclePlus")}
-              </Button>
-              <Button variant="secondary" disabled={!approved} onClick={() => navigate("/seller/listings")}>
-                {t("seller.manageListings")}
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/seller/orders")}>
-                {t("seller.orders")}
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/seller/messages")}>
-                {t("seller.messages")}
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/seller/profile/edit")}>
-                {t("seller.editProfile")}
-              </Button>
-            </div>
-            {!approved ? (
-              <p className="mt-3 text-sm text-navy-muted">
-                {t("seller.unlockHint")}
-              </p>
-            ) : null}
-          </section>
-
-          <section className="mt-6 rounded-2xl border border-line px-5 py-6 sm:px-6">
-            <h2 className="text-lg font-bold text-navy">{t("seller.profile")}</h2>
-            <dl className="mt-4 space-y-2 text-sm">
-              <MoneyRow label={t("seller.businessName")} value={profile.businessName} />
-              <MoneyRow label={t("seller.sellerName")} value={profile.fullName} />
-              <MoneyRow label={t("orders.city")} value={profile.city} />
-              <MoneyRow label="NIB" value={profile.nib} />
-              <div className="flex justify-between gap-4">
-                <dt className="text-navy-muted">{t("seller.verificationStatus")}</dt>
-                <dd>
-                  <SellerStatusBadge status={profile.status} label={approved ? t("listing.verifiedSeller") : undefined} />
-                </dd>
+        <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+          <h2 className="text-[16px] font-semibold text-navy">{t("seller.storePerformance")}</h2>
+          {hasPerformance ? (
+            <dl className="mt-3 grid grid-cols-2 gap-3">
+              <div>
+                <dt className="text-[12px] text-navy-muted">{t("seller.thisMonth")}</dt>
+                <dd className="mt-0.5 text-[16px] font-semibold text-navy">{formatIDR(thisMonth.net)}</dd>
+              </div>
+              <div>
+                <dt className="text-[12px] text-navy-muted">{t("seller.allTimeShort")}</dt>
+                <dd className="mt-0.5 text-[16px] font-semibold text-navy">{formatIDR(allTime.net)}</dd>
               </div>
             </dl>
-            <Button className="mt-5" onClick={() => navigate("/seller/profile/edit")}>
-              {t("seller.editProfile")}
-            </Button>
-          </section>
-        </div>
-      </Container>
-    </main>
+          ) : (
+            <p className="mt-2 text-[13px] leading-relaxed text-navy-muted">{t("seller.performanceEmpty")}</p>
+          )}
+        </section>
+      </div>
+    </SellerCenterLayout>
   )
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function ActionCard({
+  icon: Icon,
+  label,
+  onClick,
+  disabled,
+  className,
+}: {
+  icon: LucideIcon
+  label: string
+  onClick: () => void
+  disabled?: boolean
+  className?: string
+}) {
   return (
-    <div className="rounded-2xl border border-line bg-white px-4 py-4">
-      <p className="text-sm text-navy-muted">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-navy">{value}</p>
-    </div>
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        "flex min-h-[72px] flex-col justify-between rounded-xl border border-line bg-white p-2.5 text-left shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60 min-[1024px]:min-h-[80px] min-[1024px]:p-3",
+        className,
+      )}
+    >
+      <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand">
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+      <span className="text-[13px] font-medium text-navy">{label}</span>
+    </button>
   )
 }
 
-function MoneyRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+function MetricCard({ to, label, value }: { to?: string; label: string; value: number }) {
+  const body = (
+    <>
+      <span className="block text-[12px] text-navy-muted">{label}</span>
+      <span className="mt-1 block text-[20px] font-semibold text-navy">{value}</span>
+    </>
+  )
+  const className =
+    "block rounded-xl border border-line bg-white p-3 shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+
+  if (!to) {
+    return <div className={className}>{body}</div>
+  }
+
   return (
-    <div className="flex justify-between gap-4">
-      <dt className={strong ? "font-semibold text-navy" : "text-navy-muted"}>{label}</dt>
-      <dd className={strong ? "text-right font-semibold text-navy" : "text-right font-medium text-navy"}>{value}</dd>
-    </div>
+    <Link to={to} className={className}>
+      {body}
+    </Link>
   )
 }
