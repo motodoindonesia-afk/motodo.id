@@ -23,6 +23,9 @@ dist-ssr
 # Local Node runtime used only on this machine
 .tools
 
+# Supabase CLI cache
+supabase/.temp/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

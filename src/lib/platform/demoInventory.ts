@@ -9,7 +9,10 @@
  *
  * EXCLUDE from real transactions:
  * - create_order (database-enforced: DEMO_LISTING_NOT_FOR_SALE)
+ * - add_to_cart (same code)
  * - checkout / purchasable checks in clients
+ *
+ * Wishlist: demo listings MAY be favorited.
  *
  * Clients must not flip listings.is_demo (protect_listing_columns). Do not delete demo rows.
  */

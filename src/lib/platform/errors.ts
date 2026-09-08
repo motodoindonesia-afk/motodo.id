@@ -44,6 +44,8 @@ export const MOTODO_ERROR_CODES = [
   "NOTIFICATION_NOT_FOUND",
   "ACTIVE_REQUIRES_QUANTITY",
   "INVALID_LISTING_IMAGE_PATH",
+  "CART_ITEM_NOT_FOUND",
+  "FAVORITE_NOT_FOUND",
 ] as const
 
 export type MotodoErrorCode = (typeof MOTODO_ERROR_CODES)[number]

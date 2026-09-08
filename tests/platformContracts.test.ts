@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
 import { motodoErrorCode, stripMotodoCodePrefix } from "../src/lib/platform/errors"
+import { mapCartItemRow } from "../src/lib/cartSupabase"
+import { mapFavoriteRow } from "../src/lib/favoritesSupabase"
+import { cartQuantityIsAllowed, isCartLinePurchasable, isListingEligibleForCart, isListingEligibleForFavorite } from "../src/lib/platform/commerce"
 import { isListingEligibleForSale } from "../src/lib/platform/demoInventory"
 import { getNotificationResource } from "../src/lib/platform/notifications"
 import { isUuid, orderMatchesRef, orderPublicRef } from "../src/lib/platform/orderIdentity"
@@ -53,5 +56,90 @@ describe("demo inventory", () => {
     expect(isListingEligibleForSale({ isDemo: true, status: "active" })).toBe(false)
     expect(isListingEligibleForSale({ isDemo: false, status: "active" })).toBe(true)
     expect(isListingEligibleForSale({ isDemo: false, status: "draft" })).toBe(false)
+  })
+})
+
+describe("favorites eligibility", () => {
+  it("allows demo and sold listings on a wishlist", () => {
+    expect(isListingEligibleForFavorite({ status: "active" })).toBe(true)
+    expect(isListingEligibleForFavorite({ status: "sold" })).toBe(true)
+    expect(isListingEligibleForFavorite({ status: "draft" })).toBe(false)
+    expect(isListingEligibleForFavorite({ status: "draft", sellerId: "s1" }, "s1")).toBe(true)
+  })
+})
+
+describe("cart eligibility", () => {
+  it("rejects demo, inactive, and own listings", () => {
+    expect(isListingEligibleForCart({ isDemo: true, status: "active" })).toBe(false)
+    expect(isListingEligibleForCart({ isDemo: false, status: "active" })).toBe(true)
+    expect(isListingEligibleForCart({ isDemo: false, status: "sold" })).toBe(false)
+    expect(isListingEligibleForCart({ isDemo: false, status: "active", sellerId: "s1" }, "s1")).toBe(false)
+  })
+
+  it("rejects invalid cart quantities against availability", () => {
+    expect(cartQuantityIsAllowed(1, 1, 1)).toBe(true)
+    expect(cartQuantityIsAllowed(2, 1, 2)).toBe(false)
+    expect(cartQuantityIsAllowed(0, 1, 1)).toBe(false)
+    expect(cartQuantityIsAllowed(1.5, 2, 2)).toBe(false)
+  })
+
+  it("treats demo, inactive, and unavailable cart lines as not purchasable", () => {
+    expect(isCartLinePurchasable({ isAvailable: true, listingIsDemo: false, listingStatus: "active" })).toBe(true)
+    expect(isCartLinePurchasable({ isAvailable: true, listingIsDemo: true, listingStatus: "active" })).toBe(false)
+    expect(isCartLinePurchasable({ isAvailable: false, listingStatus: "sold" })).toBe(false)
+    expect(isCartLinePurchasable({ listingStatus: "active" })).toBe(false)
+  })
+})
+
+describe("cart and favorite error codes", () => {
+  it("recognizes CART_ITEM_NOT_FOUND and DEMO_LISTING_NOT_FOR_SALE", () => {
+    expect(motodoErrorCode({ details: "CART_ITEM_NOT_FOUND", message: "CART_ITEM_NOT_FOUND: missing" })).toBe(
+      "CART_ITEM_NOT_FOUND",
+    )
+    expect(motodoErrorCode({ hint: "DEMO_LISTING_NOT_FOR_SALE" })).toBe("DEMO_LISTING_NOT_FOR_SALE")
+    expect(motodoErrorCode({ details: "FAVORITE_NOT_FOUND" })).toBe("FAVORITE_NOT_FOUND")
+  })
+})
+
+describe("favorite and cart mappers", () => {
+  it("maps favorite rows to Favorite without embedding Listing", () => {
+    expect(
+      mapFavoriteRow({
+        id: "f1",
+        user_id: "u1",
+        listing_id: "l1",
+        created_at: "2026-09-07T00:00:00.000Z",
+      }),
+    ).toEqual({
+      id: "f1",
+      userId: "u1",
+      listingId: "l1",
+      createdAt: "2026-09-07T00:00:00.000Z",
+    })
+  })
+
+  it("maps cart rows including stale availability flags", () => {
+    expect(
+      mapCartItemRow({
+        id: "c1",
+        user_id: "u1",
+        listing_id: "l1",
+        quantity: 1,
+        created_at: "2026-09-07T00:00:00.000Z",
+        updated_at: "2026-09-07T01:00:00.000Z",
+        listing_status: "sold",
+        listing_is_demo: false,
+        available_quantity: 0,
+        is_available: false,
+      }),
+    ).toMatchObject({
+      id: "c1",
+      userId: "u1",
+      listingId: "l1",
+      quantity: 1,
+      isAvailable: false,
+      availableQuantity: 0,
+      listingStatus: "sold",
+    })
   })
 })

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import { Bell, CircleHelp } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Container } from "./Container"
@@ -9,15 +8,11 @@ function Divider() {
 }
 
 export function UtilityBar({
-  isAuthenticated,
   sellerHref,
   notificationUnread,
-  account,
 }: {
-  isAuthenticated: boolean
   sellerHref: string
   notificationUnread: number
-  account: ReactNode
 }) {
   const t = useT()
 
@@ -50,20 +45,6 @@ export function UtilityBar({
             {t("nav.help")}
           </Link>
           <LanguageSwitcher />
-          {isAuthenticated ? (
-            account
-          ) : (
-            <>
-              <Divider />
-              <Link to="/signup" className="hover:text-white/80">
-                {t("common.signup")}
-              </Link>
-              <Divider />
-              <Link to="/login" className="hover:text-white/80">
-                {t("common.login")}
-              </Link>
-            </>
-          )}
         </div>
       </Container>
     </div>

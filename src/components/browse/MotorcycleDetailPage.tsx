@@ -1,6 +1,8 @@
-import { Check, Heart, Headphones, MapPin, MessageCircle, Share2, ShieldCheck, Store } from "lucide-react"
+import { Check, Headphones, MapPin, MessageCircle, Share2, ShieldCheck, Store } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import { WishlistActionButton } from "../favorites/WishlistActionButton"
+import { AddToCartButton } from "../cart/AddToCartButton"
 import { getPublicListingById, getRelatedPublicListings } from "../../lib/listings"
 import { isSupabaseConfigured } from "../../lib/supabase"
 import { ensureRemoteListing } from "../../lib/listingsSupabase"
@@ -62,7 +64,6 @@ export function MotorcycleDetailPage() {
   useListingsLive()
   useReviewsLive()
   const listing = id ? getPublicListingById(id) : undefined
-  const [saved, setSaved] = useState(false)
   const [shareNote, setShareNote] = useState("")
   const [chatNote, setChatNote] = useState("")
   const [lookingUp, setLookingUp] = useState(false)
@@ -83,7 +84,6 @@ export function MotorcycleDetailPage() {
   }, [id, listing])
 
   useEffect(() => {
-    setSaved(false)
     setShareNote("")
     setChatNote("")
   }, [id])
@@ -182,14 +182,14 @@ export function MotorcycleDetailPage() {
   }
 
   const ctaPair = (
-    <div className="flex flex-col gap-3 sm:flex-row">
-      <Button className="flex-1 px-5 py-3" disabled={buyDisabled} onClick={handleBuyNow}>
-        {t("listing.buyNow")}
-      </Button>
-      <Button variant="secondary" className="flex-1 border-brand px-5 py-3 text-brand hover:bg-brand-soft" onClick={() => void handleChatSeller(currentListing)}>
-        <MessageCircle className="size-4" aria-hidden="true" />
-        {t("listing.chatSeller")}
-      </Button>
+    <div className="flex min-w-0 flex-col gap-2">
+      <div className="flex min-w-0 gap-3">
+        <AddToCartButton listing={currentListing} variant="labeled" className="min-w-0 flex-1" />
+        <Button className="min-w-0 flex-1 px-5 py-3" disabled={buyDisabled} onClick={handleBuyNow}>
+          {t("listing.buyNow")}
+        </Button>
+      </div>
+      <WishlistActionButton listingId={currentListing.id} />
     </div>
   )
 
@@ -244,20 +244,7 @@ export function MotorcycleDetailPage() {
             {soldOut ? (
               <p className="text-xs font-semibold tracking-wide text-navy uppercase">{t("listing.soldOut")}</p>
             ) : null}
-            <div className="flex items-start justify-between gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-navy sm:text-[1.85rem]">{listing.name}</h1>
-              {soldOut ? null : (
-                <button
-                  type="button"
-                  aria-pressed={saved}
-                  aria-label={saved ? t("listing.unsave", { name: listing.name }) : t("listing.save", { name: listing.name })}
-                  onClick={() => setSaved((value) => !value)}
-                  className="mt-1 shrink-0 rounded-full border border-line p-2.5 text-navy hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                >
-                  <Heart className="size-5" fill={saved ? "currentColor" : "none"} strokeWidth={1.75} />
-                </button>
-              )}
-            </div>
+            <h1 className="text-[1.375rem] font-bold tracking-tight text-navy sm:text-2xl">{listing.name}</h1>
 
             {listing.seller.verified ? (
               <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand">
@@ -274,7 +261,7 @@ export function MotorcycleDetailPage() {
               />
             </div>
 
-            <p className="mt-4 text-3xl font-bold tracking-tight text-brand">{listing.price}</p>
+            <p className="mt-4 text-[1.75rem] font-bold tracking-tight text-brand sm:text-[1.875rem]">{listing.price}</p>
             {soldOut ? (
               <p className="mt-2 text-sm font-medium text-navy">{t("listing.alreadySold")}</p>
             ) : (
@@ -370,6 +357,7 @@ export function MotorcycleDetailPage() {
                 {t("listing.viewShop")}
               </Link>
               <Button className="flex-1" onClick={() => void handleChatSeller(currentListing)}>
+                <MessageCircle className="size-4" aria-hidden="true" />
                 {t("listing.chatSeller")}
               </Button>
             </div>

@@ -12,6 +12,8 @@ import { OrdersProvider } from "./context/OrdersContext"
 import { ChatProvider } from "./context/ChatContext"
 import { ReviewsProvider } from "./context/ReviewsContext"
 import { NotificationsProvider } from "./context/NotificationsContext"
+import { FavoritesProvider } from "./context/FavoritesContext"
+import { CartProvider } from "./context/CartContext"
 import { ProductionConfigError } from "./components/layout/ProductionConfigError"
 import { isProductionConfigBlocked } from "./lib/supabase"
 import { NotificationsDataGate } from "./components/notifications/NotificationsDataGate"
@@ -19,7 +21,8 @@ import { ChatDataGate } from "./components/chat/ChatDataGate"
 import { ReviewsDataGate } from "./components/reviews/ReviewsDataGate"
 import { LoginPage } from "./pages/LoginPage"
 import { ProfilePage } from "./pages/ProfilePage"
-import { SavedPage } from "./pages/SavedPage"
+import { WishlistPage } from "./pages/WishlistPage"
+import { CartPage } from "./pages/CartPage"
 import { SellPage } from "./pages/SellPage"
 import { SignupPage } from "./pages/SignupPage"
 import { SellerDashboardPage } from "./pages/seller/SellerDashboardPage"
@@ -78,6 +81,8 @@ export default function App() {
         <ChatProvider>
         <ReviewsProvider>
         <NotificationsProvider>
+        <FavoritesProvider>
+        <CartProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
@@ -204,21 +209,27 @@ export default function App() {
               }
             />
             <Route
-              path="/saved"
+              path="/cart"
               element={
                 <ProtectedRoute>
-                  <SavedPage />
+                  <ListingsDataGate>
+                    <CartPage />
+                  </ListingsDataGate>
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/favorites"
+              path="/wishlist"
               element={
                 <ProtectedRoute>
-                  <SavedPage />
+                  <ListingsDataGate>
+                    <WishlistPage />
+                  </ListingsDataGate>
                 </ProtectedRoute>
               }
             />
+            <Route path="/saved" element={<Navigate to="/wishlist" replace />} />
+            <Route path="/favorites" element={<Navigate to="/wishlist" replace />} />
             <Route
               path="/seller/register"
               element={
@@ -374,6 +385,8 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
+        </CartProvider>
+        </FavoritesProvider>
         </NotificationsProvider>
         </ReviewsProvider>
         </ChatProvider>

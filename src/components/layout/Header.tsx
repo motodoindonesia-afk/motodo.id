@@ -1,7 +1,8 @@
-import { ChevronDown, Menu, Search, ShoppingCart, X } from "lucide-react"
+import { ChevronDown, Heart, Menu, Search, ShoppingCart, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
+import { useCart } from "../../context/CartContext"
 import { displayName } from "../../lib/auth"
 import { getSellerProfile, isSellerProfilesReady } from "../../lib/seller"
 import { getUnreadCount } from "../../lib/chat"
@@ -15,6 +16,7 @@ import { SearchBar } from "../ui/SearchBar"
 import { Container } from "./Container"
 import { UtilityBar } from "./UtilityBar"
 import { MotodoLogoLockup } from "../brand/MotodoLogo"
+import { UserAvatar } from "../profile/UserAvatar"
 import { LanguageSwitcher, useT, type MessageKey } from "../../i18n"
 
 const NAV_KEYS: Record<string, MessageKey> = {
@@ -42,6 +44,7 @@ export function Header() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const { user, isAuthenticated, logout } = useAuth()
+  const { itemCount } = useCart()
   useSellerLive()
   useChatLive()
   useNotificationsLive()
@@ -79,24 +82,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full min-w-0 border-b border-line bg-white">
-      <UtilityBar
-        isAuthenticated={isAuthenticated}
-        sellerHref={sellerHref}
-        notificationUnread={notificationUnread}
-        account={
-          user ? (
-            <AccountMenu
-              name={displayName(user)}
-              sellerRegistered={sellerRegistered}
-              sellerApproved={sellerApproved}
-              buyerUnread={buyerUnread}
-              sellerUnread={sellerUnread}
-              onLogout={handleLogout}
-              compact
-            />
-          ) : null
-        }
-      />
+      <UtilityBar sellerHref={sellerHref} notificationUnread={notificationUnread} />
 
       <div className="min-[769px]:hidden">
         <div className="flex h-14 min-w-0 items-center justify-between gap-2 px-4">
@@ -110,24 +96,26 @@ export function Header() {
           <div className="flex shrink-0 items-center gap-0.5">
             <button
               type="button"
-              className="flex size-11 items-center justify-center rounded-md text-navy hover:bg-brand-soft"
+              className="flex size-11 items-center justify-center rounded-md text-navy hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               aria-label={t("common.search")}
               onClick={focusMobileSearch}
             >
               <Search className="size-6" strokeWidth={1.75} />
             </button>
             <Link
-              to="/orders"
-              className="flex size-11 items-center justify-center rounded-md text-brand hover:bg-brand-soft"
-              aria-label={t("nav.cart")}
+              to="/wishlist"
+              className="flex size-11 items-center justify-center rounded-md text-navy hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              aria-label={t("nav.wishlist")}
             >
-              <ShoppingCart className="size-6" strokeWidth={1.75} />
+              <Heart className="size-6" strokeWidth={1.75} />
             </Link>
+            <CartNavLink count={itemCount} compact />
             <button
               type="button"
-              className="flex size-11 items-center justify-center rounded-md text-navy hover:bg-brand-soft"
+              className="flex size-11 items-center justify-center rounded-md text-navy hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               aria-expanded={open}
               aria-controls="mobile-menu"
+              aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
               onClick={() => setOpen((value) => !value)}
             >
               <span className="sr-only">{open ? t("nav.closeMenu") : t("nav.openMenu")}</span>
@@ -182,6 +170,12 @@ export function Header() {
                   <p className="px-0 py-2 text-[13px] font-semibold text-navy">{user.fullName}</p>
                   <Link to="/profile" className={menuItemClass} onClick={() => setOpen(false)}>
                     {t("nav.myProfile")}
+                  </Link>
+                  <Link to="/cart" className={menuItemClass} onClick={() => setOpen(false)}>
+                    {t("nav.cart")}
+                  </Link>
+                  <Link to="/wishlist" className={menuItemClass} onClick={() => setOpen(false)}>
+                    {t("nav.wishlist")}
                   </Link>
                   <Link to="/orders" className={menuItemClass} onClick={() => setOpen(false)}>
                     {t("nav.myOrders")}
@@ -292,13 +286,48 @@ export function Header() {
             </nav>
           </div>
 
-          <Link
-            to="/orders"
-            className="flex h-10 shrink-0 items-center rounded-md p-1.5 text-brand hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            aria-label={t("nav.cart")}
-          >
-            <ShoppingCart className="size-6" strokeWidth={1.75} />
-          </Link>
+          <div className="flex h-10 shrink-0 items-center gap-0.5 self-start sm:gap-1">
+            <Link
+              to="/sell"
+              className="flex h-10 shrink-0 items-center rounded-md px-2 text-[13px] font-medium text-navy hover:bg-brand-soft hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              {t("nav.jualMotor")}
+            </Link>
+            <Link
+              to="/wishlist"
+              className="flex h-10 shrink-0 items-center rounded-md p-1.5 text-navy hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              aria-label={t("nav.wishlist")}
+            >
+              <Heart className="size-6" strokeWidth={1.75} />
+            </Link>
+            <CartNavLink count={itemCount} />
+            {user ? (
+              <AccountMenu
+                name={displayName(user)}
+                sellerRegistered={sellerRegistered}
+                sellerApproved={sellerApproved}
+                buyerUnread={buyerUnread}
+                sellerUnread={sellerUnread}
+                onLogout={handleLogout}
+                showAvatar
+              />
+            ) : (
+              <div className="ml-1 flex h-10 shrink-0 items-center gap-2 text-[13px] font-medium">
+                <Link
+                  to="/signup"
+                  className="rounded-md px-1.5 text-navy hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  {t("common.signup")}
+                </Link>
+                <Link
+                  to="/login"
+                  className="rounded-md bg-brand px-2.5 py-1.5 text-white hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  {t("common.login")}
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </Container>
     </header>
@@ -312,7 +341,7 @@ function AccountMenu({
   buyerUnread,
   sellerUnread,
   onLogout,
-  compact = false,
+  showAvatar = false,
 }: {
   name: string
   sellerRegistered: boolean
@@ -320,7 +349,7 @@ function AccountMenu({
   buyerUnread: number
   sellerUnread: number
   onLogout: () => void
-  compact?: boolean
+  showAvatar?: boolean
 }) {
   const t = useT()
   const [open, setOpen] = useState(false)
@@ -330,29 +359,41 @@ function AccountMenu({
     function handleClick(event: MouseEvent) {
       if (!ref.current?.contains(event.target as Node)) setOpen(false)
     }
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false)
+    }
     window.addEventListener("mousedown", handleClick)
-    return () => window.removeEventListener("mousedown", handleClick)
+    window.addEventListener("keydown", handleKey)
+    return () => {
+      window.removeEventListener("mousedown", handleClick)
+      window.removeEventListener("keydown", handleKey)
+    }
   }, [])
 
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
-        className={
-          compact
-            ? "inline-flex max-w-[140px] items-center gap-1 truncate hover:text-white/80"
-            : "inline-flex items-center gap-1.5 text-ui font-medium text-navy hover:text-brand"
-        }
+        className="inline-flex max-w-[160px] items-center gap-1.5 rounded-md text-[13px] font-medium text-navy hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={name}
         onClick={() => setOpen((value) => !value)}
       >
-        {name}
+        {showAvatar ? <UserAvatar name={name} size="sm" /> : null}
+        <span className="truncate">{name}</span>
         <ChevronDown className="size-3 shrink-0" aria-hidden="true" />
       </button>
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-52 rounded-xl border border-line bg-white py-2 text-navy">
-          <Link to="/profile" className="block px-3 py-1.5 text-ui hover:bg-surface" onClick={() => setOpen(false)}>
+        <div role="menu" className="absolute right-0 z-30 mt-2 w-52 rounded-xl border border-line bg-white py-2 text-navy shadow-card">
+          <Link to="/profile" role="menuitem" className="block px-3 py-1.5 text-ui hover:bg-surface focus-visible:bg-surface focus-visible:outline-none" onClick={() => setOpen(false)}>
             {t("nav.myProfile")}
+          </Link>
+          <Link to="/cart" className="block px-3 py-1.5 text-ui hover:bg-surface" onClick={() => setOpen(false)}>
+            {t("nav.cart")}
+          </Link>
+          <Link to="/wishlist" className="block px-3 py-1.5 text-ui hover:bg-surface" onClick={() => setOpen(false)}>
+            {t("nav.wishlist")}
           </Link>
           <Link to="/orders" className="block px-3 py-1.5 text-ui hover:bg-surface" onClick={() => setOpen(false)}>
             {t("nav.myOrders")}
@@ -413,5 +454,28 @@ function AccountMenu({
         </div>
       ) : null}
     </div>
+  )
+}
+
+function CartNavLink({ count, compact = false }: { count: number; compact?: boolean }) {
+  const t = useT()
+  const label = count > 0 ? `${t("nav.cart")} (${count})` : t("nav.cart")
+  return (
+    <Link
+      to="/cart"
+      aria-label={label}
+      className={
+        compact
+          ? "relative flex size-11 items-center justify-center rounded-md text-brand hover:bg-brand-soft"
+          : "relative flex h-10 shrink-0 items-center rounded-md p-1.5 text-brand hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+      }
+    >
+      <ShoppingCart className="size-6" strokeWidth={1.75} />
+      {count > 0 ? (
+        <span className="absolute right-1 top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 text-white">
+          {count > 99 ? "99+" : count}
+        </span>
+      ) : null}
+    </Link>
   )
 }

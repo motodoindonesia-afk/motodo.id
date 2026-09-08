@@ -30,8 +30,28 @@
 --    - cannot UPDATE another user's notifications
 --    - mark_notification_read on someone else's id raises NOTIFICATION_NOT_FOUND
 --
+-- F. Favorites
+--    - toggle_favorite on active/sold/demo listing succeeds
+--    - duplicate unique(user_id, listing_id) / second toggle unfavorites
+--    - cannot SELECT another user's favorites
+--    - draft listing of another seller → LISTING_NOT_FOUND
+--
+-- G. Cart
+--    - add_to_cart on eligible listing succeeds and does not change listing.quantity or create orders
+--    - second add_to_cart returns the same row (no duplicate)
+--    - add_to_cart on is_demo → DEMO_LISTING_NOT_FOR_SALE
+--    - add_to_cart on own listing → SELF_PURCHASE
+--    - add_to_cart when available < 1 → INSUFFICIENT_STOCK
+--    - update_cart_quantity < 1 → INVALID_QUANTITY
+--    - update_cart_quantity > available → INSUFFICIENT_STOCK
+--    - cannot SELECT another user's cart_items
+--    - direct INSERT/UPDATE/DELETE on cart_items denied (RPC only)
+--    - clear_cart deletes only auth.uid() rows
+--    - stale sold listing remains selectable; is_available = false
+--
 -- Expected Motodo codes (details/hint and "CODE: " message prefix):
 -- UNAUTHORIZED, FORBIDDEN, LISTING_NOT_FOUND, LISTING_UNAVAILABLE, INSUFFICIENT_STOCK,
 -- DEMO_LISTING_NOT_FOR_SALE, QUANTITY_BELOW_RESERVED, INVALID_ORDER_STATE, ORDER_NOT_FOUND,
 -- SELF_CONVERSATION, CONVERSATION_NOT_FOUND, MESSAGE_NOT_ALLOWED, REVIEW_NOT_ALLOWED,
--- NOTIFICATION_NOT_FOUND, SELLER_NOT_APPROVED.
+-- NOTIFICATION_NOT_FOUND, SELLER_NOT_APPROVED, CART_ITEM_NOT_FOUND, INVALID_QUANTITY,
+-- SELF_PURCHASE.
