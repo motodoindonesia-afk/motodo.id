@@ -1,25 +1,30 @@
-import { useState, type ReactNode } from "react"
-import { Camera } from "lucide-react"
+import { Heart, MessageCircle, Package, ShoppingCart } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { accountUsername, maskEmail, maskPhone } from "../lib/profile"
-import { useLanguage } from "../i18n"
+import { useCart } from "../context/CartContext"
+import { useFavorites } from "../context/FavoritesContext"
+import { formatMemberSince } from "../lib/profile"
+import { formatOrderDate, getBuyerOrders, isOrdersReady, orderPublicRef } from "../lib/orders"
+import { getUnreadCount } from "../lib/chat"
+import { useOrdersLive } from "../lib/useOrdersLive"
+import { useChatLive } from "../lib/useChatLive"
+import { useListingsLive } from "../lib/useListingsLive"
+import { useSellerLive } from "../lib/useSellerLive"
 import { deleteListing, getListingsBySeller } from "../lib/listings"
 import { getSellerProfile, isSellerProfilesReady } from "../lib/seller"
-import { useSellerLive } from "../lib/useSellerLive"
-import { useListingsLive } from "../lib/useListingsLive"
+import { getPublicHomeListings } from "../components/home/homeListings"
 import { SellerStatusBadge } from "../components/seller/SellerStatusBadge"
 import { SellerListingCard } from "../components/seller/SellerListingCard"
 import { DeleteListingModal } from "../components/seller/DeleteListingModal"
-import { AuthInput } from "../components/auth/AuthField"
-import { Button } from "../components/ui/Button"
-import { Container } from "../components/layout/Container"
-import { AccountMobileNav, AccountSidebar } from "../components/profile/AccountSidebar"
+import { OrderStatusBadge } from "../components/orders/OrderStatusBadge"
+import { AccountLayout } from "../components/profile/AccountLayout"
 import { UserAvatar } from "../components/profile/UserAvatar"
-import { cn } from "../lib/cn"
+import { Button } from "../components/ui/Button"
+import { ViewAllLink } from "../components/ui/ViewAllLink"
+import { useLanguage } from "../i18n"
+import { useState } from "react"
 import type { MotorcycleListing } from "../types/sellerListing"
-
-const inputClass = "h-10 text-[14px]"
+import type { LucideIcon } from "lucide-react"
 
 function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: boolean }) {
   const navigate = useNavigate()
@@ -28,21 +33,13 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
   const profile = getSellerProfile(userId)
 
   if (!profile && !isSellerRole) {
-    return (
-      <section className="mt-4 rounded-2xl border border-line bg-white p-4 shadow-card">
-        <h2 className="text-[15px] font-semibold text-navy">{t("profile.wantSell")}</h2>
-        <p className="mt-2 text-[13px] leading-relaxed text-navy-muted">{t("profile.registerSeller")}</p>
-        <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/register")}>
-          {t("nav.becomeSeller")}
-        </Button>
-      </section>
-    )
+    return null
   }
 
   if (!profile) {
     return (
-      <section className="mt-4 rounded-2xl border border-line bg-white p-4 shadow-card">
-        <h2 className="text-[15px] font-semibold text-navy">{t("profile.sellerCenter")}</h2>
+      <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+        <h2 className="text-[16px] font-semibold text-navy">{t("profile.sellerCenter")}</h2>
         <p className="mt-1 text-[13px] font-medium text-navy">{t("profile.completeReg")}</p>
         <p className="mt-1 text-[13px] leading-relaxed text-navy-muted">{t("profile.completeRegBody")}</p>
         <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/register")}>
@@ -53,8 +50,8 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
   }
 
   return (
-    <section className="mt-4 rounded-2xl border border-line bg-white p-4 shadow-card">
-      <h2 className="text-[15px] font-semibold text-navy">{t("profile.sellerCenter")}</h2>
+    <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+      <h2 className="text-[16px] font-semibold text-navy">{t("profile.sellerCenter")}</h2>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <p className="text-[13px] font-medium text-navy">
           {profile.status === "approved"
@@ -87,18 +84,18 @@ function SellerCenter({ userId, isSellerRole }: { userId: string; isSellerRole: 
 }
 
 export function ProfilePage() {
-  const { user, profile, logout, updateProfile, loading } = useAuth()
-  const { t, tm } = useLanguage()
+  const { user, profile, loading } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
-  const [fullName, setFullName] = useState(user?.fullName ?? "")
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const { listingIds, loading: favoritesLoading } = useFavorites()
+  const { itemCount, loading: cartLoading } = useCart()
   const [deleteTarget, setDeleteTarget] = useState<MotorcycleListing | null>(null)
+  useOrdersLive()
+  useChatLive()
   useListingsLive()
   useSellerLive()
 
-  if (loading || !isSellerProfilesReady()) {
+  if (loading || !user || !isSellerProfilesReady()) {
     return (
       <main className="bg-surface py-16">
         <p className="text-center text-sm text-navy-muted">{t("common.loading")}</p>
@@ -106,214 +103,150 @@ export function ProfilePage() {
     )
   }
 
-  if (!user) return null
-
   const displayName = profile?.fullName ?? user.fullName
   const accountType = profile?.accountType ?? user.role
+  const memberSince = formatMemberSince(profile?.createdAt ?? user.createdAt)
+  const ordersReady = isOrdersReady()
+  const orders = ordersReady ? getBuyerOrders(user.id) : []
+  const recentOrders = orders.slice(0, 3)
+  const unreadMessages = getUnreadCount(user.id, "buyer")
   const sellerListings = getListingsBySeller(user.id)
   const sellerProfile = getSellerProfile(user.id)
-  const username = accountUsername(user.email)
-  const shopName = sellerProfile?.businessName ?? ""
-
-  function handleLogout() {
-    logout()
-    navigate("/login", { replace: true })
-  }
-
-  async function saveProfile() {
-    if (!fullName.trim()) {
-      setError(t("auth.nameRequired"))
-      setSuccess("")
-      return
-    }
-    setSaving(true)
-    try {
-      const next = await updateProfile({ fullName: fullName.trim() })
-      if (!next) {
-        setError(t("auth.unableUpdateProfile"))
-        setSuccess("")
-        return
-      }
-      setError("")
-      setSuccess(t("profile.saved"))
-    } catch (saveError) {
-      setError(saveError instanceof Error ? tm(saveError.message, "auth.unableUpdateProfile") : t("auth.unableUpdateProfile"))
-      setSuccess("")
-    } finally {
-      setSaving(false)
-    }
-  }
+  const discovery = getPublicHomeListings()?.[0] ?? null
 
   return (
-    <main className="bg-surface py-4 min-[769px]:py-6">
-      <Container>
-        <div className="flex flex-col gap-4 min-[769px]:flex-row min-[769px]:items-start min-[769px]:gap-6">
-          <AccountSidebar name={displayName} username={username} onLogout={handleLogout} />
-
-          <div className="min-w-0 flex-1">
-            <div className="mb-3 flex items-center gap-3 min-[769px]:hidden">
-              <UserAvatar name={displayName} size="md" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-navy">{displayName}</p>
-                <p className="truncate text-xs text-navy-muted">{username}</p>
-              </div>
+    <AccountLayout showIdentityBar={false}>
+      <div className="space-y-3">
+        <section className="rounded-2xl border border-line bg-white p-4 shadow-card min-[769px]:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <UserAvatar name={displayName} size="hero" />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-[20px] font-semibold tracking-tight text-navy sm:text-[22px]">{displayName}</h1>
+              <p className="mt-1 truncate text-[14px] text-navy-muted">{user.email}</p>
+              {memberSince && memberSince !== "—" ? (
+                <p className="mt-1 text-[12px] text-navy-muted">
+                  {t("profile.memberSince")} {memberSince}
+                </p>
+              ) : null}
             </div>
-            <AccountMobileNav onLogout={handleLogout} />
-
-            <section className="rounded-2xl border border-line bg-white p-4 shadow-card min-[769px]:p-6">
-              <h1 className="text-2xl font-semibold tracking-tight text-navy">{t("nav.myProfile")}</h1>
-              <p className="mt-1 text-[14px] leading-relaxed text-navy-muted">{t("profile.subtitleManage")}</p>
-              <div className="mt-4 border-t border-line" />
-
-              <div className="mt-5 flex flex-col gap-6 min-[769px]:flex-row">
-                <form
-                  className="min-w-0 flex-1 space-y-3.5"
-                  onSubmit={(event) => {
-                    event.preventDefault()
-                    void saveProfile()
-                  }}
-                >
-                  <FieldRow label={t("profile.username")} htmlFor="profile-username">
-                    <AuthInput
-                      id="profile-username"
-                      className={inputClass}
-                      value={username.replace(/^@/, "")}
-                      readOnly
-                      aria-readonly="true"
-                    />
-                  </FieldRow>
-
-                  <FieldRow label={t("profile.name")} htmlFor="profile-name" error={error}>
-                    <AuthInput
-                      id="profile-name"
-                      className={inputClass}
-                      value={fullName}
-                      invalid={Boolean(error)}
-                      onChange={(event) => {
-                        setFullName(event.target.value)
-                        setSuccess("")
-                      }}
-                    />
-                  </FieldRow>
-
-                  <MaskedRow
-                    label={t("profile.email")}
-                    value={maskEmail(user.email)}
-                    actionLabel={t("profile.change")}
-                    actionHint={t("profile.changeNotReady")}
-                  />
-
-                  <MaskedRow
-                    label={t("profile.phone")}
-                    value={user.phone ? maskPhone(user.phone) : t("profile.fieldUnavailable")}
-                    actionLabel={t("profile.change")}
-                    actionHint={t("profile.changeNotReady")}
-                  />
-
-                  <FieldRow label={t("profile.shopName")} htmlFor="profile-shop">
-                    <AuthInput
-                      id="profile-shop"
-                      className={inputClass}
-                      value={shopName || "—"}
-                      readOnly
-                      aria-readonly="true"
-                    />
-                    {sellerProfile ? (
-                      <p className="mt-1 text-[12px] text-navy-muted">
-                        {t("profile.shopEditHint")}{" "}
-                        <Link to="/seller/profile" className="font-medium text-brand hover:text-brand-hover">
-                          {t("nav.sellerProfile")}
-                        </Link>
-                      </p>
-                    ) : (
-                      <p className="mt-1 text-[12px] text-navy-muted">{t("profile.fieldUnavailable")}</p>
-                    )}
-                  </FieldRow>
-
-                  <fieldset disabled className="space-y-2">
-                    <legend className="text-[13px] font-medium text-navy">{t("profile.gender")}</legend>
-                    <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[14px] text-navy-muted">
-                      <label className="inline-flex items-center gap-1.5">
-                        <input type="radio" name="gender" disabled className="accent-brand" />
-                        {t("profile.genderMale")}
-                      </label>
-                      <label className="inline-flex items-center gap-1.5">
-                        <input type="radio" name="gender" disabled className="accent-brand" />
-                        {t("profile.genderFemale")}
-                      </label>
-                      <label className="inline-flex items-center gap-1.5">
-                        <input type="radio" name="gender" disabled className="accent-brand" />
-                        {t("profile.genderOther")}
-                      </label>
-                    </div>
-                    <p className="text-[12px] text-navy-muted">{t("profile.fieldUnavailable")}</p>
-                  </fieldset>
-
-                  <FieldRow label={t("profile.birthDate")} htmlFor="profile-birth">
-                    <AuthInput id="profile-birth" type="date" className={inputClass} disabled aria-disabled="true" />
-                    <p className="mt-1 text-[12px] text-navy-muted">{t("profile.fieldUnavailable")}</p>
-                  </FieldRow>
-
-                  {success ? (
-                    <p className="text-[13px] text-success" role="status">
-                      {success}
-                    </p>
-                  ) : null}
-
-                  <Button type="submit" className="h-10 min-w-28 px-6 py-2 text-[14px]" disabled={saving}>
-                    {saving ? t("profile.saving") : t("common.save")}
-                  </Button>
-                </form>
-
-                <div className="flex flex-col items-center gap-3 min-[769px]:w-[200px] min-[769px]:shrink-0">
-                  <UserAvatar name={displayName} size="lg" />
-                  <button
-                    type="button"
-                    disabled
-                    title={t("profile.avatarUnavailable")}
-                    aria-label={t("profile.chooseImage")}
-                    className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white px-3 text-[14px] font-medium text-navy opacity-60"
-                  >
-                    <Camera className="size-4" aria-hidden="true" />
-                    {t("profile.chooseImage")}
-                  </button>
-                  <p className="text-center text-[12px] leading-relaxed text-navy-muted">
-                    {t("profile.imageSize")}
-                    <br />
-                    {t("profile.imageFormat")}
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <SellerCenter userId={user.id} isSellerRole={accountType === "seller"} />
-
-            {sellerProfile ? (
-              <section className="mt-4 rounded-2xl border border-line bg-white p-4 shadow-card">
-                <h2 className="text-[15px] font-semibold text-navy">{t("profile.myListings")}</h2>
-                {sellerListings.length === 0 ? (
-                  <div className="mt-3 text-center">
-                    <p className="text-[13px] text-navy-muted">{t("profile.noListings")}</p>
-                    {sellerProfile.status === "approved" ? (
-                      <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/listings/new")}>
-                        {t("profile.addMotorcycle")}
-                      </Button>
-                    ) : (
-                      <p className="mt-2 text-[13px] text-navy-muted">{t("profile.listingAfterApproval")}</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="mt-3 grid gap-3">
-                    {sellerListings.map((listing) => (
-                      <SellerListingCard key={listing.id} listing={listing} onDelete={setDeleteTarget} />
-                    ))}
-                  </div>
-                )}
-              </section>
-            ) : null}
+            <Button className="h-10 w-full shrink-0 px-4 py-2 text-[14px] sm:w-auto" onClick={() => navigate("/profile/edit")}>
+              {t("account.editProfile")}
+            </Button>
           </div>
-        </div>
-      </Container>
+        </section>
+
+        <section className="grid grid-cols-2 gap-2 min-[769px]:grid-cols-4 min-[769px]:gap-2.5">
+          <QuickCard
+            to="/orders"
+            icon={Package}
+            label={t("account.navOrders")}
+            count={ordersReady ? orders.length : undefined}
+          />
+          <QuickCard
+            to="/wishlist"
+            icon={Heart}
+            label={t("account.navWishlist")}
+            count={favoritesLoading ? undefined : listingIds.size}
+          />
+          <QuickCard
+            to="/cart"
+            icon={ShoppingCart}
+            label={t("account.navCart")}
+            count={cartLoading ? undefined : itemCount}
+          />
+          <QuickCard to="/messages" icon={MessageCircle} label={t("account.navMessages")} count={unreadMessages} />
+        </section>
+
+        <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+          <div className="flex items-end justify-between gap-3">
+            <h2 className="text-[18px] font-semibold text-navy">{t("account.recentOrders")}</h2>
+            {orders.length > 0 ? <ViewAllLink href="/orders">{t("common.viewAll")}</ViewAllLink> : null}
+          </div>
+          {!ordersReady ? (
+            <p className="mt-4 text-[13px] text-navy-muted">{t("common.loading")}</p>
+          ) : recentOrders.length === 0 ? (
+            <div className="mt-4 py-4 text-center">
+              <p className="text-[14px] font-medium text-navy">{t("account.ordersEmptyTitle")}</p>
+              <p className="mt-1 text-[13px] text-navy-muted">{t("account.ordersEmptyBody")}</p>
+              <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/browse")}>
+                {t("common.browseMotorcycles")}
+              </Button>
+            </div>
+          ) : (
+            <ul className="mt-3 divide-y divide-line">
+              {recentOrders.map((order) => (
+                <li key={order.id}>
+                  <Link
+                    to={`/orders/${orderPublicRef(order)}`}
+                    className="flex gap-3 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    <span className="size-14 shrink-0 overflow-hidden rounded-lg bg-surface sm:size-16">
+                      {order.listingImage ? (
+                        <img src={order.listingImage} alt="" className="h-full w-full object-cover" />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="truncate text-[14px] font-medium text-navy">{order.listingName}</span>
+                        <OrderStatusBadge status={order.status} />
+                      </span>
+                      <span className="mt-0.5 block text-[12px] text-navy-muted">{orderPublicRef(order)}</span>
+                      <span className="mt-0.5 block text-[12px] text-navy-muted">{formatOrderDate(order.createdAt)}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {discovery ? (
+          <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
+            <Link
+              to={`/motorcycles/${discovery.id}`}
+              className="flex min-w-0 flex-col sm:flex-row"
+            >
+              <span className="aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface sm:aspect-auto sm:h-auto sm:w-[220px]">
+                {discovery.image ? (
+                  <img src={discovery.image} alt={discovery.name} className="h-full w-full object-cover" />
+                ) : null}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col justify-center p-4">
+                <span className="text-[12px] font-medium tracking-wide text-brand uppercase">{t("account.discover")}</span>
+                <span className="mt-1 line-clamp-2 text-[15px] font-semibold text-navy">{discovery.name}</span>
+                <span className="mt-1 text-[16px] font-bold text-brand">{discovery.price}</span>
+                <span className="mt-2 text-[13px] font-medium text-navy-muted">{t("account.discoverCta")}</span>
+              </span>
+            </Link>
+          </section>
+        ) : null}
+
+        <SellerCenter userId={user.id} isSellerRole={accountType === "seller"} />
+
+        {sellerProfile ? (
+          <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
+            <h2 className="text-[16px] font-semibold text-navy">{t("profile.myListings")}</h2>
+            {sellerListings.length === 0 ? (
+              <div className="mt-3 text-center">
+                <p className="text-[13px] text-navy-muted">{t("profile.noListings")}</p>
+                {sellerProfile.status === "approved" ? (
+                  <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/listings/new")}>
+                    {t("profile.addMotorcycle")}
+                  </Button>
+                ) : (
+                  <p className="mt-2 text-[13px] text-navy-muted">{t("profile.listingAfterApproval")}</p>
+                )}
+              </div>
+            ) : (
+              <div className="mt-3 grid gap-3">
+                {sellerListings.map((listing) => (
+                  <SellerListingCard key={listing.id} listing={listing} onDelete={setDeleteTarget} />
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
+      </div>
       {deleteTarget ? (
         <DeleteListingModal
           onCancel={() => setDeleteTarget(null)}
@@ -323,61 +256,35 @@ export function ProfilePage() {
           }}
         />
       ) : null}
-    </main>
+    </AccountLayout>
   )
 }
 
-function FieldRow({
+function QuickCard({
+  to,
+  icon: Icon,
   label,
-  htmlFor,
-  error,
-  children,
+  count,
 }: {
+  to: string
+  icon: LucideIcon
   label: string
-  htmlFor: string
-  error?: string
-  children: ReactNode
+  count?: number
 }) {
   return (
-    <div>
-      <label htmlFor={htmlFor} className="mb-1 block text-[13px] font-medium text-navy">
-        {label}
-      </label>
-      {children}
-      {error ? (
-        <p className="mt-1 text-[12px] text-red-700" role="alert">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  )
-}
-
-function MaskedRow({
-  label,
-  value,
-  actionLabel,
-  actionHint,
-}: {
-  label: string
-  value: string
-  actionLabel: string
-  actionHint: string
-}) {
-  return (
-    <div>
-      <p className="mb-1 text-[13px] font-medium text-navy">{label}</p>
-      <div className="flex min-w-0 items-center gap-3">
-        <p className="min-w-0 truncate text-[14px] text-navy">{value}</p>
-        <button
-          type="button"
-          disabled
-          title={actionHint}
-          className={cn("shrink-0 text-[13px] font-medium text-brand/50")}
-        >
-          {actionLabel}
-        </button>
-      </div>
-    </div>
+    <Link
+      to={to}
+      className="flex min-h-[76px] flex-col justify-between rounded-xl border border-line bg-white p-2.5 shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand min-[769px]:min-h-[84px] min-[769px]:rounded-2xl min-[769px]:p-3"
+    >
+      <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand">
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+      <span>
+        <span className="block text-[13px] font-medium text-navy">{label}</span>
+        {typeof count === "number" ? (
+          <span className="mt-0.5 block text-[12px] text-navy-muted">{count}</span>
+        ) : null}
+      </span>
+    </Link>
   )
 }

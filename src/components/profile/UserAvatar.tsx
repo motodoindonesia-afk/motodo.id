@@ -1,12 +1,13 @@
 import { cn } from "../../lib/cn"
 import { nameInitials } from "../../lib/profile"
 
-type Size = "sm" | "md" | "lg"
+type Size = "sm" | "md" | "lg" | "hero"
 
 const SIZE: Record<Size, string> = {
   sm: "size-7 text-[11px]",
   md: "size-12 text-sm",
-  lg: "size-[140px] text-3xl",
+  lg: "size-[120px] text-3xl",
+  hero: "size-20 text-xl min-[769px]:size-[88px] min-[769px]:text-2xl",
 }
 
 export function UserAvatar({

@@ -387,7 +387,13 @@ function AccountMenu({
       {open ? (
         <div role="menu" className="absolute right-0 z-30 mt-2 w-52 rounded-xl border border-line bg-white py-2 text-navy shadow-card">
           <Link to="/profile" role="menuitem" className="block px-3 py-1.5 text-ui hover:bg-surface focus-visible:bg-surface focus-visible:outline-none" onClick={() => setOpen(false)}>
-            {t("nav.myProfile")}
+            {t("account.navDashboard")}
+          </Link>
+          <Link to="/profile/edit" className="block px-3 py-1.5 text-ui hover:bg-surface" onClick={() => setOpen(false)}>
+            {t("account.navProfile")}
+          </Link>
+          <Link to="/settings" className="block px-3 py-1.5 text-ui hover:bg-surface" onClick={() => setOpen(false)}>
+            {t("account.navSettings")}
           </Link>
           <Link to="/cart" className="block px-3 py-1.5 text-ui hover:bg-surface" onClick={() => setOpen(false)}>
             {t("nav.cart")}

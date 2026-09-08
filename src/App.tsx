@@ -21,6 +21,8 @@ import { ChatDataGate } from "./components/chat/ChatDataGate"
 import { ReviewsDataGate } from "./components/reviews/ReviewsDataGate"
 import { LoginPage } from "./pages/LoginPage"
 import { ProfilePage } from "./pages/ProfilePage"
+import { ProfileEditPage } from "./pages/ProfileEditPage"
+import { SettingsPage } from "./pages/SettingsPage"
 import { WishlistPage } from "./pages/WishlistPage"
 import { CartPage } from "./pages/CartPage"
 import { SellPage } from "./pages/SellPage"
@@ -197,6 +199,22 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/edit"
+              element={
+                <ProtectedRoute>
+                  <ProfileEditPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
                 </ProtectedRoute>
               }
             />
