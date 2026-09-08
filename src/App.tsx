@@ -119,11 +119,7 @@ export default function App() {
             />
             <Route
               path="/sellers/:sellerId"
-              element={
-                <ReviewsDataGate>
-                  <PublicSellerPage />
-                </ReviewsDataGate>
-              }
+              element={<PublicSellerPage />}
             />
             <Route
               path="/checkout/:listingId"
