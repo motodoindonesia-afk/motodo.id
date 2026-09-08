@@ -38,7 +38,7 @@ const STORE_ITEMS: NavItem[] = [
 ]
 
 const SETTING_ITEMS: NavItem[] = [
-  { id: "settings", label: "seller.navSettings", available: false, icon: Settings },
+  { id: "settings", label: "seller.navSettings", to: "/seller/settings", available: true, icon: Settings, match: "prefix" },
 ]
 
 function isActive(item: NavItem, pathname: string) {
@@ -70,7 +70,7 @@ export function SellerCenterSidebar() {
 export function SellerCenterMobileNav() {
   const t = useT()
   const location = useLocation()
-  const items = [...MAIN_ITEMS, ...STORE_ITEMS].filter((item) => item.available && item.to)
+  const items = [...MAIN_ITEMS, ...STORE_ITEMS, ...SETTING_ITEMS].filter((item) => item.available && item.to)
 
   return (
     <nav className="min-[1024px]:hidden" aria-label={t("seller.menu")}>

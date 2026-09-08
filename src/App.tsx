@@ -36,6 +36,7 @@ import { SellerListingViewPage } from "./pages/seller/SellerListingViewPage"
 import { SellerMessagesPage } from "./pages/seller/SellerMessagesPage"
 import { MessagesPage } from "./pages/MessagesPage"
 import { SellerProfilePage } from "./pages/seller/SellerProfilePage"
+import { SellerSettingsPage } from "./pages/seller/SellerSettingsPage"
 import { SellerRegisterPage } from "./pages/seller/SellerRegisterPage"
 import { ApprovedSellerRoute } from "./components/seller/ApprovedSellerRoute"
 import { SellerOnlyRoute } from "./components/seller/SellerOnlyRoute"
@@ -298,6 +299,16 @@ export default function App() {
                 <ProtectedRoute>
                   <SellerOnlyRoute>
                     <SellerProfileEditPage />
+                  </SellerOnlyRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/seller/settings"
+              element={
+                <ProtectedRoute>
+                  <SellerOnlyRoute>
+                    <SellerSettingsPage />
                   </SellerOnlyRoute>
                 </ProtectedRoute>
               }
