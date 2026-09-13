@@ -7,6 +7,12 @@ import { isListingEligibleForSale } from "../src/lib/platform/demoInventory"
 import { getNotificationResource } from "../src/lib/platform/notifications"
 import { isUuid, orderMatchesRef, orderPublicRef } from "../src/lib/platform/orderIdentity"
 import { isAdminCancellableOrderStatus } from "../src/lib/platform/orderAdmin"
+import { CLIENT_REFRESH } from "../src/lib/platform/dataRefresh"
+import { listingImageStoragePath } from "../src/lib/platform/listingStorage"
+import {
+  createSupabaseClient,
+  hasUsableSupabasePublicCredentials,
+} from "../src/lib/platform/supabaseClient"
 
 describe("RPC error contract", () => {
   it("reads Motodo codes from PostgREST details, hint, and CODE prefix", () => {
@@ -151,5 +157,39 @@ describe("favorite and cart mappers", () => {
       availableQuantity: 0,
       listingStatus: "sold",
     })
+  })
+})
+
+describe("Supabase client factory", () => {
+  it("accepts url, anonKey, detectSessionInUrl, and authStorage without Vite env", () => {
+    expect(hasUsableSupabasePublicCredentials("https://example.supabase.co", "a".repeat(20))).toBe(true)
+    expect(hasUsableSupabasePublicCredentials("http://127.0.0.1:54321", "a".repeat(20))).toBe(false)
+    expect(hasUsableSupabasePublicCredentials("http://127.0.0.1:54321", "a".repeat(20), true)).toBe(true)
+
+    const memory = {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+    }
+    const client = createSupabaseClient({
+      url: "https://example.supabase.co",
+      anonKey: "a".repeat(40),
+      authStorage: memory,
+      detectSessionInUrl: false,
+    })
+    expect(client).toBeTruthy()
+  })
+})
+
+describe("listing storage path", () => {
+  it("keeps listings/{id}/{file} object keys", () => {
+    expect(listingImageStoragePath("listing-1", "photo.jpg")).toBe("listings/listing-1/photo.jpg")
+  })
+})
+
+describe("data refresh contract", () => {
+  it("documents focus-refetch and existing realtime tables only", () => {
+    expect(CLIENT_REFRESH.mobileFocusRefetch).toBe(true)
+    expect(CLIENT_REFRESH.realtimeTables).toEqual(["messages", "conversations", "notifications"])
   })
 })

@@ -3,6 +3,7 @@ import { SELLER_SUCCESS_FEE_RATE } from "../types/order"
 import { getListingByIdRemote, putCachedListing, refreshListingStock } from "./listingsSupabase"
 import { throwUserFacing } from "./userFacingError"
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase"
+import { notifyWebCache } from "./webCacheNotify"
 
 const ORDERS_UPDATED_EVENT = "motodo:orders-updated"
 
@@ -41,9 +42,7 @@ const orderIdIndex = new Map<string, string>()
 let hydrated = false
 
 function notifyOrdersUpdated() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(ORDERS_UPDATED_EVENT))
-  }
+  notifyWebCache(ORDERS_UPDATED_EVENT)
 }
 
 export function isOrdersHydrated() {

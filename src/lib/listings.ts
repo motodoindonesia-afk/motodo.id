@@ -685,6 +685,7 @@ export function getRelatedPublicListings(listing: CatalogListing, limit = 8) {
   return ranked.slice(0, limit).map((entry) => entry.item)
 }
 
+/** Web same-tab/mock bus. Not used for RPC correctness. Mobile: refetch on focus. */
 export function subscribeListingUpdates(onChange: () => void) {
   function handleStorage(event: StorageEvent) {
     if (event.key === LISTINGS_STORAGE_KEY || event.key === null) onChange()

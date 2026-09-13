@@ -7,9 +7,11 @@ import type {
 import { LISTING_CONDITIONS, LISTING_FUELS, LISTING_TRANSMISSIONS } from "../types/sellerListing"
 import { coerceListingQuantity } from "./listingForm"
 import { throwUserFacing } from "./userFacingError"
+import { LISTING_IMAGES_BUCKET, listingImageStoragePath } from "./platform/listingStorage"
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase"
+import { notifyWebCache } from "./webCacheNotify"
 
-export const LISTING_IMAGES_BUCKET = "listing-images"
+export { LISTING_IMAGES_BUCKET } from "./platform/listingStorage"
 const LISTINGS_UPDATED_EVENT = "motodo:listings-updated"
 
 type ListingImageRow = {
@@ -67,9 +69,7 @@ const listingStock = new Map<string, ListingStock>()
 let hydrated = false
 
 function notifyListingsUpdated() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(LISTINGS_UPDATED_EVENT))
-  }
+  notifyWebCache(LISTINGS_UPDATED_EVENT)
 }
 
 export function isListingsHydrated() {
@@ -384,17 +384,16 @@ function isDataImage(src: string) {
   return src.startsWith("data:image/")
 }
 
-async function dataUrlToFile(dataUrl: string, filename: string) {
+async function dataUrlToBlob(dataUrl: string) {
   const response = await fetch(dataUrl)
-  const blob = await response.blob()
-  return new File([blob], filename, { type: blob.type || "image/jpeg" })
+  return response.blob()
 }
 
-export async function uploadListingImage(listingId: string, source: string | File, sortOrder: number) {
+/** Accepts a data URL (web Canvas) or already-compressed bytes (web File / future native Blob). */
+export async function uploadListingImage(listingId: string, source: string | Blob, sortOrder: number) {
   const client = getSupabaseClient()
-  const file =
-    typeof source === "string" ? await dataUrlToFile(source, `${crypto.randomUUID()}.jpg`) : source
-  const path = `listings/${listingId}/${crypto.randomUUID()}.jpg`
+  const file = typeof source === "string" ? await dataUrlToBlob(source) : source
+  const path = listingImageStoragePath(listingId, `${crypto.randomUUID()}.jpg`)
   const { error: uploadError } = await client.storage.from(LISTING_IMAGES_BUCKET).upload(path, file, {
     contentType: file.type || "image/jpeg",
     upsert: false,

@@ -1,6 +1,7 @@
 import type { RatingBreakdown, Review, ReviewStatus } from "../types/review"
 import { throwUserFacing } from "./userFacingError"
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase"
+import { notifyWebCache } from "./webCacheNotify"
 
 const REVIEWS_UPDATED_EVENT = "motodo:reviews-updated"
 
@@ -40,9 +41,7 @@ const sellerRatings = new Map<string, RatingSummary>()
 let hydrated = false
 
 function notifyReviewsUpdated() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(REVIEWS_UPDATED_EVENT))
-  }
+  notifyWebCache(REVIEWS_UPDATED_EVENT)
 }
 
 export function isReviewsHydrated() {

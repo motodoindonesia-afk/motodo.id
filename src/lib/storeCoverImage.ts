@@ -1,6 +1,9 @@
 /**
- * Browser-only store-cover resize for the Motodo web client.
- * Native apps should compress locally, then upload to Storage.
+ * Browser-only store-cover resize (Canvas). Do not import from React Native.
+ *
+ * Web: File → this module → Blob → uploadSellerStoreCover.
+ * Mobile: native picker → native compression → Blob → uploadSellerStoreCover.
+ * Shared: bucket + path in platform/storeCover.ts. RLS unchanged.
  */
 
 const MAX_WIDTH = 1920

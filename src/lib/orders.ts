@@ -599,6 +599,7 @@ export function catalogFromOrder(order: Order): CatalogListing {
   }
 }
 
+/** Web same-tab/mock bus. Not used for RPC correctness. Mobile: refetch on focus. */
 export function subscribeOrderUpdates(onChange: () => void) {
   function handleStorage(event: StorageEvent) {
     if (event.key === ORDERS_STORAGE_KEY || event.key === null) onChange()

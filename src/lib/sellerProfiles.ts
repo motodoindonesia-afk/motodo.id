@@ -2,6 +2,7 @@ import type { BusinessType, SellerProfile, SellerProfileInput, SellerStatus } fr
 import { BUSINESS_TYPES } from "../types/seller"
 import { throwUserFacing } from "./userFacingError"
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase"
+import { notifyWebCache } from "./webCacheNotify"
 
 export const SELLER_PROFILES_UPDATED_EVENT = "motodo:sellers-updated"
 
@@ -46,9 +47,7 @@ function isStatus(value: unknown): value is SellerStatus {
 }
 
 function notifySellerProfilesUpdated() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(SELLER_PROFILES_UPDATED_EVENT))
-  }
+  notifyWebCache(SELLER_PROFILES_UPDATED_EVENT)
 }
 
 function ownerName(row: SellerProfileRowWithOwner, hints?: OwnerHints) {

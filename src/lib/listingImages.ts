@@ -1,8 +1,9 @@
 /**
- * Browser-only listing photo resize for the Motodo web client.
- * Native apps should compress locally, then upload to Storage.
- * Bucket listing-images: public read; writes require listings/{listing_id}/… ownership.
- * MIME/size: storage.buckets.allowed_mime_types + file_size_limit when the project supports those columns.
+ * Browser-only listing photo resize (Canvas). Do not import from React Native.
+ *
+ * Web: File → this module → data URL/JPEG → uploadListingImage (Storage).
+ * Mobile: native picker → native compression → Blob/bytes → uploadListingImage.
+ * Shared: bucket + path in platform/listingStorage.ts. RLS unchanged.
  */
 
 const MAX_EDGE = 1280

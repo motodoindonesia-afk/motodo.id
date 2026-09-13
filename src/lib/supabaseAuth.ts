@@ -75,7 +75,7 @@ async function fetchProfileWithRetry(userId: string): Promise<MotodoProfile> {
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const profile = await fetchMotodoProfile(userId)
     if (profile) return profile
-    await new Promise((resolve) => window.setTimeout(resolve, 200))
+    await new Promise((resolve) => setTimeout(resolve, 200))
   }
   throw new Error("Your account was created but the profile is not ready yet. Try logging in again.")
 }
@@ -90,12 +90,20 @@ export async function loadSessionUser(): Promise<{ user: AuthUser; profile: Moto
   return { user: authUserFromProfile(sessionUser, profile), profile }
 }
 
-export async function supabaseSignInWithGoogle() {
+function defaultWebOAuthRedirect() {
+  if (typeof window === "undefined" || !window.location?.origin) return ""
+  return `${window.location.origin}/login`
+}
+
+/** Web default: `{origin}/login`. Native must pass an app deep-link redirectTo. */
+export async function supabaseSignInWithGoogle(redirectTo?: string) {
   const client = getSupabaseClient()
+  const target = redirectTo ?? defaultWebOAuthRedirect()
+  if (!target) throw new Error("OAuth redirect URL is required.")
   const { error } = await client.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/login`,
+      redirectTo: target,
     },
   })
   if (error) throw new Error(authMessage(error))

@@ -1,6 +1,7 @@
 import type { Notification, NotificationRelatedType, NotificationType } from "../types/notification"
 import { throwUserFacing } from "./userFacingError"
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase"
+import { notifyWebCache } from "./webCacheNotify"
 
 const NOTIFICATIONS_UPDATED_EVENT = "motodo:notifications-updated"
 
@@ -39,9 +40,7 @@ const notificationCache = new Map<string, Notification>()
 let hydrated = false
 
 function notifyUpdated() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(NOTIFICATIONS_UPDATED_EVENT))
-  }
+  notifyWebCache(NOTIFICATIONS_UPDATED_EVENT)
 }
 
 export function isNotificationsHydrated() {

@@ -41,9 +41,9 @@ export type MotorcycleSeller = {
 }
 
 /**
- * Public catalog DTO for browse/home/detail cards.
+ * Public catalog DTO for browse/home/detail cards (web presentation).
  * Not the database listing: `price` is formatted text; `priceValue` is the numeric price.
- * Canonical domain listing is `Listing` in listing.ts (`price: number`).
+ * Canonical domain listing for mobile reuse is `Listing` in listing.ts (`price: number`).
  */
 export type MotorcycleListing = {
   id: string

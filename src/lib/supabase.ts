@@ -1,39 +1,23 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import { type SupabaseClient } from "@supabase/supabase-js"
+import {
+  createSupabaseClient,
+  hasUsableSupabasePublicCredentials,
+} from "./platform/supabaseClient"
+
+export { createSupabaseClient, type CreateSupabaseClientOptions } from "./platform/supabaseClient"
 
 function readPublicEnv(name: "VITE_SUPABASE_URL" | "VITE_SUPABASE_ANON_KEY"): string {
   const value = import.meta.env[name]
   return typeof value === "string" ? value.trim() : ""
 }
 
-function looksLikePlaceholder(value: string) {
-  const lower = value.toLowerCase()
-  return (
-    lower.includes("your_project") ||
-    lower.includes("your_anon") ||
-    lower.includes("your_supabase") ||
-    lower.includes("placeholder")
-  )
-}
-
-function isValidSupabaseUrl(url: string) {
-  if (!url || looksLikePlaceholder(url)) return false
-  try {
-    const parsed = new URL(url)
-    if (import.meta.env.DEV && parsed.protocol === "http:") return Boolean(parsed.host)
-    return parsed.protocol === "https:" && Boolean(parsed.host)
-  } catch {
-    return false
-  }
-}
-
-function isValidAnonKey(key: string) {
-  if (!key || looksLikePlaceholder(key)) return false
-  return key.length >= 20
-}
-
 /** True when public URL + anon key are present and look usable. Never logs their values. */
 export function hasValidSupabasePublicConfig() {
-  return isValidSupabaseUrl(readPublicEnv("VITE_SUPABASE_URL")) && isValidAnonKey(readPublicEnv("VITE_SUPABASE_ANON_KEY"))
+  return hasUsableSupabasePublicCredentials(
+    readPublicEnv("VITE_SUPABASE_URL"),
+    readPublicEnv("VITE_SUPABASE_ANON_KEY"),
+    Boolean(import.meta.env.DEV),
+  )
 }
 
 /**
@@ -56,12 +40,12 @@ export function isProductionConfigBlocked(): boolean {
 
 function createBrowserClient(): SupabaseClient | null {
   if (!isSupabaseConfigured()) return null
-  return createClient(readPublicEnv("VITE_SUPABASE_URL"), readPublicEnv("VITE_SUPABASE_ANON_KEY"), {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
+  return createSupabaseClient({
+    url: readPublicEnv("VITE_SUPABASE_URL"),
+    anonKey: readPublicEnv("VITE_SUPABASE_ANON_KEY"),
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
   })
 }
 

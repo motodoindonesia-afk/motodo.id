@@ -1,6 +1,7 @@
 import type { ChatMessage, Conversation } from "../types/chat"
 import { throwUserFacing } from "./userFacingError"
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase"
+import { notifyWebCache } from "./webCacheNotify"
 
 export const CHAT_UPDATED_EVENT = "motodo:chat-updated"
 export const MAX_CHAT_MESSAGE_LENGTH = 5000
@@ -35,9 +36,7 @@ const messagesByConversation = new Map<string, Map<string, ChatMessage>>()
 let hydrated = false
 
 function notifyChatUpdated() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(CHAT_UPDATED_EVENT))
-  }
+  notifyWebCache(CHAT_UPDATED_EVENT)
 }
 
 export function isChatHydrated() {

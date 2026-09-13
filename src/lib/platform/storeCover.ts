@@ -1,4 +1,7 @@
-/** Shared store-cover contract for Motodo web and a future native client. */
+/**
+ * Shared store-cover contract for Motodo web and a future native client.
+ * Compression is client-specific (web Canvas vs native). Upload uses this bucket/path + RLS.
+ */
 
 export const SELLER_STORE_COVERS_BUCKET = "seller-store-covers"
 export const STORE_COVER_OBJECT_NAME = "cover.webp"

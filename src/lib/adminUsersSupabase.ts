@@ -2,6 +2,7 @@ import type { AuthUser, UserRole } from "../types/auth"
 import type { PrivilegeRole } from "../types/profile"
 import { throwUserFacing } from "./userFacingError"
 import { getSupabaseClient, isSupabaseConfigured } from "./supabase"
+import { notifyWebCache } from "./webCacheNotify"
 
 const ADMIN_USERS_UPDATED_EVENT = "motodo:admin-users-updated"
 
@@ -39,9 +40,7 @@ function mapProfileRowToAuthUser(row: ProfileDirectoryRow): AuthUser | null {
 }
 
 function notifyUpdated() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(ADMIN_USERS_UPDATED_EVENT))
-  }
+  notifyWebCache(ADMIN_USERS_UPDATED_EVENT)
 }
 
 export function isAdminUsersHydrated() {
@@ -106,6 +105,7 @@ export async function fetchAdminUser(id: string): Promise<AuthUser | null> {
 }
 
 export function subscribeAdminUsersUpdates(onChange: () => void) {
+  if (typeof window === "undefined") return () => {}
   window.addEventListener(ADMIN_USERS_UPDATED_EVENT, onChange)
   return () => window.removeEventListener(ADMIN_USERS_UPDATED_EVENT, onChange)
 }

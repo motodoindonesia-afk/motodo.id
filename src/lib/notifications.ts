@@ -194,6 +194,7 @@ export function formatNotificationTime(iso: string) {
   return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
 }
 
+/** Web same-tab/mock bus. Mobile: refetch on focus; use notifications Realtime. */
 export function subscribeNotificationUpdates(onChange: () => void) {
   function handleStorage(event: StorageEvent) {
     if (event.key === NOTIFICATIONS_STORAGE_KEY || event.key === null) onChange()
