@@ -13,6 +13,7 @@ export type PublicSellerProfile = {
   status: SellerStatus
   sellerFleetAvailable: boolean
   createdAt?: string
+  store_cover_url: string | null
 }
 
 export type PublicSellerSort = "newest" | "price-asc" | "price-desc"

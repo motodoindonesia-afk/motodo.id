@@ -5,6 +5,7 @@ import { sortListings } from "./browse"
 import { getPublicListings } from "./listings"
 import { getSellerOrderCounts } from "./orders"
 import { getRatingBreakdown, getSellerRatingSummary, getSellerReviews } from "./reviews"
+import { getSellerListingCard } from "./listingsSupabase"
 import { getSellerProfile, getSellerProfileById } from "./seller"
 
 export type { PublicSellerProfile, PublicSellerSort }
@@ -36,29 +37,37 @@ function toPublicSellerProfile(profile: SellerProfile): PublicSellerProfile {
     status: profile.status,
     sellerFleetAvailable: Boolean(profile.sellerFleetAvailable),
     createdAt: profile.createdAt,
+    store_cover_url: profile.store_cover_url,
   }
 }
 
 function catalogFallbackProfile(sellerId: string): PublicSellerProfile | null {
   const listings = getPublicListings().filter((item) => item.sellerId === sellerId)
-  if (listings.length === 0) return null
-  const seller = listings[0].seller
+  const card = getSellerListingCard(sellerId)
+  if (listings.length === 0 && !card) return null
+  const seller = listings[0]?.seller
   return {
     id: sellerId,
     userId: sellerId,
-    businessName: seller.name,
-    city: optionalText(seller.location),
-    status: seller.verified ? "approved" : "pending",
+    businessName: card?.businessName || seller?.name || "Motodo Seller",
+    city: optionalText(card?.city) || optionalText(seller?.location),
+    status: card || seller?.verified ? "approved" : "pending",
     sellerFleetAvailable: false,
+    createdAt: card?.createdAt,
+    store_cover_url: card?.store_cover_url ?? null,
   }
 }
 
 export function getPublicSellerProfile(sellerId: string): PublicSellerProfile | null {
   if (!sellerId) return null
+  const card = getSellerListingCard(sellerId)
   const profile = getSellerById(sellerId)
   if (profile) {
     if (profile.status !== "approved") return null
-    return toPublicSellerProfile(profile)
+    return {
+      ...toPublicSellerProfile(profile),
+      store_cover_url: profile.store_cover_url || card?.store_cover_url || null,
+    }
   }
   const fallback = catalogFallbackProfile(sellerId)
   if (!fallback || fallback.status !== "approved") return null

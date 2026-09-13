@@ -217,6 +217,15 @@ export async function cancelOrderRemote(orderRef: string) {
   return callOrderRpc("cancel_order", orderRef)
 }
 
+export async function adminCancelOrderRemote(orderRef: string) {
+  const client = getSupabaseClient()
+  const { data, error } = await client.rpc("admin_cancel_order", { p_order_ref: orderRef })
+  if (error) throwUserFacing(error, "Unable to cancel order.")
+  const row = firstOrderRow(data)
+  if (!row) throw new Error("Unable to cancel order.")
+  return afterOrderMutation(row)
+}
+
 export async function updateSellerOrderStatusRemote(orderRef: string, nextStatus: OrderStatus): Promise<Order> {
   if (nextStatus === "confirmed") return confirmOrderRemote(orderRef)
   if (nextStatus === "completed") return completeOrderRemote(orderRef)

@@ -5,7 +5,6 @@ import { canManageListing, getListingById } from "../../lib/listings"
 import { useListingsLive } from "../../lib/useListingsLive"
 import { ListingForm } from "../../components/seller/ListingForm"
 import { SellerListingAccessMessage } from "../../components/seller/SellerListingAccessMessage"
-import { Container } from "../../components/layout/Container"
 import { useT } from "../../i18n"
 
 export function SellerListingEditPage() {
@@ -34,14 +33,12 @@ export function SellerListingEditPage() {
   }
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.editTitle")}</h1>
-          <p className="mt-2 text-base leading-relaxed text-navy-muted">
+    <div className="min-w-0">
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("seller.editTitle")}</h1>
+          <p className="mt-1 text-[13px] leading-relaxed text-navy-muted">
             {t("seller.listBody")}
           </p>
-          <div className="mt-8">
+          <div className="mt-6">
             <ListingForm
               mode="edit"
               profile={profile}
@@ -51,8 +48,6 @@ export function SellerListingEditPage() {
               onSaved={() => navigate("/seller/listings", { state: { saved: true } })}
             />
           </div>
-        </div>
-      </Container>
-    </main>
+    </div>
   )
 }

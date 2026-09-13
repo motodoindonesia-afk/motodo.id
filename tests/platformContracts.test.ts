@@ -6,6 +6,7 @@ import { cartQuantityIsAllowed, isCartLinePurchasable, isListingEligibleForCart,
 import { isListingEligibleForSale } from "../src/lib/platform/demoInventory"
 import { getNotificationResource } from "../src/lib/platform/notifications"
 import { isUuid, orderMatchesRef, orderPublicRef } from "../src/lib/platform/orderIdentity"
+import { isAdminCancellableOrderStatus } from "../src/lib/platform/orderAdmin"
 
 describe("RPC error contract", () => {
   it("reads Motodo codes from PostgREST details, hint, and CODE prefix", () => {
@@ -33,6 +34,15 @@ describe("order identity", () => {
     expect(orderPublicRef(order)).toBe("MTD-ABCDEF12")
     expect(orderMatchesRef(order, order.id)).toBe(true)
     expect(orderMatchesRef(order, order.orderNumber)).toBe(true)
+  })
+})
+
+describe("admin order cancellation statuses", () => {
+  it("allows pending and confirmed only", () => {
+    expect(isAdminCancellableOrderStatus("pending")).toBe(true)
+    expect(isAdminCancellableOrderStatus("confirmed")).toBe(true)
+    expect(isAdminCancellableOrderStatus("completed")).toBe(false)
+    expect(isAdminCancellableOrderStatus("cancelled")).toBe(false)
   })
 })
 

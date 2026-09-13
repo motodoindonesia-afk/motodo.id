@@ -10,7 +10,6 @@ import {
   markListingAsSold,
   type SellerListingSort,
 } from "../../lib/listings"
-import { SellerNav } from "../../components/seller/SellerNav"
 import { useListingsLive } from "../../lib/useListingsLive"
 import type { MotorcycleListing, SellerListingStatus } from "../../types/sellerListing"
 import { ConfirmListingModal } from "../../components/seller/ConfirmListingModal"
@@ -19,7 +18,6 @@ import { SellerListingCard } from "../../components/seller/SellerListingCard"
 import { AuthInput } from "../../components/auth/AuthField"
 import { AuthSelect } from "../../components/auth/AuthField"
 import { Button } from "../../components/ui/Button"
-import { Container } from "../../components/layout/Container"
 import { cn } from "../../lib/cn"
 import { sortOptionLabel, useLanguage, type MessageKey } from "../../i18n"
 
@@ -55,17 +53,14 @@ export function SellerListingsPage() {
   if (!user) return null
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-3xl">
+    <div className="min-w-0">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.myListings")}</h1>
-              <p className="mt-2 text-navy-muted">{t("seller.manageBody")}</p>
+              <h1 className="text-heading font-semibold tracking-tight text-navy">{t("seller.myListings")}</h1>
+              <p className="mt-1 text-[13px] text-navy-muted">{t("seller.manageBody")}</p>
             </div>
             <Button onClick={() => navigate("/seller/listings/new")}>{t("profile.addMotorcycle")}</Button>
           </div>
-          <SellerNav approved />
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label={t("seller.totalListings")} value={counts.total} />
@@ -137,8 +132,6 @@ export function SellerListingsPage() {
               ))}
             </div>
           )}
-        </div>
-      </Container>
 
       {deleteTarget ? (
         <DeleteListingModal
@@ -173,7 +166,7 @@ export function SellerListingsPage() {
           }}
         />
       ) : null}
-    </main>
+    </div>
   )
 }
 

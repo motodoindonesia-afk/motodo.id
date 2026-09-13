@@ -74,7 +74,7 @@ export function SearchBar({
             market
               ? cn(
                   "min-w-0 w-full flex-1 border-0 bg-transparent px-3 focus:ring-0",
-                  compact ? "h-10 text-[14px]" : "h-10 text-ui",
+                  "h-10 text-ui",
                 )
               : cn(
                   "rounded-full border border-transparent bg-surface pl-10 pr-4 focus:border-brand/30 focus:ring-2 focus:ring-brand/20",

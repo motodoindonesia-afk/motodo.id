@@ -16,6 +16,7 @@ import { getAvailableStock, listingStockSummary } from "./inventory"
 import { getSellerProfile, isSellerFleetAvailable } from "./seller"
 import { userFacingMessage } from "./userFacingError"
 import { isListingEligibleForSale } from "./platform/demoInventory"
+import { isAdminCancellableOrderStatus } from "./platform/orderAdmin"
 import { generateOrderNumber, isUuid, orderMatchesRef, orderPublicRef } from "./platform/orderIdentity"
 import { isSupabaseConfigured } from "./supabase"
 import {
@@ -23,6 +24,7 @@ import {
   isOrdersHydrated,
   peekCachedOrder,
   peekCachedOrders,
+  adminCancelOrderRemote,
   updateSellerOrderStatusRemote,
 } from "./ordersSupabase"
 
@@ -440,6 +442,38 @@ export async function updateSellerOrderStatus(orderId: string, sellerId: string,
     }
   }
 
+  syncListingAvailability(order.listingId)
+  notifyBuyerOrderStatus(next)
+  return next
+}
+
+export async function adminCancelOrder(orderRef: string): Promise<Order> {
+  if (isSupabaseConfigured()) {
+    try {
+      return await adminCancelOrderRemote(orderRef)
+    } catch (error) {
+      throw new OrderError(userFacingMessage(error, "Unable to cancel order."))
+    }
+  }
+
+  const order = getOrderById(orderRef)
+  if (!order) throw new OrderError("Order not found.")
+  if (order.status === "cancelled") throw new OrderError("This order is already cancelled.")
+  if (order.status === "completed") throw new OrderError("Completed orders cannot be cancelled.")
+  if (!isAdminCancellableOrderStatus(order.status)) {
+    throw new OrderError("This order status cannot be changed.")
+  }
+
+  let next: Order = {
+    ...order,
+    status: "cancelled",
+    updatedAt: new Date().toISOString(),
+  }
+  if (!order.inventoryRestored) {
+    applyListingInventoryChange(order.listingId, order.quantity)
+    next = { ...next, inventoryRestored: true }
+  }
+  writeOrders(readOrders().map((item) => (orderMatchesRef(item, orderRef) ? next : item)))
   syncListingAvailability(order.listingId)
   notifyBuyerOrderStatus(next)
   return next

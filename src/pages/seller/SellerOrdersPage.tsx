@@ -2,9 +2,7 @@ import { Navigate, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge"
 import { Button } from "../../components/ui/Button"
-import { Container } from "../../components/layout/Container"
 import { getSellerProfile } from "../../lib/seller"
-import { SellerNav } from "../../components/seller/SellerNav"
 import { formatIDR } from "../../lib/listingForm"
 import { formatOrderDate, getSellerOrders, orderPublicRef } from "../../lib/orders"
 import { useT, type Translate } from "../../i18n"
@@ -32,12 +30,9 @@ export function SellerOrdersPage() {
   const orders = getSellerOrders(user.id)
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.ordersTitle")}</h1>
-          <p className="mt-2 text-navy-muted">{t("seller.ordersBody")}</p>
-          <SellerNav approved={profile.status === "approved"} />
+    <div className="min-w-0">
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("seller.ordersTitle")}</h1>
+          <p className="mt-1 text-[13px] text-navy-muted">{t("seller.ordersBody")}</p>
 
           {orders.length === 0 ? (
             <div className="mt-8 rounded-2xl border border-line px-5 py-10 text-center">
@@ -74,8 +69,6 @@ export function SellerOrdersPage() {
               ))}
             </div>
           )}
-        </div>
-      </Container>
-    </main>
+    </div>
   )
 }

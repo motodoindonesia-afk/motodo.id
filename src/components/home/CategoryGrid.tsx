@@ -24,6 +24,8 @@ import { ViewAllLink } from "../ui/ViewAllLink"
 import { surfaceCard } from "../ui/surface"
 import { useT, type MessageKey } from "../../i18n"
 
+const MOBILE_VISIBLE = 10
+
 const shortcuts: { key: MessageKey; href: string; icon: LucideIcon; active?: boolean }[] = [
   { key: "cat.all", href: "/browse", icon: LayoutGrid, active: true },
   { key: "cat.custom", href: "/browse?category=Chopper", icon: Wrench },
@@ -52,7 +54,7 @@ export function CategoryGrid() {
   return (
     <section id="categories" className="pb-5">
       <Container>
-        <div className={surfaceCard("px-4 py-4 sm:px-5")}>
+        <div className={surfaceCard("px-4 py-3.5 sm:px-5 sm:py-4")}>
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-section font-semibold text-navy">{t("home.categories")}</h2>
           <ViewAllLink href="/browse" className="text-ui">
@@ -60,13 +62,16 @@ export function CategoryGrid() {
           </ViewAllLink>
         </div>
         <div className="grid grid-cols-5 gap-x-1 gap-y-3 lg:grid-cols-10">
-          {shortcuts.map((item) => {
+          {shortcuts.map((item, index) => {
             const Icon = item.icon
             return (
               <Link
                 key={item.key}
                 to={item.href}
-                className="flex min-w-0 flex-col items-center gap-1.5 text-center"
+                className={cn(
+                  "min-w-0 flex-col items-center gap-1.5 text-center",
+                  index >= MOBILE_VISIBLE ? "hidden lg:flex" : "flex",
+                )}
               >
                 <span
                   className={cn(
@@ -76,7 +81,7 @@ export function CategoryGrid() {
                 >
                   <Icon className="size-5" strokeWidth={1.75} aria-hidden="true" />
                 </span>
-                <span className="line-clamp-2 text-[11px] font-medium leading-tight text-navy">{t(item.key)}</span>
+                <span className="line-clamp-2 text-meta font-medium leading-tight text-navy">{t(item.key)}</span>
             </Link>
           )
         })}

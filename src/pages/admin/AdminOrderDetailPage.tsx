@@ -1,18 +1,24 @@
 import { Link, useNavigate, useParams } from "react-router-dom"
+import { useState } from "react"
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge"
+import { CancelOrderModal } from "../../components/admin/CancelOrderModal"
 import { Button } from "../../components/ui/Button"
 import { Container } from "../../components/layout/Container"
 import { formatMoney, sellerBusinessName } from "../../lib/adminPlatform"
 import { formatIDR } from "../../lib/listingForm"
 import {
+  adminCancelOrder,
   deliveryFeeLabel,
   deliveryMethodLabel,
   formatOrderDate,
   getOrderById,
+  OrderError,
   orderPublicRef,
   paymentMethodLabel,
   SELLER_SUCCESS_FEE_RATE,
 } from "../../lib/orders"
+import { isAdminCancellableOrderStatus } from "../../lib/platform/orderAdmin"
+import { userFacingMessage } from "../../lib/userFacingError"
 import { useOrdersLive } from "../../lib/useOrdersLive"
 import { useSellerLive } from "../../lib/useSellerLive"
 import type { ReactNode } from "react"
@@ -34,6 +40,10 @@ export function AdminOrderDetailPage() {
   useSellerLive()
   const order = orderIdResolved ? getOrderById(orderIdResolved) : null
   const feePercent = Math.round(SELLER_SUCCESS_FEE_RATE * 100)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [message, setMessage] = useState("")
+  const [cancelError, setCancelError] = useState("")
 
   if (!order) {
     return (
@@ -46,6 +56,29 @@ export function AdminOrderDetailPage() {
         </Container>
       </main>
     )
+  }
+
+  const currentOrder = order
+  const cancellable = isAdminCancellableOrderStatus(currentOrder.status)
+  const publicRef = orderPublicRef(currentOrder)
+
+  async function handleConfirmCancel() {
+    if (cancelling) return
+    setCancelError("")
+    setCancelling(true)
+    try {
+      await adminCancelOrder(publicRef)
+      setConfirmOpen(false)
+      setMessage("Order cancelled successfully.")
+    } catch (error) {
+      setCancelError(
+        error instanceof OrderError || error instanceof Error
+          ? userFacingMessage(error, "Unable to cancel order.")
+          : "Unable to cancel order.",
+      )
+    } finally {
+      setCancelling(false)
+    }
   }
 
   return (
@@ -62,7 +95,14 @@ export function AdminOrderDetailPage() {
             <h2 className="text-2xl font-bold text-navy">Order {orderPublicRef(order)}</h2>
             <OrderStatusBadge status={order.status} />
           </div>
-          <p className="mt-2 text-sm text-navy-muted">Admin can view this order. Sellers update status from Seller Orders.</p>
+          <p className="mt-2 text-sm text-navy-muted">
+            Admins can cancel pending or confirmed orders. Other order status changes follow the existing order workflow.
+          </p>
+          {message ? (
+            <p className="mt-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-navy" role="status">
+              {message}
+            </p>
+          ) : null}
 
           <div className="mt-8 grid gap-4">
             <section className="rounded-2xl border border-line px-5 py-6">
@@ -73,13 +113,13 @@ export function AdminOrderDetailPage() {
                 <Row label="Updated Date" value={formatOrderDate(order.updatedAt)} />
                 <Row label="Status" value={<OrderStatusBadge status={order.status} />} />
               </dl>
-              <ol className="mt-6 grid gap-2 sm:grid-cols-4">
+              <ol className="mt-6 grid gap-2 sm:grid-cols-4" aria-hidden="true">
                 {(["pending", "confirmed", "completed", "cancelled"] as const).map((step) => {
                   const active = order.status === step
                   return (
                     <li
                       key={step}
-                      className={`rounded-lg border px-3 py-2 text-center text-xs font-medium capitalize ${
+                      className={`pointer-events-none select-none rounded-lg border px-3 py-2 text-center text-xs font-medium capitalize ${
                         active ? "border-brand bg-brand/10 text-brand" : "border-line text-navy-muted"
                       }`}
                     >
@@ -88,10 +128,31 @@ export function AdminOrderDetailPage() {
                   )
                 })}
               </ol>
-              <p className="mt-3 text-xs text-navy-muted">
-                Order status is changed by buyers and sellers through existing order RPCs. Ritme does not override the
-                order machine from this screen.
-              </p>
+              {cancellable ? (
+                <div className="mt-6 border-t border-line pt-5">
+                  <h4 className="text-sm font-semibold text-navy">Admin Actions</h4>
+                  <p className="mt-1 text-sm text-navy-muted">
+                    Admins can cancel pending or confirmed orders. Other order status changes follow the existing order
+                    workflow.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="mt-4 min-h-11 border-red-200 bg-white px-4 text-red-700 hover:bg-red-50"
+                    onClick={() => {
+                      setCancelError("")
+                      setConfirmOpen(true)
+                    }}
+                  >
+                    Cancel Order
+                  </Button>
+                </div>
+              ) : (
+                <p className="mt-6 border-t border-line pt-5 text-sm text-navy-muted">
+                  Admins can cancel pending or confirmed orders. Other order status changes follow the existing order
+                  workflow.
+                </p>
+              )}
             </section>
             <section className="rounded-2xl border border-line px-5 py-6">
               <h3 className="text-lg font-bold text-navy">Buyer</h3>
@@ -159,6 +220,19 @@ export function AdminOrderDetailPage() {
           </div>
         </div>
       </Container>
+      {confirmOpen ? (
+        <CancelOrderModal
+          orderRef={publicRef}
+          loading={cancelling}
+          error={cancelError}
+          onKeep={() => {
+            if (cancelling) return
+            setConfirmOpen(false)
+            setCancelError("")
+          }}
+          onConfirm={() => void handleConfirmCancel()}
+        />
+      ) : null}
     </main>
   )
 }

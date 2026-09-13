@@ -2,7 +2,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { OrderStatusBadge } from "../components/orders/OrderStatusBadge"
 import { Button } from "../components/ui/Button"
-import { Container } from "../components/layout/Container"
 import { startBuyerConversation } from "../lib/chat"
 import { formatIDR } from "../lib/listingForm"
 import { getListingPickupDetails } from "../lib/listings"
@@ -56,38 +55,28 @@ export function OrderDetailPage() {
   }, [location.hash, order, user])
 
   if (!user) {
-    return (
-      <main className="bg-white py-16 sm:py-20">
-        <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.loading")}</h1>
-        </Container>
-      </main>
-    )
+    return <h1 className="text-heading font-semibold tracking-tight text-navy">{t("orders.loading")}</h1>
   }
 
   if (!order) {
     return (
-      <main className="bg-white py-16 sm:py-20">
-        <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.notFound")}</h1>
-          <Button className="mt-8" onClick={() => navigate("/orders")}>
-            {t("orders.viewMy")}
-          </Button>
-        </Container>
-      </main>
+      <div className="min-w-0">
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("orders.notFound")}</h1>
+        <Button className="mt-6" onClick={() => navigate("/orders")}>
+          {t("orders.viewMy")}
+        </Button>
+      </div>
     )
   }
 
   if (!canBuyerViewOrder(order, user.id)) {
     return (
-      <main className="bg-white py-16 sm:py-20">
-        <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.noPermission")}</h1>
-          <Button className="mt-8" onClick={() => navigate("/orders")}>
-            {t("orders.viewMy")}
-          </Button>
-        </Container>
-      </main>
+      <div className="min-w-0">
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("orders.noPermission")}</h1>
+        <Button className="mt-6" onClick={() => navigate("/orders")}>
+          {t("orders.viewMy")}
+        </Button>
+      </div>
     )
   }
 
@@ -108,10 +97,8 @@ export function OrderDetailPage() {
   }
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">
+    <div className="min-w-0">
+          <h1 className="text-heading font-semibold tracking-tight text-navy">
             {placed ? t("orders.placed") : t("orders.details")}
           </h1>
           <p className="mt-2 text-sm text-navy-muted">
@@ -202,9 +189,7 @@ export function OrderDetailPage() {
               {t("listing.chatSeller")}
             </Button>
           </div>
-        </div>
-      </Container>
-    </main>
+    </div>
   )
 }
 

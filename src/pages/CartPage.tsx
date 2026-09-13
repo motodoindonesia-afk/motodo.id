@@ -1,7 +1,6 @@
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Container } from "../components/layout/Container"
 import { Button } from "../components/ui/Button"
 import { useCart } from "../context/CartContext"
 import { ensureRemoteListing, getListingById, toCatalogListing } from "../lib/listings"
@@ -155,9 +154,8 @@ export function CartPage() {
   )
 
   return (
-    <main className="bg-white pb-10 sm:pb-12">
-      <Container className="pt-6 sm:pt-8">
-        <h1 className="text-xl font-bold tracking-tight text-navy sm:text-2xl">{t("cart.title")}</h1>
+    <div className="min-w-0">
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("cart.title")}</h1>
 
         {loading || resolving ? (
           <p className="mt-8 text-sm text-navy-muted">{t("common.loading")}</p>
@@ -212,8 +210,7 @@ export function CartPage() {
             </div>
           </>
         )}
-      </Container>
-    </main>
+    </div>
   )
 }
 

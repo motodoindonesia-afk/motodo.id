@@ -1,7 +1,6 @@
 import { Heart } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { Container } from "../components/layout/Container"
 import { MotorcycleCard } from "../components/ui/MotorcycleCard"
 import { useFavorites } from "../context/FavoritesContext"
 import { ensureRemoteListing, getListingById, toCatalogListing } from "../lib/listings"
@@ -48,9 +47,8 @@ export function WishlistPage() {
   }, [ids, listingVersion, resolving])
 
   return (
-    <main className="bg-white pb-10 sm:pb-12">
-      <Container className="pt-6 sm:pt-8">
-        <h1 className="text-xl font-bold tracking-tight text-navy sm:text-2xl">{t("wishlist.title")}</h1>
+    <div className="min-w-0">
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("wishlist.title")}</h1>
 
         {loading || resolving ? (
           <p className="mt-8 text-sm text-navy-muted">{t("common.loading")}</p>
@@ -103,7 +101,6 @@ export function WishlistPage() {
             })}
           </div>
         )}
-      </Container>
-    </main>
+    </div>
   )
 }

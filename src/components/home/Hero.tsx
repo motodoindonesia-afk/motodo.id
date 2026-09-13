@@ -17,7 +17,7 @@ export function Hero() {
           <div className="absolute inset-0 bg-gradient-to-r from-navy/80 via-navy/45 to-navy/20" />
           <div className="relative flex h-full min-h-[240px] flex-col justify-between p-5 sm:min-h-[280px] sm:p-6 lg:min-h-[320px] lg:p-7">
             <div className="max-w-md">
-              <h1 className="text-page font-bold tracking-tight text-white sm:text-[1.625rem]">
+              <h1 className="text-display font-bold tracking-tight text-white">
                 {t("home.heroTitle")}
               </h1>
               <p className="mt-2 max-w-sm text-ui leading-relaxed text-white/90">
@@ -59,7 +59,7 @@ export function Hero() {
           >
             <div className="relative z-10 max-w-[58%]">
               <p className="text-ui text-navy">{t("home.promoGear")}</p>
-              <p className="mt-1 text-[1.05rem] font-bold leading-tight text-navy">{t("home.promoGearOffer")}</p>
+              <p className="mt-1 text-section font-bold leading-tight text-navy">{t("home.promoGearOffer")}</p>
               <span className="mt-3 inline-flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-meta font-semibold text-white">
                 {t("home.promoGearCta")}
                 <ArrowRight className="size-3" aria-hidden="true" />
@@ -78,7 +78,7 @@ export function Hero() {
             className="relative flex min-h-[132px] overflow-hidden rounded-2xl border border-navy/20 bg-navy p-4 shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             <div className="relative z-10 max-w-[62%]">
-              <p className="text-[1.05rem] font-bold leading-tight text-white">{t("home.promoSell")}</p>
+              <p className="text-section font-bold leading-tight text-white">{t("home.promoSell")}</p>
               <p className="mt-1 text-meta leading-snug text-white/85">
                 {t("home.promoSellBody")}
               </p>
@@ -105,7 +105,7 @@ function TrustItem({ icon, title, text }: { icon: ReactNode; title: string; text
       <span className="mt-0.5">{icon}</span>
       <span>
         <span className="block text-meta font-semibold">{title}</span>
-        <span className="block text-[11px] text-white/80">{text}</span>
+        <span className="block text-meta text-white/80">{text}</span>
       </span>
     </div>
   )

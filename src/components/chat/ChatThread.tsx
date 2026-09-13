@@ -86,7 +86,7 @@ export function ChatThread({ conversation, userId, backHref }: Props) {
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="truncate text-sm font-semibold text-navy">{listing.name}</h2>
             {listing.status === "sold" ? (
-              <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-navy">
+              <span className="rounded-full bg-surface px-2 py-0.5 text-meta font-semibold uppercase tracking-wide text-navy">
                 {t("chat.sold")}
               </span>
             ) : null}
@@ -124,7 +124,7 @@ export function ChatThread({ conversation, userId, backHref }: Props) {
                 )}
               >
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.message}</p>
-                <p className={cn("mt-1 text-[11px]", mine ? "text-white/80" : "text-navy-muted")}>
+                <p className={cn("mt-1 text-[10px]", mine ? "text-white/80" : "text-navy-muted")}>
                   {formatMessageTime(message.createdAt)}
                   {mine ? (message.read ? ` · ${t("chat.read")}` : ` · ${t("chat.sent")}`) : null}
                 </p>

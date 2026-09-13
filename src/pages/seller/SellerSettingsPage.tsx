@@ -11,7 +11,6 @@ import {
   Users,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { SellerCenterLayout } from "../../components/seller/SellerCenterLayout"
 import { SellerStatusBadge } from "../../components/seller/SellerStatusBadge"
 import { Button } from "../../components/ui/Button"
 import { useAuth } from "../../context/AuthContext"
@@ -45,7 +44,9 @@ const INFO_CARDS: SettingCard[] = [
     icon: Palette,
     title: "seller.navStoreLook",
     hint: "seller.settingLookHint",
-    available: false,
+    to: "/seller/profile#store-cover",
+    available: true,
+    action: "seller.settingsView",
   },
 ]
 
@@ -120,25 +121,24 @@ export function SellerSettingsPage() {
         : t("seller.pendingVerify")
 
   return (
-    <SellerCenterLayout>
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div>
-          <h1 className="text-[20px] font-semibold tracking-tight text-navy">{t("seller.settingsTitle")}</h1>
-          <p className="mt-1 text-[14px] leading-relaxed text-navy-muted">{t("seller.settingsSubtitle")}</p>
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("seller.settingsTitle")}</h1>
+          <p className="mt-1 text-[13px] leading-relaxed text-navy-muted">{t("seller.settingsSubtitle")}</p>
         </div>
 
         <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
-          <h2 className="text-[16px] font-semibold text-navy">{t("seller.settingStatus")}</h2>
+          <h2 className="text-section font-semibold text-navy">{t("seller.settingStatus")}</h2>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <p className="min-w-0 truncate text-[14px] font-medium text-navy">{profile.businessName}</p>
+            <p className="min-w-0 truncate text-ui font-medium text-navy">{profile.businessName}</p>
             <SellerStatusBadge status={profile.status} label={statusLabel} />
           </div>
           {profile.status === "rejected" ? (
             <>
               {profile.rejectionReason ? (
-                <p className="mt-2 text-[13px] leading-relaxed text-navy">{profile.rejectionReason}</p>
+                <p className="mt-2 text-[12px] leading-relaxed text-navy">{profile.rejectionReason}</p>
               ) : null}
-              <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/register")}>
+              <Button className="mt-3 h-10 px-4 py-2 text-[13px]" onClick={() => navigate("/seller/register")}>
                 {t("profile.editRegistration")}
               </Button>
             </>
@@ -150,14 +150,13 @@ export function SellerSettingsPage() {
         <SettingsSection title={t("seller.sectionSales")} cards={SALES_CARDS} />
         <SettingsSection title={t("seller.sectionAccountNotify")} cards={ACCOUNT_CARDS} />
       </div>
-    </SellerCenterLayout>
   )
 }
 
 function SettingsSection({ title, cards }: { title: string; cards: SettingCard[] }) {
   return (
     <section>
-      <h2 className="mb-2 text-[13px] font-semibold tracking-wide text-navy-muted uppercase">{title}</h2>
+      <h2 className="mb-2 text-ui font-semibold tracking-wide text-navy-muted uppercase">{title}</h2>
       <div className="grid grid-cols-1 gap-2 min-[768px]:grid-cols-2">
         {cards.map((card) => (
           <SettingsCard key={card.id} card={card} />
@@ -176,17 +175,17 @@ function SettingsCard({ card }: { card: SettingCard }) {
         <Icon className="size-4" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[14px] font-medium text-navy">{t(card.title)}</span>
-        <span className="mt-0.5 block text-[12px] leading-snug text-navy-muted">{t(card.hint)}</span>
+        <span className="block text-ui font-medium text-navy">{t(card.title)}</span>
+        <span className="mt-0.5 block text-[11px] leading-snug text-navy-muted">{t(card.hint)}</span>
       </span>
       {card.available ? (
         card.action ? (
-          <span className="shrink-0 text-[12px] font-medium text-brand">{t(card.action)}</span>
+          <span className="shrink-0 text-[11px] font-medium text-brand">{t(card.action)}</span>
         ) : (
           <ChevronRight className="size-4 shrink-0 text-navy-muted" aria-hidden="true" />
         )
       ) : (
-        <span className="shrink-0 text-[11px] font-medium text-navy-muted">{t("account.soonBadge")}</span>
+        <span className="shrink-0 text-meta font-medium text-navy-muted">{t("account.soonBadge")}</span>
       )}
     </>
   )

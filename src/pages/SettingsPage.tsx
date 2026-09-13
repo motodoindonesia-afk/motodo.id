@@ -11,7 +11,6 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Link } from "react-router-dom"
-import { AccountLayout } from "../components/profile/AccountLayout"
 import { LanguageSwitcher, useT, type MessageKey } from "../i18n"
 import { cn } from "../lib/cn"
 
@@ -49,18 +48,16 @@ export function SettingsPage() {
   const t = useT()
 
   return (
-    <AccountLayout>
-      <div className="space-y-4">
-        <div>
-          <h1 className="text-[20px] font-semibold tracking-tight text-navy sm:text-[22px]">{t("account.settingsTitle")}</h1>
-          <p className="mt-1 text-[14px] text-navy-muted">{t("account.settingsSubtitle")}</p>
-        </div>
-        <SettingsGroup title={t("account.sectionAccount")} rows={ACCOUNT_ROWS} />
-        <SettingsGroup title={t("account.sectionNotify")} rows={NOTIFY_ROWS} />
-        <SettingsGroup title={t("account.sectionPrefs")} rows={PREF_ROWS} />
-        <SettingsGroup title={t("account.sectionPrivacy")} rows={PRIVACY_ROWS} />
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("account.settingsTitle")}</h1>
+        <p className="mt-1 text-[13px] text-navy-muted">{t("account.settingsSubtitle")}</p>
       </div>
-    </AccountLayout>
+      <SettingsGroup title={t("account.sectionAccount")} rows={ACCOUNT_ROWS} />
+      <SettingsGroup title={t("account.sectionNotify")} rows={NOTIFY_ROWS} />
+      <SettingsGroup title={t("account.sectionPrefs")} rows={PREF_ROWS} />
+      <SettingsGroup title={t("account.sectionPrivacy")} rows={PRIVACY_ROWS} />
+    </div>
   )
 }
 
@@ -68,7 +65,7 @@ function SettingsGroup({ title, rows }: { title: string; rows: SettingRow[] }) {
   const t = useT()
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
-      <h2 className="border-b border-line px-4 py-2.5 text-[12px] font-semibold tracking-wide text-navy-muted uppercase">
+      <h2 className="border-b border-line px-4 py-2.5 text-meta font-semibold tracking-wide text-navy-muted uppercase">
         {title}
       </h2>
       <ul>
@@ -80,15 +77,15 @@ function SettingsGroup({ title, rows }: { title: string; rows: SettingRow[] }) {
                 <Icon className="size-4" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-medium text-navy">{t(row.label)}</span>
-                {row.hint ? <span className="mt-0.5 block text-[12px] text-navy-muted">{t(row.hint)}</span> : null}
+                <span className="block text-ui font-medium text-navy">{t(row.label)}</span>
+                {row.hint ? <span className="mt-0.5 block text-meta text-navy-muted">{t(row.hint)}</span> : null}
               </span>
               {row.extra === "language" ? (
                 <LanguageSwitcher tone="onLight" />
               ) : row.available ? (
                 <ChevronRight className="size-4 shrink-0 text-navy-muted" aria-hidden="true" />
               ) : (
-                <span className="shrink-0 text-[11px] font-medium text-navy-muted">{t("account.soonBadge")}</span>
+                <span className="shrink-0 text-meta font-medium text-navy-muted">{t("account.soonBadge")}</span>
               )}
             </>
           )

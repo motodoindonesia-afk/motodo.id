@@ -80,10 +80,10 @@ export function BrowsePage() {
     <main className="bg-white pb-10 sm:pb-12">
       <Container className="pt-4 min-[769px]:pt-8">
         <div className="max-w-2xl">
-          <h1 className="text-[22px] font-bold leading-tight tracking-tight text-navy sm:text-[1.5rem]">
+          <h1 className="text-heading font-bold leading-tight tracking-tight text-navy sm:text-display">
             {t("browse.title")}
           </h1>
-          <p className="mt-1 text-[14px] leading-snug text-navy-muted min-[769px]:mt-1.5 min-[769px]:text-ui min-[769px]:leading-relaxed">
+          <p className="mt-1 text-[13px] leading-snug text-navy-muted min-[769px]:mt-1.5 min-[769px]:text-ui min-[769px]:leading-relaxed">
             {t("browse.subtitle")}
           </p>
         </div>
@@ -116,11 +116,11 @@ export function BrowsePage() {
 
           <div>
             <div className="mb-3 flex min-w-0 items-center gap-2 min-[769px]:mb-4 min-[769px]:justify-between">
-              <p className="min-w-0 shrink truncate text-[13px] font-medium text-navy min-[769px]:text-ui">
+              <p className="min-w-0 shrink truncate text-ui font-medium text-navy min-[769px]:text-ui">
                 {filtered.length === 1 ? t("browse.countOne") : t("browse.countMany", { count: filtered.length })}
               </p>
               <div className="flex min-w-0 items-center gap-2">
-                <label className="flex min-w-0 items-center gap-2 text-[13px] text-navy-muted min-[769px]:text-ui">
+                <label className="flex min-w-0 items-center gap-2 text-[12px] text-navy-muted min-[769px]:text-ui">
                   <span className="hidden shrink-0 min-[769px]:inline">{t("browse.sort")}</span>
                   <select
                     value={sort}
@@ -128,7 +128,7 @@ export function BrowsePage() {
                       setSort(event.target.value as SortOption)
                       setPage(1)
                     }}
-                    className="h-9 min-w-0 max-w-[158px] rounded-lg border border-line bg-white px-2 text-[13px] text-navy focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20 min-[769px]:max-w-none min-[769px]:min-w-[180px] min-[769px]:px-3 min-[769px]:text-ui"
+                    className="h-9 min-w-0 max-w-[158px] rounded-lg border border-line bg-white px-2 text-[12px] text-navy focus:border-brand/30 focus:outline-none focus:ring-2 focus:ring-brand/20 min-[769px]:max-w-none min-[769px]:min-w-[180px] min-[769px]:px-3 min-[769px]:text-ui"
                   >
                     {SORT_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -139,7 +139,7 @@ export function BrowsePage() {
                 </label>
                 <Button
                   variant="secondary"
-                  className="h-9 shrink-0 px-2.5 py-0 text-[13px] lg:hidden"
+                  className="h-9 shrink-0 px-2.5 py-0 text-[12px] lg:hidden"
                   onClick={() => setFiltersOpen(true)}
                 >
                   <SlidersHorizontal className="size-4" aria-hidden="true" />

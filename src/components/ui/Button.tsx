@@ -17,12 +17,12 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+        "inline-flex items-center justify-center gap-2 rounded-lg text-ui font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
         variant === "primary" &&
-          "bg-brand px-4 py-2.5 text-white hover:bg-brand-hover",
+          "bg-brand px-4 py-2 text-white hover:bg-brand-hover",
         variant === "text" && "text-navy hover:text-brand",
         variant === "secondary" &&
-          "border border-line bg-white px-4 py-2.5 text-navy hover:bg-surface",
+          "border border-line bg-white px-4 py-2 text-navy hover:bg-surface",
         "disabled:pointer-events-none disabled:opacity-60",
         className,
       )}

@@ -8,7 +8,6 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
-import { SellerCenterLayout } from "../../components/seller/SellerCenterLayout"
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge"
 import { Button } from "../../components/ui/Button"
 import { ViewAllLink } from "../../components/ui/ViewAllLink"
@@ -55,22 +54,21 @@ export function SellerDashboardPage() {
   const hasPerformance = allTime.countedCount > 0 || thisMonth.countedCount > 0
 
   return (
-    <SellerCenterLayout>
-      <div className="space-y-3">
+    <div className="space-y-3">
         {profile.status !== "approved" ? (
           <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
             {profile.status === "pending" ? (
               <>
-                <p className="text-[14px] font-semibold text-navy">{t("seller.pendingReview")}</p>
-                <p className="mt-1 text-[13px] leading-relaxed text-navy-muted">{t("seller.pendingCannot")}</p>
+                <p className="text-[13px] font-semibold text-navy">{t("seller.pendingReview")}</p>
+                <p className="mt-1 text-[12px] leading-relaxed text-navy-muted">{t("seller.pendingCannot")}</p>
               </>
             ) : (
               <>
-                <p className="text-[14px] font-semibold text-navy">{t("seller.rejectedTitle")}</p>
+                <p className="text-[13px] font-semibold text-navy">{t("seller.rejectedTitle")}</p>
                 {profile.rejectionReason ? (
-                  <p className="mt-1 text-[13px] leading-relaxed text-navy">{profile.rejectionReason}</p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-navy">{profile.rejectionReason}</p>
                 ) : null}
-                <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/register")}>
+                <Button className="mt-3 h-10 px-4 py-2 text-[13px]" onClick={() => navigate("/seller/register")}>
                   {t("profile.editRegistration")}
                 </Button>
               </>
@@ -79,9 +77,9 @@ export function SellerDashboardPage() {
         ) : null}
 
         <section className="rounded-2xl border border-line bg-white p-4 shadow-card min-[1024px]:p-5">
-          <h1 className="text-[20px] font-semibold tracking-tight text-navy">{t("seller.welcome")}</h1>
-          <p className="mt-1 text-[14px] text-navy-muted">{t("seller.welcomeBody")}</p>
-          <p className="mt-2 truncate text-[13px] font-medium text-navy">{profile.businessName}</p>
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("seller.welcome")}</h1>
+          <p className="mt-1 text-[13px] text-navy-muted">{t("seller.welcomeBody")}</p>
+          <p className="mt-2 truncate text-ui font-medium text-navy">{profile.businessName}</p>
         </section>
 
         <section className="grid grid-cols-2 gap-2 min-[1024px]:grid-cols-5 min-[1024px]:gap-2.5">
@@ -107,10 +105,10 @@ export function SellerDashboardPage() {
             className="col-span-2 min-[1024px]:col-span-1"
           />
         </section>
-        {!approved ? <p className="text-[12px] text-navy-muted">{t("seller.unlockHint")}</p> : null}
+        {!approved ? <p className="text-meta text-navy-muted">{t("seller.unlockHint")}</p> : null}
 
         <section>
-          <h2 className="mb-2 text-[13px] font-semibold tracking-wide text-navy-muted uppercase">{t("seller.importantToday")}</h2>
+          <h2 className="mb-2 text-ui font-semibold tracking-wide text-navy-muted uppercase">{t("seller.importantToday")}</h2>
           <div className="grid grid-cols-2 gap-2 min-[1024px]:grid-cols-4">
             <MetricCard to="/seller/orders" label={t("seller.newOrders")} value={orderCounts.pending} />
             <MetricCard to="/seller/messages" label={t("seller.unreadMessages")} value={unread} />
@@ -121,21 +119,21 @@ export function SellerDashboardPage() {
 
         <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
           <div className="flex items-end justify-between gap-3">
-            <h2 className="text-[16px] font-semibold text-navy">{t("seller.myProducts")}</h2>
+            <h2 className="text-section font-semibold text-navy">{t("seller.myProducts")}</h2>
             {approved && listings.length > 0 ? (
               <ViewAllLink href="/seller/listings">{t("seller.manageListings")}</ViewAllLink>
             ) : null}
           </div>
           {listings.length === 0 ? (
             <div className="mt-3 py-3 text-center">
-              <p className="text-[14px] font-medium text-navy">{t("seller.noMotors")}</p>
-              <p className="mt-1 text-[13px] text-navy-muted">{t("seller.addFirstHint")}</p>
+              <p className="text-ui font-medium text-navy">{t("seller.noMotors")}</p>
+              <p className="mt-1 text-[12px] text-navy-muted">{t("seller.addFirstHint")}</p>
               {approved ? (
-                <Button className="mt-3 h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/listings/new")}>
+                <Button className="mt-3 h-10 px-4 py-2 text-[13px]" onClick={() => navigate("/seller/listings/new")}>
                   {t("seller.addMotor")}
                 </Button>
               ) : (
-                <p className="mt-2 text-[13px] text-navy-muted">{t("seller.listingAfterApprove")}</p>
+                <p className="mt-2 text-[12px] text-navy-muted">{t("seller.listingAfterApprove")}</p>
               )}
             </div>
           ) : (
@@ -153,8 +151,8 @@ export function SellerDashboardPage() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2">
-                        <span className="truncate text-[14px] font-medium text-navy">{listing.name || t("seller.untitled")}</span>
-                        <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-navy">
+                        <span className="truncate text-ui font-medium text-navy">{listing.name || t("seller.untitled")}</span>
+                        <span className="rounded-full bg-surface px-2 py-0.5 text-meta font-medium text-navy">
                           {listing.status === "active"
                             ? t("seller.statusActive")
                             : listing.status === "sold"
@@ -162,7 +160,7 @@ export function SellerDashboardPage() {
                               : t("seller.statusDraft")}
                         </span>
                       </span>
-                      <span className="mt-0.5 block text-[13px] font-semibold text-brand">{formatIDR(listing.price)}</span>
+                      <span className="mt-0.5 block text-ui font-semibold text-brand">{formatIDR(listing.price)}</span>
                     </span>
                   </Link>
                 </li>
@@ -173,11 +171,11 @@ export function SellerDashboardPage() {
 
         <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
           <div className="flex items-end justify-between gap-3">
-            <h2 className="text-[16px] font-semibold text-navy">{t("seller.recentOrders")}</h2>
+            <h2 className="text-section font-semibold text-navy">{t("seller.recentOrders")}</h2>
             {recentOrders.length > 0 ? <ViewAllLink href="/seller/orders">{t("seller.viewAllOrders")}</ViewAllLink> : null}
           </div>
           {recentOrders.length === 0 ? (
-            <p className="mt-3 py-3 text-center text-[14px] text-navy-muted">{t("seller.noOrdersYet")}</p>
+            <p className="mt-3 py-3 text-center text-[13px] text-navy-muted">{t("seller.noOrdersYet")}</p>
           ) : (
             <ul className="mt-3 divide-y divide-line">
               {recentOrders.map((order) => (
@@ -188,13 +186,13 @@ export function SellerDashboardPage() {
                   >
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2">
-                        <span className="truncate text-[14px] font-medium text-navy">{order.listingName}</span>
+                        <span className="truncate text-ui font-medium text-navy">{order.listingName}</span>
                         <OrderStatusBadge status={order.status} />
                       </span>
-                      <span className="mt-0.5 block text-[12px] text-navy-muted">{orderPublicRef(order)}</span>
-                      <span className="mt-0.5 block text-[12px] text-navy-muted">{formatOrderDate(order.createdAt)}</span>
+                      <span className="mt-0.5 block text-meta text-navy-muted">{orderPublicRef(order)}</span>
+                      <span className="mt-0.5 block text-meta text-navy-muted">{formatOrderDate(order.createdAt)}</span>
                     </span>
-                    <span className="shrink-0 text-[13px] font-semibold text-navy">{formatIDR(order.buyerTotal)}</span>
+                    <span className="shrink-0 text-ui font-semibold text-navy">{formatIDR(order.buyerTotal)}</span>
                   </Link>
                 </li>
               ))}
@@ -203,10 +201,10 @@ export function SellerDashboardPage() {
         </section>
 
         <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
-          <h2 className="text-[16px] font-semibold text-navy">{t("seller.myStore")}</h2>
-          <p className="mt-2 text-[15px] font-semibold text-navy">{profile.businessName}</p>
-          {profile.city ? <p className="mt-0.5 text-[13px] text-navy-muted">{profile.city}</p> : null}
-          <p className="mt-1 text-[13px] text-navy-muted">{t("seller.listingCount", { count: listingCounts.total })}</p>
+          <h2 className="text-section font-semibold text-navy">{t("seller.myStore")}</h2>
+          <p className="mt-2 text-[13px] font-semibold text-navy">{profile.businessName}</p>
+          {profile.city ? <p className="mt-0.5 text-[12px] text-navy-muted">{profile.city}</p> : null}
+          <p className="mt-1 text-[12px] text-navy-muted">{t("seller.listingCount", { count: listingCounts.total })}</p>
           {rating.count > 0 ? (
             <div className="mt-2">
               <CompactRating average={rating.average} count={rating.count} emptyLabel="" />
@@ -214,37 +212,36 @@ export function SellerDashboardPage() {
           ) : null}
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             {approved ? (
-              <Button className="h-10 px-4 py-2 text-[14px]" onClick={() => navigate(publicSellerPath(user.id))}>
+              <Button className="h-10 px-4 py-2 text-[13px]" onClick={() => navigate(publicSellerPath(user.id))}>
                 {t("seller.visitStore")}
               </Button>
             ) : (
-              <p className="text-[12px] text-navy-muted">{t("seller.storeNotPublic")}</p>
+              <p className="text-meta text-navy-muted">{t("seller.storeNotPublic")}</p>
             )}
-            <Button variant="secondary" className="h-10 px-4 py-2 text-[14px]" onClick={() => navigate("/seller/profile/edit")}>
+            <Button variant="secondary" className="h-10 px-4 py-2 text-[13px]" onClick={() => navigate("/seller/profile/edit")}>
               {t("seller.editStoreProfile")}
             </Button>
           </div>
         </section>
 
         <section className="rounded-2xl border border-line bg-white p-4 shadow-card">
-          <h2 className="text-[16px] font-semibold text-navy">{t("seller.storePerformance")}</h2>
+          <h2 className="text-section font-semibold text-navy">{t("seller.storePerformance")}</h2>
           {hasPerformance ? (
             <dl className="mt-3 grid grid-cols-2 gap-3">
               <div>
-                <dt className="text-[12px] text-navy-muted">{t("seller.thisMonth")}</dt>
-                <dd className="mt-0.5 text-[16px] font-semibold text-navy">{formatIDR(thisMonth.net)}</dd>
+                <dt className="text-meta text-navy-muted">{t("seller.thisMonth")}</dt>
+                <dd className="mt-0.5 text-section font-semibold text-navy">{formatIDR(thisMonth.net)}</dd>
               </div>
               <div>
-                <dt className="text-[12px] text-navy-muted">{t("seller.allTimeShort")}</dt>
-                <dd className="mt-0.5 text-[16px] font-semibold text-navy">{formatIDR(allTime.net)}</dd>
+                <dt className="text-meta text-navy-muted">{t("seller.allTimeShort")}</dt>
+                <dd className="mt-0.5 text-section font-semibold text-navy">{formatIDR(allTime.net)}</dd>
               </div>
             </dl>
           ) : (
-            <p className="mt-2 text-[13px] leading-relaxed text-navy-muted">{t("seller.performanceEmpty")}</p>
+            <p className="mt-2 text-[12px] leading-relaxed text-navy-muted">{t("seller.performanceEmpty")}</p>
           )}
         </section>
       </div>
-    </SellerCenterLayout>
   )
 }
 
@@ -274,7 +271,7 @@ function ActionCard({
       <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand">
         <Icon className="size-4" aria-hidden="true" />
       </span>
-      <span className="text-[13px] font-medium text-navy">{label}</span>
+      <span className="text-ui font-medium text-navy">{label}</span>
     </button>
   )
 }
@@ -282,8 +279,8 @@ function ActionCard({
 function MetricCard({ to, label, value }: { to?: string; label: string; value: number }) {
   const body = (
     <>
-      <span className="block text-[12px] text-navy-muted">{label}</span>
-      <span className="mt-1 block text-[20px] font-semibold text-navy">{value}</span>
+      <span className="block text-meta text-navy-muted">{label}</span>
+      <span className="mt-1 block text-heading font-semibold text-navy">{value}</span>
     </>
   )
   const className =

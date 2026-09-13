@@ -48,7 +48,10 @@ export function AdminOrdersPage() {
       <Container>
         <div className="mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold tracking-tight text-navy">Orders</h1>
-          <p className="mt-2 text-navy-muted">Monitor marketplace transactions. Sellers remain responsible for status changes.</p>
+          <p className="mt-2 text-navy-muted">
+            Monitor marketplace transactions. Admins may cancel pending or confirmed orders. Sellers confirm and complete
+            their own orders.
+          </p>
 
           <div className="mt-6 flex flex-wrap gap-2">
             {FILTERS.map((item) => (

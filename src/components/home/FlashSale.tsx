@@ -39,7 +39,7 @@ function useEndOfDayCountdown() {
 
 function CountdownBox({ value }: { value: string }) {
   return (
-    <span className="inline-flex min-w-[1.75rem] justify-center rounded-sm bg-navy px-1 py-0.5 text-[11px] font-medium tabular-nums text-white">
+    <span className="inline-flex min-w-[1.75rem] justify-center rounded-sm bg-navy px-1 py-0.5 text-meta font-medium tabular-nums text-white">
       {value}
     </span>
   )

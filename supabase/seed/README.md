@@ -6,6 +6,8 @@ DEMO DATA ONLY. Run these in the **Supabase SQL Editor** as the project owner. D
 
 1. Run `supabase/migrations/20260906120000_add_is_demo.sql` (if not already applied)
 2. Run `supabase/seed/demo_motodo_marketplace.sql`
+3. Optional local purchase QA: run `supabase/seed/qa_purchase_listing.sql` (exactly one `(Testing Buy)` listing with `is_demo = false`; does not modify the 18 demo listings)
+
 
 The seed is idempotent. Running it twice must not duplicate sellers, listings, demo buyers, demo orders, or demo reviews (deterministic UUIDs + `ON CONFLICT`).
 
@@ -37,6 +39,25 @@ ORDER BY review_count DESC;
 SELECT seller_id, review_count, average_rating
 FROM public.seller_rating_summary
 WHERE seller_id IN (SELECT id FROM public.seller_profiles WHERE is_demo);
+```
+
+## QA purchase listing (local only)
+
+`qa_purchase_listing.sql` inserts **one** active listing copied from Harley-Davidson Sportster 883 Custom.
+
+This listing is intentionally `is_demo=false` so the real cart/checkout/order flow can be tested locally.
+
+- Name contains `(Testing Buy)`
+- Deterministic id `b0000000-0000-4000-8000-000000000101`
+- Seller is the existing Motodo Demo Garage row
+- Images reuse the source listing `public_url` values
+- Does **not** modify the 18 demo listings
+
+```sql
+SELECT id, name, seller_id, is_demo, status, quantity
+FROM public.listings
+WHERE name LIKE '%(Testing Buy)%';
+-- expect 1 row, is_demo = false, status = active, quantity = 1
 ```
 
 ## Remove

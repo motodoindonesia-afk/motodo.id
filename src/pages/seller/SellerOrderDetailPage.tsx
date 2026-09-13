@@ -3,7 +3,6 @@ import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge"
 import { Button } from "../../components/ui/Button"
-import { Container } from "../../components/layout/Container"
 import { formatIDR } from "../../lib/listingForm"
 import { getListingPickupDetails } from "../../lib/listings"
 import {
@@ -56,27 +55,23 @@ export function SellerOrderDetailPage() {
   const order = orderId ? getOrderById(orderId) : null
   if (!order) {
     return (
-      <main className="bg-white py-16 sm:py-20">
-        <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.notFound")}</h1>
-          <Button className="mt-8" onClick={() => navigate("/seller/orders")}>
-            {t("seller.backOrders")}
-          </Button>
-        </Container>
-      </main>
+      <div className="min-w-0">
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("orders.notFound")}</h1>
+        <Button className="mt-6" onClick={() => navigate("/seller/orders")}>
+          {t("seller.backOrders")}
+        </Button>
+      </div>
     )
   }
 
   if (!canSellerViewOrder(order, user.id)) {
     return (
-      <main className="bg-white py-16 sm:py-20">
-        <Container className="max-w-xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.noPermission")}</h1>
-          <Button className="mt-8" onClick={() => navigate("/seller/orders")}>
-            {t("seller.backOrders")}
-          </Button>
-        </Container>
-      </main>
+      <div className="min-w-0">
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("orders.noPermission")}</h1>
+        <Button className="mt-6" onClick={() => navigate("/seller/orders")}>
+          {t("seller.backOrders")}
+        </Button>
+      </div>
     )
   }
 
@@ -98,10 +93,8 @@ export function SellerOrderDetailPage() {
   }
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.orderInfo")}</h1>
+    <div className="min-w-0">
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("seller.orderInfo")}</h1>
           <div className="mt-4 rounded-2xl border border-line px-5 py-6 sm:px-6">
             <dl className="space-y-2 text-sm">
               <Row label={t("seller.orderId")} value={orderPublicRef(order)} />
@@ -234,9 +227,7 @@ export function SellerOrderDetailPage() {
               {t("seller.backOrders")}
             </Button>
           </div>
-        </div>
-      </Container>
-    </main>
+    </div>
   )
 }
 

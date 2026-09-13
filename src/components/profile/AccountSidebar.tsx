@@ -60,13 +60,13 @@ export function AccountSidebar({
         <Link to="/profile" className="flex items-center gap-3 rounded-xl px-1 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
           <UserAvatar name={name} size="md" />
           <div className="min-w-0">
-            <p className="truncate text-[14px] font-semibold text-navy">{name}</p>
-            <p className="truncate text-[12px] text-navy-muted">{username}</p>
+            <p className="truncate text-[13px] font-semibold text-navy">{name}</p>
+            <p className="truncate text-meta text-navy-muted">{username}</p>
           </div>
         </Link>
         <Link
           to="/profile/edit"
-          className="mt-2 inline-flex px-1 text-[13px] font-medium text-brand hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="mt-2 inline-flex px-1 text-ui font-medium text-brand hover:text-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {t("account.editProfile")}
         </Link>
@@ -79,7 +79,7 @@ export function AccountSidebar({
         <div className="my-2 border-t border-line" />
         <button
           type="button"
-          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium text-navy hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-ui font-medium text-navy hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           onClick={onLogout}
         >
           <LogOut className="size-4 shrink-0" aria-hidden="true" />
@@ -93,11 +93,11 @@ export function AccountSidebar({
 export function AccountMobileNav({ onLogout }: { onLogout: () => void }) {
   const t = useT()
   const location = useLocation()
-  const items = [...ACCOUNT_ITEMS, ...ACTIVITY_ITEMS].filter((item) => item.available && item.to)
+  const items = [...ACCOUNT_ITEMS, ...ACTIVITY_ITEMS, ...HELP_ITEMS].filter((item) => item.available && item.to)
 
   return (
-    <nav className="min-[769px]:hidden" aria-label={t("account.menu")}>
-      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav className="min-w-0 min-[769px]:hidden" aria-label={t("account.menu")}>
+      <div className="flex flex-wrap gap-1.5">
         {items.map((item) => {
           const active = isActive(item.to, location.pathname)
           return (
@@ -105,7 +105,7 @@ export function AccountMobileNav({ onLogout }: { onLogout: () => void }) {
               key={item.id}
               to={item.to!}
               className={cn(
-                "shrink-0 rounded-full border px-3 py-1.5 text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+                "rounded-full border px-3 py-1.5 text-ui font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
                 active
                   ? "border-brand bg-brand-soft text-brand"
                   : "border-line bg-white text-navy hover:border-brand/40",
@@ -117,7 +117,7 @@ export function AccountMobileNav({ onLogout }: { onLogout: () => void }) {
         })}
         <button
           type="button"
-          className="shrink-0 rounded-full border border-line bg-white px-3 py-1.5 text-[13px] font-medium text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="rounded-full border border-line bg-white px-3 py-1.5 text-ui font-medium text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           onClick={onLogout}
         >
           {t("common.logout")}
@@ -130,6 +130,8 @@ export function AccountMobileNav({ onLogout }: { onLogout: () => void }) {
 function isActive(to: string | undefined, pathname: string) {
   if (!to || to.startsWith("/#")) return false
   if (to === "/profile") return pathname === "/profile"
+  if (to === "/orders") return pathname === "/orders" || pathname.startsWith("/orders/")
+  if (to === "/messages") return pathname === "/messages" || pathname.startsWith("/messages/")
   return pathname === to
 }
 
@@ -145,7 +147,7 @@ function NavGroup({
   const t = useT()
   return (
     <div className="mt-3">
-      <p className="px-2 text-[11px] font-semibold tracking-wide text-navy-muted uppercase">{title}</p>
+      <p className="px-2 text-meta font-semibold tracking-wide text-navy-muted uppercase">{title}</p>
       <ul className="mt-1">
         {items.map((item) => {
           const Icon = item.icon
@@ -158,7 +160,7 @@ function NavGroup({
                   disabled
                   aria-disabled="true"
                   title={t("account.comingSoon")}
-                  className="flex w-full cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] text-navy-muted/70"
+                  className="flex w-full cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-navy-muted/70"
                 >
                   <Icon className="size-4 shrink-0" aria-hidden="true" />
                   <span className="flex-1">{t(item.label)}</span>
@@ -173,7 +175,7 @@ function NavGroup({
                 to={item.to}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-2 rounded-md border-l-2 px-2 py-1.5 text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+                  "flex items-center gap-2 rounded-md border-l-2 px-2 py-1.5 text-ui font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
                   active
                     ? "border-brand bg-brand-soft text-brand"
                     : "border-transparent text-navy hover:bg-surface",

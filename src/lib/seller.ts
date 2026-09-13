@@ -52,6 +52,7 @@ const SEEDED_SELLERS: SellerProfile[] = [
     sellerFleetAvailable: false,
     status: "pending",
     createdAt: "2026-08-20T08:00:00.000Z",
+    store_cover_url: null,
   },
   {
     id: "seed-seller-pending-2",
@@ -71,6 +72,7 @@ const SEEDED_SELLERS: SellerProfile[] = [
     sellerFleetAvailable: false,
     status: "pending",
     createdAt: "2026-08-28T08:00:00.000Z",
+    store_cover_url: null,
   },
   {
     id: "seed-seller-approved",
@@ -92,6 +94,7 @@ const SEEDED_SELLERS: SellerProfile[] = [
     createdAt: "2026-07-12T08:00:00.000Z",
     reviewedAt: "2026-07-14T09:00:00.000Z",
     reviewedBy: "mock-admin-motodo",
+    store_cover_url: null,
   },
   {
     id: "seed-seller-approved-2",
@@ -113,6 +116,7 @@ const SEEDED_SELLERS: SellerProfile[] = [
     createdAt: "2026-06-04T08:00:00.000Z",
     reviewedAt: "2026-06-06T09:00:00.000Z",
     reviewedBy: "mock-admin-motodo",
+    store_cover_url: null,
   },
   {
     id: "seed-seller-rejected",
@@ -134,6 +138,7 @@ const SEEDED_SELLERS: SellerProfile[] = [
     rejectionReason: "Motodo sellers must operate from a physical showroom. Please add a dedicated display space and resubmit.",
     reviewedAt: "2026-08-04T10:00:00.000Z",
     reviewedBy: "mock-admin-motodo",
+    store_cover_url: null,
   },
 ]
 
@@ -175,6 +180,7 @@ function normalizeProfile(value: Partial<SellerProfile>): SellerProfile | null {
     rejectionReason: value.rejectionReason || undefined,
     reviewedAt: value.reviewedAt || undefined,
     reviewedBy: value.reviewedBy || undefined,
+    store_cover_url: value.store_cover_url?.trim() || null,
   }
 }
 
@@ -286,6 +292,7 @@ export async function createSellerProfile(input: SellerProfileInput): Promise<Se
     id: crypto.randomUUID(),
     status: "pending",
     createdAt: new Date().toISOString(),
+    store_cover_url: null,
   }
   writeProfiles([...readProfiles(), profile])
   notifyAdminSellerRegistration(profile.id)
@@ -355,6 +362,7 @@ export async function resubmitSellerProfile(userId: string, input: SellerProfile
     rejectionReason: undefined,
     reviewedAt: undefined,
     reviewedBy: undefined,
+    store_cover_url: current?.store_cover_url ?? null,
   }
   const others = readProfiles().filter((item) => item.userId !== userId)
   writeProfiles([...others, profile])

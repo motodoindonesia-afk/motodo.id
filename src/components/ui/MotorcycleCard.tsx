@@ -59,14 +59,14 @@ export function MotorcycleCard({
 
   const body = (
     <div className="flex min-h-0 flex-1 flex-col px-2.5 py-2 sm:px-3">
-      <h3 className="h-[calc(1.35em*2)] overflow-hidden text-[14px] font-semibold leading-[1.35] text-navy [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+      <h3 className="h-[calc(1.35em*2)] overflow-hidden text-card-title font-semibold text-navy [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
         {listing.name}
       </h3>
-      <p className="mt-0.5 shrink-0 text-[16px] font-bold leading-[1.25] text-brand min-[769px]:text-[18px]">{listing.price}</p>
+      <p className="mt-0.5 shrink-0 text-price font-bold text-brand">{listing.price}</p>
       {hideQuantity ? null : (
-        <p className="mt-0.5 min-h-[1.4em] shrink-0 truncate text-[11px] leading-[1.4] text-navy-muted min-[769px]:text-[12px]">{quantityLabel ?? "\u00a0"}</p>
+        <p className="mt-0.5 min-h-[1.4em] shrink-0 truncate text-meta text-navy-muted">{quantityLabel ?? "\u00a0"}</p>
       )}
-      <p className="mt-1 min-h-[1.4em] shrink-0 truncate text-[11px] leading-[1.4] text-navy-muted min-[769px]:text-[12px]">{meta || "\u00a0"}</p>
+      <p className="mt-1 min-h-[1.4em] shrink-0 truncate text-meta text-navy-muted">{meta || "\u00a0"}</p>
       {footer ? <div className="mt-1.5 shrink-0">{footer}</div> : null}
     </div>
   )

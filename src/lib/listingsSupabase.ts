@@ -52,6 +52,7 @@ export type SellerListingCard = {
   businessName: string
   city: string
   createdAt: string
+  store_cover_url: string | null
 }
 
 export type ListingStock = {
@@ -133,6 +134,27 @@ export function peekCachedListing(id: string): MotorcycleListing | undefined {
 
 export function getSellerListingCard(sellerId: string): SellerListingCard | undefined {
   return sellerCards.get(sellerId)
+}
+
+export function rememberSellerListingCard(card: SellerListingCard) {
+  sellerCards.set(card.id, card)
+  notifyListingsUpdated()
+}
+
+function mapSellerListingCardRow(row: {
+  id: string
+  business_name: string | null
+  city: string | null
+  created_at: string
+  store_cover_url?: string | null
+}): SellerListingCard {
+  return {
+    id: row.id,
+    businessName: row.business_name ?? "Motodo Seller",
+    city: row.city ?? "",
+    createdAt: row.created_at,
+    store_cover_url: row.store_cover_url?.trim() || null,
+  }
 }
 
 function rememberListing(listing: MotorcycleListing) {
@@ -255,20 +277,31 @@ async function refreshSellerCards(sellerIds: string[]) {
   const unique = [...new Set(sellerIds.filter(Boolean))]
   if (unique.length === 0) return
   const client = getSupabaseClient()
-  const { data, error } = await client.from("seller_listing_cards").select("id, business_name, city, created_at").in("id", unique)
+  const { data, error } = await client
+    .from("seller_listing_cards")
+    .select("id, business_name, city, created_at, store_cover_url")
+    .in("id", unique)
   if (error) return
   for (const row of data ?? []) {
-    sellerCards.set(row.id, {
-      id: row.id,
-      businessName: row.business_name ?? "Motodo Seller",
-      city: row.city ?? "",
-      createdAt: row.created_at,
-    })
+    sellerCards.set(row.id, mapSellerListingCardRow(row))
   }
 }
 
 function cacheRows(rows: ListingRow[]) {
   for (const row of rows) rememberListing(mapListingRow(row))
+}
+
+export async function ensureSellerListingCard(sellerId: string) {
+  if (!sellerId || !isSupabaseConfigured()) return
+  if (sellerCards.has(sellerId)) return
+  const client = getSupabaseClient()
+  const { data, error } = await client
+    .from("seller_listing_cards")
+    .select("id, business_name, city, created_at, store_cover_url")
+    .eq("id", sellerId)
+    .maybeSingle()
+  if (error || !data) return
+  rememberSellerListingCard(mapSellerListingCardRow(data))
 }
 
 export async function hydrateListings() {

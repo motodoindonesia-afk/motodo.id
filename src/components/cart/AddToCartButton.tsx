@@ -21,9 +21,10 @@ type Props = {
   listing: ListingHint
   variant?: "icon" | "labeled"
   className?: string
+  labeledText?: string
 }
 
-export function AddToCartButton({ listing, variant = "icon", className }: Props) {
+export function AddToCartButton({ listing, variant = "icon", className, labeledText }: Props) {
   const t = useT()
   const navigate = useNavigate()
   const location = useLocation()
@@ -100,7 +101,7 @@ export function AddToCartButton({ listing, variant = "icon", className }: Props)
         ) : (
           <ShoppingCart className="size-4" strokeWidth={1.75} aria-hidden="true" />
         )}
-        {justAdded || inCart ? t("cart.inCart") : t("cart.addShort")}
+        {justAdded || inCart ? t("cart.inCart") : labeledText ?? t("cart.addShort")}
       </Button>
       {error ? (
         <p className="mt-1 text-xs text-navy" role="status">

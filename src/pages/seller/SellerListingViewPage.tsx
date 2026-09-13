@@ -18,7 +18,6 @@ import { DeleteListingModal } from "../../components/seller/DeleteListingModal"
 import { SellerListingAccessMessage } from "../../components/seller/SellerListingAccessMessage"
 import { ImageGallery } from "../../components/browse/ImageGallery"
 import { Button } from "../../components/ui/Button"
-import { Container } from "../../components/layout/Container"
 import { availableQuantityLabel, catalogValue, categoryLabel, useLanguage } from "../../i18n"
 
 export function SellerListingViewPage() {
@@ -69,9 +68,8 @@ export function SellerListingViewPage() {
   ]
 
   return (
-    <main className="bg-white pb-16 sm:pb-20">
-      <Container className="pt-8 sm:pt-10">
-        <div className="rounded-2xl border border-line bg-surface px-5 py-4 sm:px-6">
+    <div className="min-w-0">
+        <div className="rounded-2xl border border-line bg-white px-5 py-4 sm:px-6">
           <p className="text-sm font-semibold text-navy">{t("seller.sellerView")}</p>
           <p className="mt-1 text-sm text-navy-muted">{t("seller.sellerViewBody")}</p>
         </div>
@@ -139,7 +137,6 @@ export function SellerListingViewPage() {
           <h2 className="text-xl font-bold text-navy">{t("listing.description")}</h2>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-navy-muted">{catalog.description}</p>
         </section>
-      </Container>
 
       {deleteOpen ? (
         <DeleteListingModal
@@ -174,6 +171,6 @@ export function SellerListingViewPage() {
           }}
         />
       ) : null}
-    </main>
+    </div>
   )
 }

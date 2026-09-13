@@ -22,10 +22,10 @@ const sellerLinks: { key: MessageKey; href: string }[] = [
 ]
 
 const linkClass =
-  "text-[13px] font-normal leading-6 text-navy-muted transition-colors hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+  "break-words text-base font-normal leading-6 text-navy-muted transition-colors hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
 
 function FooterHeading({ children }: { children: string }) {
-  return <p className="text-[13px] font-normal text-navy">{children}</p>
+  return <p className="text-section font-semibold text-navy">{children}</p>
 }
 
 function FooterLink({ href, children, id }: { href: string; children: string; id?: string }) {
@@ -67,7 +67,7 @@ function AppStoreBadge() {
       </svg>
       <span className="flex flex-col leading-none">
         <span className="text-[8px] font-medium tracking-wide">{t("footer.appStoreSmall")}</span>
-        <span className="mt-[2px] text-[13px] font-semibold tracking-tight">App Store</span>
+        <span className="mt-[2px] text-ui font-semibold tracking-tight">App Store</span>
       </span>
     </a>
   )
@@ -89,7 +89,7 @@ function GooglePlayBadge() {
       </svg>
       <span className="flex flex-col leading-none">
         <span className="text-[8px] font-medium tracking-[0.12em]">{t("footer.googlePlaySmall")}</span>
-        <span className="mt-[2px] text-[13px] font-semibold tracking-tight">Google Play</span>
+        <span className="mt-[2px] text-ui font-semibold tracking-tight">Google Play</span>
       </span>
     </a>
   )
@@ -99,53 +99,58 @@ export function Footer() {
   const t = useT()
 
   return (
-    <footer id="contact" className="border-t border-line bg-white">
+    <footer id="contact" className="min-w-0 border-t border-line bg-white">
       <Container>
-        <div className="grid gap-8 py-10 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 sm:py-12 lg:grid-cols-[minmax(0,1.15fr)_repeat(3,minmax(0,1fr))] lg:gap-0 lg:py-14">
-          <div className="lg:pr-8">
-            <p className="text-[13px] font-normal leading-none text-navy">motodo.id</p>
-            <p className="mt-3 max-w-[260px] text-[13px] font-normal leading-6 text-navy-muted">
+        <div className="py-8 lg:grid lg:grid-cols-[minmax(0,1.15fr)_repeat(3,minmax(0,1fr))] lg:gap-0 lg:py-14">
+          <div className="min-w-0 lg:pr-8">
+            <p className="text-base font-normal leading-none text-navy">motodo.id</p>
+            <p className="mt-3 max-w-[260px] text-base font-normal leading-6 text-navy-muted">
               {t("footer.tagline")}
             </p>
             <div id="app-store" className="mt-5 flex flex-wrap gap-2">
               <AppStoreBadge />
               <GooglePlayBadge />
             </div>
-            <p className="mt-6 text-[13px] font-normal text-navy-muted">{t("footer.copyright")}</p>
+            <p className="mt-6 text-base font-normal text-navy-muted">{t("footer.copyright")}</p>
           </div>
 
-          <nav className="lg:border-l lg:border-line lg:px-8" aria-label={t("footer.motodo")}>
-            <FooterHeading>{t("footer.motodo")}</FooterHeading>
-            <ul className="mt-4 flex flex-col gap-2.5">
-              {motodoLinks.map((link) => (
-                <li key={link.key} id={link.help ? "help" : undefined}>
-                  <FooterLink href={link.href}>{t(link.key)}</FooterLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <div className="mt-8 grid min-w-0 grid-cols-2 lg:mt-0 lg:contents">
+            <nav
+              className="min-w-0 border-r border-line pr-4 lg:border-l lg:border-r-0 lg:px-8"
+              aria-label={t("footer.motodo")}
+            >
+              <FooterHeading>{t("footer.motodo")}</FooterHeading>
+              <ul className="mt-3 flex flex-col gap-2">
+                {motodoLinks.map((link) => (
+                  <li key={link.key} id={link.help ? "help" : undefined}>
+                    <FooterLink href={link.href}>{t(link.key)}</FooterLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-          <nav className="lg:border-l lg:border-line lg:px-8" aria-label={t("footer.forSellers")}>
-            <FooterHeading>{t("footer.forSellers")}</FooterHeading>
-            <ul className="mt-4 flex flex-col gap-2.5">
-              {sellerLinks.map((link) => (
-                <li key={link.key}>
-                  <FooterLink href={link.href}>{t(link.key)}</FooterLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
+            <nav className="min-w-0 pl-4 lg:border-l lg:border-line lg:px-8" aria-label={t("footer.forSellers")}>
+              <FooterHeading>{t("footer.forSellers")}</FooterHeading>
+              <ul className="mt-3 flex flex-col gap-2">
+                {sellerLinks.map((link) => (
+                  <li key={link.key}>
+                    <FooterLink href={link.href}>{t(link.key)}</FooterLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
 
-          <div className="lg:border-l lg:border-line lg:pl-8">
+          <div className="mt-8 min-w-0 border-t border-line pt-6 lg:mt-0 lg:border-l lg:border-t-0 lg:border-line lg:pl-8 lg:pt-0">
             <FooterHeading>{t("footer.contactUs")}</FooterHeading>
-            <p className="mt-4 max-w-[240px] text-[13px] font-normal leading-6 text-navy-muted">
+            <p className="mt-3 max-w-[240px] text-base font-normal leading-6 text-navy-muted">
               {t("footer.contactBody")}
             </p>
             <a
               href="mailto:care@motodo.id"
-              className="mt-3 inline-flex items-center gap-2 text-[13px] font-normal text-navy hover:text-navy/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+              className="mt-3 inline-flex min-w-0 items-center gap-2 break-all text-base font-normal text-navy hover:text-navy/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
             >
-              <Mail className="size-3 shrink-0 stroke-[1.5] text-navy-muted" aria-hidden="true" />
+              <Mail className="size-3.5 shrink-0 stroke-[1.5] text-navy-muted" aria-hidden="true" />
               care@motodo.id
             </a>
           </div>

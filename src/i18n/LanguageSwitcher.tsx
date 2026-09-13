@@ -51,7 +51,7 @@ export function LanguageSwitcher({
               type="button"
               role="option"
               aria-selected={selected}
-              className={`flex min-h-10 w-full items-center gap-2 text-left text-[14px] font-medium hover:text-brand ${selected ? "text-brand" : "text-navy"}`}
+              className={`flex min-h-10 w-full items-center gap-2 text-left text-ui font-medium hover:text-brand ${selected ? "text-brand" : "text-navy"}`}
               onClick={() => setLocale(option.value)}
             >
               {option.value === "id" ? (

@@ -21,6 +21,7 @@ type SellerProfileRow = {
   created_at: string
   updated_at: string
   is_demo?: boolean
+  store_cover_url?: string | null
 }
 
 type SellerProfileRowWithOwner = SellerProfileRow & {
@@ -77,6 +78,7 @@ export function mapSellerProfileRow(row: SellerProfileRowWithOwner, hints?: Owne
     createdAt: row.created_at,
     rejectionReason: row.rejection_reason?.trim() || undefined,
     isDemo: row.is_demo === true,
+    store_cover_url: row.store_cover_url?.trim() || null,
   }
 }
 
@@ -242,7 +244,7 @@ export async function updateMySellerProfile(
   patch: Partial<
     Pick<
       SellerProfile,
-      "businessName" | "businessType" | "nib" | "city" | "showroomAddress" | "phone" | "description"
+      "businessName" | "businessType" | "nib" | "city" | "showroomAddress" | "phone" | "description" | "store_cover_url"
     >
   >,
 ): Promise<SellerProfile> {
@@ -252,7 +254,7 @@ export async function updateMySellerProfile(
   const userId = sessionData.session?.user.id
   if (!userId) throw new Error("You must be logged in to update your seller profile.")
 
-  const updates: Record<string, string> = {}
+  const updates: Record<string, string | null> = {}
   if (typeof patch.businessName === "string") {
     updates.business_name = patch.businessName.trim()
     updates.showroom_name = patch.businessName.trim()
@@ -263,6 +265,10 @@ export async function updateMySellerProfile(
   if (typeof patch.showroomAddress === "string") updates.showroom_address = patch.showroomAddress.trim()
   if (typeof patch.phone === "string") updates.phone = patch.phone.trim()
   if (typeof patch.description === "string") updates.description = patch.description.trim()
+  if (patch.store_cover_url !== undefined) {
+    const cover = patch.store_cover_url?.trim() || null
+    updates.store_cover_url = cover
+  }
 
   if (Object.keys(updates).length === 0) {
     const current = await getMySellerProfile()

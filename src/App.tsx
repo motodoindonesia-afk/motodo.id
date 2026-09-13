@@ -4,6 +4,8 @@ import { BrowsePage } from "./components/browse/BrowsePage"
 import { MotorcycleDetailPage } from "./components/browse/MotorcycleDetailPage"
 import { HomePage } from "./components/home/HomePage"
 import { ProtectedRoute } from "./components/auth/ProtectedRoute"
+import { AccountLayout } from "./components/profile/AccountLayout"
+import { SellerCenterLayout } from "./components/seller/SellerCenterLayout"
 import { SiteLayout } from "./components/layout/SiteLayout"
 import { AuthProvider } from "./context/AuthContext"
 import { SellerProfilesProvider } from "./context/SellerProfilesContext"
@@ -55,13 +57,11 @@ import { PublicSellerReviewsPage } from "./pages/PublicSellerReviewsPage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 import { LanguageProvider } from "./i18n"
 
-function SellerListingGate({ children }: { children: ReactNode }) {
+function SellerListingPages({ children }: { children: ReactNode }) {
   return (
-    <ProtectedRoute>
-      <ApprovedSellerRoute>
-        <ListingsDataGate>{children}</ListingsDataGate>
-      </ApprovedSellerRoute>
-    </ProtectedRoute>
+    <ApprovedSellerRoute>
+      <ListingsDataGate>{children}</ListingsDataGate>
+    </ApprovedSellerRoute>
   )
 }
 
@@ -134,112 +134,81 @@ export default function App() {
               }
             />
             <Route
-              path="/orders"
               element={
                 <ProtectedRoute>
+                  <AccountLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/edit" element={<ProfileEditPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route
+                path="/notifications"
+                element={
+                  <NotificationsDataGate>
+                    <NotificationsPage />
+                  </NotificationsDataGate>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
                   <OrdersDataGate>
                     <ReviewsDataGate>
                       <OrdersPage />
                     </ReviewsDataGate>
                   </OrdersDataGate>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/orders/:orderId"
-              element={
-                <ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders/:orderId"
+                element={
                   <OrdersDataGate>
                     <ReviewsDataGate>
                       <OrderDetailPage />
                     </ReviewsDataGate>
                   </OrdersDataGate>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <ProtectedRoute>
-                  <NotificationsDataGate>
-                    <NotificationsPage />
-                  </NotificationsDataGate>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/orders"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
-                    <OrdersDataGate>
-                      <SellerOrdersPage />
-                    </OrdersDataGate>
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/orders/:orderId"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
-                    <OrdersDataGate>
-                      <SellerOrderDetailPage />
-                    </OrdersDataGate>
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile/edit"
-              element={
-                <ProtectedRoute>
-                  <ProfileEditPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <SettingsPage />
-                </ProtectedRoute>
-              }
-            />
+                }
+              />
+              <Route
+                path="/cart"
+                element={
+                  <ListingsDataGate>
+                    <CartPage />
+                  </ListingsDataGate>
+                }
+              />
+              <Route
+                path="/wishlist"
+                element={
+                  <ListingsDataGate>
+                    <WishlistPage />
+                  </ListingsDataGate>
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  <ChatDataGate>
+                    <MessagesPage />
+                  </ChatDataGate>
+                }
+              />
+              <Route
+                path="/messages/:conversationId"
+                element={
+                  <ChatDataGate>
+                    <MessagesPage />
+                  </ChatDataGate>
+                }
+              />
+            </Route>
             <Route
               path="/sell"
               element={
                 <ProtectedRoute>
                   <SellPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/cart"
-              element={
-                <ProtectedRoute>
-                  <ListingsDataGate>
-                    <CartPage />
-                  </ListingsDataGate>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/wishlist"
-              element={
-                <ProtectedRoute>
-                  <ListingsDataGate>
-                    <WishlistPage />
-                  </ListingsDataGate>
                 </ProtectedRoute>
               }
             />
@@ -264,147 +233,110 @@ export default function App() {
               }
             />
             <Route
-              path="/seller/dashboard"
               element={
                 <ProtectedRoute>
                   <SellerOnlyRoute>
-                    <OrdersDataGate>
-                      <ChatDataGate>
-                        <ReviewsDataGate>
-                          <SellerDashboardPage />
-                        </ReviewsDataGate>
-                      </ChatDataGate>
-                    </OrdersDataGate>
+                    <SellerCenterLayout />
                   </SellerOnlyRoute>
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="/seller/profile"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
-                    <SellerProfilePage />
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/profile/edit"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
-                    <SellerProfileEditPage />
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/settings"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
-                    <SellerSettingsPage />
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/listings/new"
-              element={
-                <SellerListingGate>
-                  <SellerListingNewPage />
-                </SellerListingGate>
-              }
-            />
-            <Route
-              path="/seller/listings"
-              element={
-                <SellerListingGate>
-                  <SellerListingsPage />
-                </SellerListingGate>
-              }
-            />
-            <Route
-              path="/seller/listings/:id/edit"
-              element={
-                <SellerListingGate>
-                  <SellerListingEditPage />
-                </SellerListingGate>
-              }
-            />
-            <Route
-              path="/seller/listings/:id/preview"
-              element={
-                <SellerListingGate>
-                  <SellerListingPreviewPage />
-                </SellerListingGate>
-              }
-            />
-            <Route
-              path="/seller/listings/:id"
-              element={
-                <SellerListingGate>
-                  <SellerListingViewPage />
-                </SellerListingGate>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute>
-                  <ChatDataGate>
-                    <MessagesPage />
-                  </ChatDataGate>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages/:conversationId"
-              element={
-                <ProtectedRoute>
-                  <ChatDataGate>
-                    <MessagesPage />
-                  </ChatDataGate>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/reviews"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
-                    <ReviewsDataGate>
-                      <SellerReviewsPage />
-                    </ReviewsDataGate>
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/messages"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
+            >
+              <Route
+                path="/seller/dashboard"
+                element={
+                  <OrdersDataGate>
                     <ChatDataGate>
-                      <SellerMessagesPage />
+                      <ReviewsDataGate>
+                        <SellerDashboardPage />
+                      </ReviewsDataGate>
                     </ChatDataGate>
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/seller/messages/:conversationId"
-              element={
-                <ProtectedRoute>
-                  <SellerOnlyRoute>
-                    <ChatDataGate>
-                      <SellerMessagesPage />
-                    </ChatDataGate>
-                  </SellerOnlyRoute>
-                </ProtectedRoute>
-              }
-            />
+                  </OrdersDataGate>
+                }
+              />
+              <Route path="/seller/profile" element={<SellerProfilePage />} />
+              <Route path="/seller/profile/edit" element={<SellerProfileEditPage />} />
+              <Route path="/seller/settings" element={<SellerSettingsPage />} />
+              <Route
+                path="/seller/listings/new"
+                element={
+                  <SellerListingPages>
+                    <SellerListingNewPage />
+                  </SellerListingPages>
+                }
+              />
+              <Route
+                path="/seller/listings"
+                element={
+                  <SellerListingPages>
+                    <SellerListingsPage />
+                  </SellerListingPages>
+                }
+              />
+              <Route
+                path="/seller/listings/:id/edit"
+                element={
+                  <SellerListingPages>
+                    <SellerListingEditPage />
+                  </SellerListingPages>
+                }
+              />
+              <Route
+                path="/seller/listings/:id/preview"
+                element={
+                  <SellerListingPages>
+                    <SellerListingPreviewPage />
+                  </SellerListingPages>
+                }
+              />
+              <Route
+                path="/seller/listings/:id"
+                element={
+                  <SellerListingPages>
+                    <SellerListingViewPage />
+                  </SellerListingPages>
+                }
+              />
+              <Route
+                path="/seller/orders"
+                element={
+                  <OrdersDataGate>
+                    <SellerOrdersPage />
+                  </OrdersDataGate>
+                }
+              />
+              <Route
+                path="/seller/orders/:orderId"
+                element={
+                  <OrdersDataGate>
+                    <SellerOrderDetailPage />
+                  </OrdersDataGate>
+                }
+              />
+              <Route
+                path="/seller/reviews"
+                element={
+                  <ReviewsDataGate>
+                    <SellerReviewsPage />
+                  </ReviewsDataGate>
+                }
+              />
+              <Route
+                path="/seller/messages"
+                element={
+                  <ChatDataGate>
+                    <SellerMessagesPage />
+                  </ChatDataGate>
+                }
+              />
+              <Route
+                path="/seller/messages/:conversationId"
+                element={
+                  <ChatDataGate>
+                    <SellerMessagesPage />
+                  </ChatDataGate>
+                }
+              />
+            </Route>
             <Route path="/admin" element={<NotFoundPage />} />
             <Route path="/admin/*" element={<NotFoundPage />} />
             <Route path="*" element={<NotFoundPage />} />

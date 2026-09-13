@@ -7,5 +7,5 @@ export function SellerMessagesPage() {
   const { user } = useAuth()
   if (!user) return null
   if (!getSellerProfile(user.id)) return <Navigate to="/messages" replace />
-  return <MessagesWorkspace role="seller" />
+  return <MessagesWorkspace role="seller" embedded />
 }

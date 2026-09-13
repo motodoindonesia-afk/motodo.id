@@ -9,9 +9,11 @@ import { useT } from "../../i18n"
 type Props = {
   listingId: string
   className?: string
+  label?: string
+  savedLabel?: string
 }
 
-export function WishlistActionButton({ listingId, className }: Props) {
+export function WishlistActionButton({ listingId, className, label, savedLabel }: Props) {
   const t = useT()
   const navigate = useNavigate()
   const location = useLocation()
@@ -47,7 +49,7 @@ export function WishlistActionButton({ listingId, className }: Props) {
         onClick={() => void handleClick()}
       >
         <Heart className="size-4" fill={favorited ? "currentColor" : "none"} strokeWidth={1.75} aria-hidden="true" />
-        {favorited ? t("listing.wishlistSaved") : t("listing.wishlist")}
+        {favorited ? (savedLabel ?? t("listing.wishlistSaved")) : (label ?? t("listing.wishlist"))}
       </Button>
       {error ? (
         <p className="mt-1 text-xs text-navy" role="status">

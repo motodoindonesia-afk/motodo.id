@@ -2,7 +2,6 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { Button } from "../components/ui/Button"
-import { Container } from "../components/layout/Container"
 import { NotificationTypeIcon } from "../components/notifications/NotificationTypeIcon"
 import {
   formatNotificationTime,
@@ -30,13 +29,11 @@ export function NotificationsPage() {
   const visible = filter === "unread" ? unread : all
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-3xl">
+    <div className="min-w-0">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy">{t("notify.title")}</h1>
-              <p className="mt-2 text-navy-muted">{t("notify.subtitle")}</p>
+              <h1 className="text-heading font-semibold tracking-tight text-navy">{t("notify.title")}</h1>
+              <p className="mt-1 text-[13px] text-navy-muted">{t("notify.subtitle")}</p>
             </div>
             <Button
               variant="secondary"
@@ -95,11 +92,11 @@ export function NotificationsPage() {
                         <span className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-semibold text-navy">{item.title}</span>
                           {!item.read ? (
-                            <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand">
+                            <span className="rounded-full bg-brand/10 px-2 py-0.5 text-meta font-medium text-brand">
                               {t("notify.unread")}
                             </span>
                           ) : (
-                            <span className="text-[11px] text-navy-muted">{t("notify.read")}</span>
+                            <span className="text-meta text-navy-muted">{t("notify.read")}</span>
                           )}
                         </span>
                         <span className="mt-1 block text-sm text-navy-muted">{item.message}</span>
@@ -120,8 +117,6 @@ export function NotificationsPage() {
               ))}
             </ul>
           )}
-        </div>
-      </Container>
-    </main>
+    </div>
   )
 }

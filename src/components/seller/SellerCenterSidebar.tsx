@@ -34,17 +34,22 @@ const MAIN_ITEMS: NavItem[] = [
 
 const STORE_ITEMS: NavItem[] = [
   { id: "storeProfile", label: "seller.navStoreProfile", to: "/seller/profile", available: true, icon: Store, match: "prefix" },
-  { id: "storeLook", label: "seller.navStoreLook", available: false, icon: Palette },
+  { id: "storeLook", label: "seller.navStoreLook", to: "/seller/profile#store-cover", available: true, icon: Palette, match: "exact" },
 ]
 
 const SETTING_ITEMS: NavItem[] = [
   { id: "settings", label: "seller.navSettings", to: "/seller/settings", available: true, icon: Settings, match: "prefix" },
 ]
 
-function isActive(item: NavItem, pathname: string) {
+function isActive(item: NavItem, pathname: string, hash: string) {
   if (!item.to) return false
-  if (item.match === "exact") return pathname === item.to
-  return pathname === item.to || pathname.startsWith(`${item.to}/`)
+  const [path] = item.to.split("#")
+  const pathMatch =
+    item.match === "exact" ? pathname === path : pathname === path || pathname.startsWith(`${path}/`)
+  if (!pathMatch) return false
+  if (item.id === "storeLook") return hash === "#store-cover"
+  if (item.id === "storeProfile") return hash !== "#store-cover"
+  return true
 }
 
 export function SellerCenterSidebar() {
@@ -54,14 +59,14 @@ export function SellerCenterSidebar() {
   return (
     <aside className="hidden w-[252px] shrink-0 min-[1024px]:block">
       <div className="rounded-2xl border border-line bg-white p-3 shadow-card">
-        <p className="px-2 text-[11px] font-semibold tracking-wide text-navy-muted uppercase">{t("seller.center")}</p>
-        <NavGroup items={MAIN_ITEMS} pathname={location.pathname} />
+        <p className="px-2 text-meta font-semibold tracking-wide text-navy-muted uppercase">{t("seller.center")}</p>
+        <NavGroup items={MAIN_ITEMS} pathname={location.pathname} hash={location.hash} />
         <div className="my-2 border-t border-line" />
-        <p className="px-2 text-[11px] font-semibold tracking-wide text-navy-muted uppercase">{t("seller.sectionStore")}</p>
-        <NavGroup items={STORE_ITEMS} pathname={location.pathname} />
+        <p className="px-2 text-meta font-semibold tracking-wide text-navy-muted uppercase">{t("seller.sectionStore")}</p>
+        <NavGroup items={STORE_ITEMS} pathname={location.pathname} hash={location.hash} />
         <div className="my-2 border-t border-line" />
-        <p className="px-2 text-[11px] font-semibold tracking-wide text-navy-muted uppercase">{t("seller.sectionSettings")}</p>
-        <NavGroup items={SETTING_ITEMS} pathname={location.pathname} />
+        <p className="px-2 text-meta font-semibold tracking-wide text-navy-muted uppercase">{t("seller.sectionSettings")}</p>
+        <NavGroup items={SETTING_ITEMS} pathname={location.pathname} hash={location.hash} />
       </div>
     </aside>
   )
@@ -73,16 +78,16 @@ export function SellerCenterMobileNav() {
   const items = [...MAIN_ITEMS, ...STORE_ITEMS, ...SETTING_ITEMS].filter((item) => item.available && item.to)
 
   return (
-    <nav className="min-[1024px]:hidden" aria-label={t("seller.menu")}>
-      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav className="min-w-0 min-[1024px]:hidden" aria-label={t("seller.menu")}>
+      <div className="flex flex-wrap gap-1.5">
         {items.map((item) => {
-          const active = isActive(item, location.pathname)
+          const active = isActive(item, location.pathname, location.hash)
           return (
             <Link
               key={item.id}
               to={item.to!}
               className={cn(
-                "shrink-0 rounded-full border px-3 py-1.5 text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+                "rounded-full border px-3 py-1.5 text-ui font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
                 active
                   ? "border-brand bg-brand-soft text-brand"
                   : "border-line bg-white text-navy hover:border-brand/40",
@@ -97,13 +102,13 @@ export function SellerCenterMobileNav() {
   )
 }
 
-function NavGroup({ items, pathname }: { items: NavItem[]; pathname: string }) {
+function NavGroup({ items, pathname, hash }: { items: NavItem[]; pathname: string; hash: string }) {
   const t = useT()
   return (
     <ul className="mt-1">
       {items.map((item) => {
         const Icon = item.icon
-        const active = isActive(item, pathname)
+        const active = isActive(item, pathname, hash)
         if (!item.available || !item.to) {
           return (
             <li key={item.id}>
@@ -112,7 +117,7 @@ function NavGroup({ items, pathname }: { items: NavItem[]; pathname: string }) {
                 disabled
                 aria-disabled="true"
                 title={t("account.comingSoon")}
-                className="flex w-full cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] text-navy-muted/70"
+                className="flex w-full cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-navy-muted/70"
               >
                 <Icon className="size-4 shrink-0" aria-hidden="true" />
                 <span className="flex-1">{t(item.label)}</span>
@@ -127,7 +132,7 @@ function NavGroup({ items, pathname }: { items: NavItem[]; pathname: string }) {
               to={item.to}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-2 rounded-md border-l-2 px-2 py-1.5 text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+                "flex items-center gap-2 rounded-md border-l-2 px-2 py-1.5 text-ui font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
                 active ? "border-brand bg-brand-soft text-brand" : "border-transparent text-navy hover:bg-surface",
               )}
             >

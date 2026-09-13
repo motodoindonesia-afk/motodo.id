@@ -1,7 +1,5 @@
-import { SellerNav } from "../../components/seller/SellerNav"
 import { RatingSummary } from "../../components/reviews/RatingSummary"
 import { ReviewCard } from "../../components/reviews/ReviewCard"
-import { Container } from "../../components/layout/Container"
 import { useAuth } from "../../context/AuthContext"
 import { getSellerProfile } from "../../lib/seller"
 import { getOrderById } from "../../lib/orders"
@@ -26,12 +24,9 @@ export function SellerReviewsPage() {
   const breakdown = getRatingBreakdown(reviews)
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("seller.reviewsTitle")}</h1>
-          <p className="mt-2 text-navy-muted">{t("seller.reviewsBody")}</p>
-          <SellerNav approved={profile.status === "approved"} />
+    <div className="min-w-0">
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("seller.reviewsTitle")}</h1>
+          <p className="mt-1 text-[13px] text-navy-muted">{t("seller.reviewsBody")}</p>
 
           <section className="mt-8 rounded-2xl border border-line px-5 py-6 sm:px-6">
             <RatingSummary
@@ -54,8 +49,6 @@ export function SellerReviewsPage() {
               ))}
             </div>
           ) : null}
-        </div>
-      </Container>
-    </main>
+    </div>
   )
 }

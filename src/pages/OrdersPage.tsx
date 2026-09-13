@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { OrderStatusBadge } from "../components/orders/OrderStatusBadge"
 import { Button } from "../components/ui/Button"
-import { Container } from "../components/layout/Container"
 import { formatIDR } from "../lib/listingForm"
 import { formatOrderDate, getBuyerOrders, orderPublicRef } from "../lib/orders"
 import { getReviewByOrderId } from "../lib/reviews"
@@ -28,11 +27,9 @@ export function OrdersPage() {
   const hasCompleted = orders.some((order) => order.status === "completed")
 
   return (
-    <main className="bg-white py-10 sm:py-14">
-      <Container>
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-navy">{t("orders.title")}</h1>
-          <p className="mt-2 text-navy-muted">{t("orders.subtitle")}</p>
+    <div className="min-w-0">
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("orders.title")}</h1>
+          <p className="mt-1 text-[13px] text-navy-muted">{t("orders.subtitle")}</p>
 
           {orders.length === 0 ? (
             <div className="mt-8 rounded-2xl border border-line bg-white px-5 py-10 text-center shadow-card">
@@ -91,8 +88,6 @@ export function OrdersPage() {
               })}
             </div>
           )}
-        </div>
-      </Container>
-    </main>
+    </div>
   )
 }

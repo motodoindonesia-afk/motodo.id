@@ -9,7 +9,6 @@ import { useListingsLive } from "../../lib/useListingsLive"
 import { ImageGallery } from "../../components/browse/ImageGallery"
 import { SellerListingAccessMessage } from "../../components/seller/SellerListingAccessMessage"
 import { Button } from "../../components/ui/Button"
-import { Container } from "../../components/layout/Container"
 import { availableQuantityLabel, catalogValue, categoryLabel, useLanguage } from "../../i18n"
 
 export function SellerListingPreviewPage() {
@@ -71,9 +70,8 @@ export function SellerListingPreviewPage() {
   }
 
   return (
-    <main className="bg-white pb-16 sm:pb-20">
-      <Container className="pt-8 sm:pt-10">
-        <div className="rounded-2xl border border-line bg-surface px-5 py-4 sm:px-6">
+    <div className="min-w-0">
+        <div className="rounded-2xl border border-line bg-white px-5 py-4 sm:px-6">
           <p className="text-sm font-semibold text-navy">{t("seller.previewTitle")}</p>
           <p className="mt-1 text-sm text-navy-muted">{t("seller.previewBody")}</p>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -138,7 +136,6 @@ export function SellerListingPreviewPage() {
           <h2 className="text-xl font-bold text-navy">{t("listing.description")}</h2>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-navy-muted">{catalog.description}</p>
         </section>
-      </Container>
-    </main>
+    </div>
   )
 }

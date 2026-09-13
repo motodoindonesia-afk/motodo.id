@@ -20,9 +20,10 @@ import { useT } from "../../i18n"
 
 type Props = {
   role: "buyer" | "seller"
+  embedded?: boolean
 }
 
-export function MessagesWorkspace({ role }: Props) {
+export function MessagesWorkspace({ role, embedded = false }: Props) {
   const { conversationId } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -39,6 +40,9 @@ export function MessagesWorkspace({ role }: Props) {
   }, [conversationId, userId, allowed, version])
 
   if (!user) {
+    if (embedded) {
+      return <h1 className="text-heading font-semibold tracking-tight text-navy">{t("chat.loading")}</h1>
+    }
     return (
       <main className="bg-white py-10 sm:py-14">
         <Container>
@@ -55,6 +59,17 @@ export function MessagesWorkspace({ role }: Props) {
   const hrefFor = (id: string) => (role === "buyer" ? `/messages/${id}` : `/seller/messages/${id}`)
 
   if (conversationId && !allowed) {
+    if (embedded) {
+      return (
+        <div className="min-w-0">
+          <h1 className="text-heading font-semibold tracking-tight text-navy">{t("chat.notFound")}</h1>
+          <p className="mt-2 text-sm text-navy-muted">{t("chat.noPermission")}</p>
+          <Button className="mt-6" onClick={() => navigate(listHref)}>
+            {t("chat.back")}
+          </Button>
+        </div>
+      )
+    }
     return (
       <main className="bg-white py-10 sm:py-14">
         <Container>
@@ -70,14 +85,13 @@ export function MessagesWorkspace({ role }: Props) {
     )
   }
 
-  return (
-    <main className="bg-white py-8 sm:py-10">
-      <Container>
-        <h1 className="text-3xl font-bold tracking-tight text-navy">{t("chat.title")}</h1>
+  const body = (
+    <>
+        <h1 className="text-heading font-semibold tracking-tight text-navy">{t("chat.title")}</h1>
         <p className="mt-2 text-navy-muted">
           {role === "seller" ? t("chat.sellerSub") : t("chat.buyerSub")}
         </p>
-        {role === "seller" ? <SellerNav approved={getSellerProfile(user.id)?.status === "approved"} /> : null}
+        {role === "seller" && !embedded ? <SellerNav approved={getSellerProfile(user.id)?.status === "approved"} /> : null}
 
         {conversations.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-line px-5 py-12 text-center">
@@ -92,7 +106,7 @@ export function MessagesWorkspace({ role }: Props) {
             </Button>
           </div>
         ) : (
-          <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-white shadow-card lg:grid lg:grid-cols-[minmax(260px,340px)_1fr]">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-white shadow-card lg:grid lg:grid-cols-[minmax(220px,300px)_1fr]">
             <aside className={cn("border-line lg:border-r", conversationId && "hidden lg:block")}>
               <ConversationList
                 conversations={conversations}
@@ -123,7 +137,16 @@ export function MessagesWorkspace({ role }: Props) {
             {t("common.browseMotorcycles")}
           </Link>
         </p>
-      </Container>
+    </>
+  )
+
+  if (embedded) {
+    return <div className="min-w-0">{body}</div>
+  }
+
+  return (
+    <main className="bg-white py-8 sm:py-10">
+      <Container>{body}</Container>
     </main>
   )
 }

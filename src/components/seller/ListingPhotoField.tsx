@@ -80,7 +80,7 @@ export function ListingPhotoField({ images, error, onChange }: Props) {
               <div className="relative aspect-[4/3] bg-surface">
                 <img src={src} alt="" className="h-full w-full object-cover" />
                 {index === 0 ? (
-                  <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-navy">
+                  <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-meta font-medium text-navy">
                     {t("photo.cover")}
                   </span>
                 ) : null}

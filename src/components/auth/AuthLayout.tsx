@@ -59,7 +59,7 @@ export function AuthLayout({ variant, children }: Props) {
           </Link>
 
           <div className="max-w-lg py-3 lg:py-0">
-            <h1 className="text-[1.65rem] leading-[1.15] font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            <h1 className="text-display font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
               {t("auth.heroTitleLead")}{" "}
               <span className="text-[#c9dcff]">{t("auth.heroTitleAccent")}</span>
             </h1>
@@ -92,7 +92,7 @@ export function AuthLayout({ variant, children }: Props) {
 
         <div className="mx-auto flex w-full max-w-[36.5rem] flex-1 items-center">
           <div className="w-full rounded-2xl border border-white bg-white px-5 py-7 shadow-[0_16px_48px_rgba(15,40,80,0.08)] sm:px-9 sm:py-9">
-            <h2 className="text-2xl font-bold tracking-tight text-navy sm:text-[1.65rem]">
+            <h2 className="text-heading font-bold tracking-tight text-navy sm:text-2xl">
               {isLogin ? t("auth.cardTitleLogin") : t("auth.cardTitleSignup")}
             </h2>
             <p className="mt-2 text-sm text-navy-muted">
