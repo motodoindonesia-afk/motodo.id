@@ -8,11 +8,13 @@ export function ListingRail({
   loading,
   favorited,
   onFavorite,
+  onPress,
 }: {
   listings: HomeListing[]
   loading: boolean
   favorited: (id: string) => boolean
   onFavorite: (listing: HomeListing) => void
+  onPress?: (listing: HomeListing) => void
 }) {
   if (loading) {
     return (
@@ -37,6 +39,7 @@ export function ListingRail({
           key={listing.id}
           listing={listing}
           onFavorite={() => onFavorite(listing)}
+          onPress={onPress ? () => onPress(listing) : undefined}
           width={148}
         />
       ))}

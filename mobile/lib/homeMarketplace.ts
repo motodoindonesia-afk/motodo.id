@@ -1,5 +1,6 @@
 import { LISTING_IMAGES_BUCKET } from "../../src/lib/platform/listingStorage"
 import { MOTORCYCLE_CATEGORIES, type HomeGarage, type HomeListing, type MotorcycleCategory } from "../types/marketplace"
+import { fetchSellerListingCards } from "./sellerListingCards"
 import { getMobileSupabaseClient } from "./supabase"
 
 const HOME_LISTING_LIMIT = 24
@@ -54,13 +55,11 @@ export async function fetchHomeMarketplace(): Promise<{ listings: HomeListing[];
   const listingIds = rows.map((row) => row.id)
   const sellerIds = [...new Set(rows.map((row) => row.seller_id).filter(Boolean))]
 
-  const [stockResult, cardResult, ratingResult] = await Promise.all([
+  const [stockResult, cards, ratingResult] = await Promise.all([
     listingIds.length
       ? client.from("listing_stock").select("id, available_quantity").in("id", listingIds)
       : Promise.resolve({ data: [], error: null }),
-    sellerIds.length
-      ? client.from("seller_listing_cards").select("id, business_name, city, store_cover_url").in("id", sellerIds)
-      : Promise.resolve({ data: [], error: null }),
+    fetchSellerListingCards(sellerIds),
     sellerIds.length
       ? client.from("seller_rating_summary").select("seller_id, review_count, average_rating").in("seller_id", sellerIds)
       : Promise.resolve({ data: [], error: null }),
@@ -74,7 +73,7 @@ export async function fetchHomeMarketplace(): Promise<{ listings: HomeListing[];
   const sellerName = new Map<string, string>()
   const sellerCity = new Map<string, string>()
   const sellerCover = new Map<string, string | null>()
-  for (const row of (cardResult.data as { id: string; business_name: string | null; city: string | null; store_cover_url: string | null }[] | null) ?? []) {
+  for (const row of cards) {
     sellerName.set(row.id, row.business_name?.trim() || "Motodo Seller")
     sellerCity.set(row.id, row.city?.trim() || "")
     sellerCover.set(row.id, row.store_cover_url?.trim() || null)

@@ -3,8 +3,10 @@ import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } fr
 import { useRouter } from "expo-router"
 import { isListingEligibleForFavorite } from "../../../src/lib/platform/commerce"
 import { useAuth } from "../../features/auth/AuthContext"
+import { useCart } from "../../features/cart/CartContext"
 import { useFavorites } from "../../features/favorites/FavoritesContext"
-import { getCartItemCount, getInboxUnreadCount } from "../../lib/commerce"
+import { getInboxUnreadCount } from "../../lib/commerce"
+import { setPendingAuthRedirect } from "../../lib/authRedirect"
 import { isMobileSupabaseConfigured } from "../../lib/env"
 import { fetchHomeMarketplace } from "../../lib/homeMarketplace"
 import { colors } from "../../lib/theme"
@@ -36,6 +38,7 @@ export function HomeScreen() {
   const { width } = useWindowDimensions()
   const { session } = useAuth()
   const { isFavorited, toggleListingFavorite } = useFavorites()
+  const { itemCount } = useCart()
   const scrollRef = useRef<ScrollView>(null)
   const garageY = useRef(0)
   const recY = useRef(0)
@@ -45,7 +48,6 @@ export function HomeScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState("all")
-  const [cartCount, setCartCount] = useState(0)
   const [messageCount, setMessageCount] = useState(0)
 
   const load = useCallback(async () => {
@@ -75,15 +77,14 @@ export function HomeScreen() {
 
   useEffect(() => {
     if (!session?.user.id) {
-      setCartCount(0)
       setMessageCount(0)
       return
     }
     let cancelled = false
-    void Promise.allSettled([getCartItemCount(), getInboxUnreadCount(session.user.id)]).then(([cart, inbox]) => {
-      if (cancelled) return
-      setCartCount(cart.status === "fulfilled" ? cart.value : 0)
-      setMessageCount(inbox.status === "fulfilled" ? inbox.value : 0)
+    void getInboxUnreadCount(session.user.id).then((count) => {
+      if (!cancelled) setMessageCount(count)
+    }).catch(() => {
+      if (!cancelled) setMessageCount(0)
     })
     return () => {
       cancelled = true
@@ -133,16 +134,25 @@ export function HomeScreen() {
 
   async function onFavorite(listing: HomeListing) {
     if (!session) {
-      router.push({ pathname: "/(auth)/login", params: { next: "/(tabs)" } })
+      setPendingAuthRedirect(`/motorcycles/${listing.id}`)
+      router.push({ pathname: "/(auth)/login", params: { next: `/motorcycles/${listing.id}` } })
       return
     }
     if (!isListingEligibleForFavorite({ status: listing.status, sellerId: listing.sellerId }, session.user.id)) return
-    await toggleListingFavorite(listing.id)
+    try {
+      await toggleListingFavorite(listing.id)
+    } catch {
+      /* FavoritesContext restores the previous heart state. */
+    }
+  }
+
+  function openListing(listing: HomeListing) {
+    router.push({ pathname: "/motorcycles/[id]", params: { id: listing.id } })
   }
 
   return (
     <View style={styles.screen}>
-      <HomeHeader cartCount={cartCount} messageCount={messageCount} onSearch={goExplore} />
+      <HomeHeader cartCount={itemCount} messageCount={messageCount} onSearch={goExplore} />
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.content}
@@ -174,6 +184,7 @@ export function HomeScreen() {
             listings={filtered.slice(0, RAIL_COUNT)}
             loading={loading}
             onFavorite={(listing) => void onFavorite(listing)}
+            onPress={openListing}
           />
         )}
 
@@ -183,6 +194,7 @@ export function HomeScreen() {
           listings={filtered.slice(0, RAIL_COUNT)}
           loading={loading}
           onFavorite={(listing) => void onFavorite(listing)}
+          onPress={openListing}
         />
 
         <View onLayout={(event) => { garageY.current = event.nativeEvent.layout.y }}>
@@ -191,7 +203,11 @@ export function HomeScreen() {
         {!loading && garages.length === 0 && !error ? (
           <Text style={styles.empty}>Belum ada garage untuk ditampilkan.</Text>
         ) : (
-          <GarageRail garages={garages} loading={loading} />
+          <GarageRail
+            garages={garages}
+            loading={loading}
+            onPress={(garage) => router.push({ pathname: "/sellers/[sellerId]", params: { sellerId: garage.id } })}
+          />
         )}
 
         <View onLayout={(event) => { recY.current = event.nativeEvent.layout.y }}>
@@ -204,6 +220,7 @@ export function HomeScreen() {
           listings={filtered.slice(0, GRID_COUNT)}
           loading={loading}
           onFavorite={(listing) => void onFavorite(listing)}
+          onPress={openListing}
         />
 
         {brands.length > 0 ? (

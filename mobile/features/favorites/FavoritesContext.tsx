@@ -62,14 +62,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         return next
       })
       return result.favorited
-    } catch {
+    } catch (error) {
       setListingIds((current) => {
         const next = new Set(current)
         if (previous) next.add(listingId)
         else next.delete(listingId)
         return next
       })
-      return previous
+      throw error
     } finally {
       pendingRef.current.delete(listingId)
     }

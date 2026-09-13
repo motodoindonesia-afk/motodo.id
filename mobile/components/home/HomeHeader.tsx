@@ -28,7 +28,7 @@ export function HomeHeader({
             name="cart-outline"
             count={cartCount}
             label="Cart"
-            onPress={() => router.push({ pathname: "/coming-soon", params: { title: "Cart" } })}
+            onPress={() => router.push("/cart")}
           />
           <HeaderIcon
             name="chatbubble-ellipses-outline"

@@ -1,10 +1,18 @@
 import { Ionicons } from "@expo/vector-icons"
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native"
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { colors } from "../../lib/theme"
 import type { HomeGarage } from "../../types/marketplace"
 import { SkeletonBox } from "./SkeletonBox"
 
-export function GarageRail({ garages, loading }: { garages: HomeGarage[]; loading: boolean }) {
+export function GarageRail({
+  garages,
+  loading,
+  onPress,
+}: {
+  garages: HomeGarage[]
+  loading: boolean
+  onPress?: (garage: HomeGarage) => void
+}) {
   if (loading) {
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
@@ -18,7 +26,7 @@ export function GarageRail({ garages, loading }: { garages: HomeGarage[]; loadin
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       {garages.map((garage) => (
-        <View key={garage.id} style={styles.card}>
+        <Pressable key={garage.id} onPress={() => onPress?.(garage)} style={styles.card}>
           {garage.coverUrl ? <Image resizeMode="cover" source={{ uri: garage.coverUrl }} style={styles.cover} /> : <View style={styles.coverFallback} />}
           <View style={styles.body}>
             <View style={styles.nameRow}>
@@ -33,7 +41,7 @@ export function GarageRail({ garages, loading }: { garages: HomeGarage[]; loadin
                 .join(" · ")}
             </Text>
           </View>
-        </View>
+        </Pressable>
       ))}
     </ScrollView>
   )

@@ -9,24 +9,34 @@ export function ProductCard({
   width,
   favorited,
   onFavorite,
+  onPress,
   compact = false,
 }: {
   listing: HomeListing
   width: number
   favorited: boolean
   onFavorite: () => void
+  onPress?: () => void
   compact?: boolean
 }) {
   const imageHeight = compact ? 96 : Math.round(width * 0.92)
   return (
-    <View style={[styles.card, { width }]}>
+    <Pressable disabled={!onPress} onPress={onPress} style={[styles.card, { width }]}>
       <View style={[styles.imageWrap, { height: imageHeight }]}>
         {listing.image ? (
           <Image resizeMode="cover" source={{ uri: listing.image }} style={styles.image} />
         ) : (
           <View style={styles.fallback} />
         )}
-        <Pressable accessibilityLabel="Favorite" hitSlop={10} onPress={onFavorite} style={styles.heart}>
+        <Pressable
+          accessibilityLabel="Favorite"
+          hitSlop={10}
+          onPress={(event) => {
+            event.stopPropagation?.()
+            onFavorite()
+          }}
+          style={styles.heart}
+        >
           <Ionicons color={favorited ? colors.brand : colors.navy} name={favorited ? "heart" : "heart-outline"} size={16} />
         </Pressable>
       </View>
@@ -41,7 +51,7 @@ export function ProductCard({
           {[listing.city, listing.sellerName].filter(Boolean).join(" · ")}
         </Text>
       </View>
-    </View>
+    </Pressable>
   )
 }
 

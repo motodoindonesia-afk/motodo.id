@@ -37,6 +37,42 @@ export async function getCartItemCount(): Promise<number> {
   return Array.isArray(data) ? data.length : 0
 }
 
+export async function addToCartRemote(listingId: string) {
+  const client = getMobileSupabaseClient()
+  const { data, error } = await client.rpc("add_to_cart", { p_listing_id: listingId })
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  const listing = (row as { listing_id?: unknown } | null)?.listing_id
+  const quantity = Number((row as { quantity?: unknown } | null)?.quantity)
+  return {
+    listingId: typeof listing === "string" ? listing : listingId,
+    quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
+  }
+}
+
+export async function getMyCartLines(): Promise<{ listingId: string; quantity: number }[]> {
+  const client = getMobileSupabaseClient()
+  const { data, error } = await client.rpc("get_my_cart")
+  if (error) throw error
+  const rows = Array.isArray(data) ? data : []
+  return rows.flatMap((row) => {
+    const listingId = (row as { listing_id?: unknown }).listing_id
+    const quantity = Number((row as { quantity?: unknown }).quantity)
+    if (typeof listingId !== "string") return []
+    return [{ listingId, quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1 }]
+  })
+}
+
+export async function startConversationRemote(listingId: string): Promise<string> {
+  const client = getMobileSupabaseClient()
+  const { data, error } = await client.rpc("start_conversation", { p_listing_id: listingId })
+  if (error) throw error
+  const payload = data as { conversation?: { id?: unknown } } | null
+  const id = payload?.conversation?.id
+  if (typeof id !== "string") throw new Error("Unable to start conversation.")
+  return id
+}
+
 export async function getInboxUnreadCount(userId: string): Promise<number> {
   const client = getMobileSupabaseClient()
   const { data, error } = await client

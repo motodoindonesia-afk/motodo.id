@@ -1,12 +1,14 @@
 import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import { AuthProvider } from "../features/auth/AuthContext"
+import { CartProvider } from "../features/cart/CartContext"
 import { FavoritesProvider } from "../features/favorites/FavoritesContext"
 import { colors } from "../lib/theme"
 
 export default function RootLayout() {
   return (
     <AuthProvider>
+      <CartProvider>
       <FavoritesProvider>
         <StatusBar style="dark" />
         <Stack
@@ -19,8 +21,13 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="coming-soon" options={{ headerShown: true, title: "Motodo", headerBackTitle: "Home" }} />
+          <Stack.Screen name="motorcycles/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
+          <Stack.Screen name="cart" options={{ headerShown: true, title: "Keranjang", headerBackTitle: "Back" }} />
+          <Stack.Screen name="sellers/[sellerId]" options={{ headerShown: true, title: "Toko Seller", headerBackTitle: "Back" }} />
+          <Stack.Screen name="messages/[id]" options={{ headerShown: true, title: "Chat", headerBackTitle: "Back" }} />
         </Stack>
       </FavoritesProvider>
+      </CartProvider>
     </AuthProvider>
   )
 }

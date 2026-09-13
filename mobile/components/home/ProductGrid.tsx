@@ -10,6 +10,7 @@ export function ProductGrid({
   gap,
   favorited,
   onFavorite,
+  onPress,
 }: {
   listings: HomeListing[]
   loading: boolean
@@ -17,6 +18,7 @@ export function ProductGrid({
   gap: number
   favorited: (id: string) => boolean
   onFavorite: (listing: HomeListing) => void
+  onPress?: (listing: HomeListing) => void
 }) {
   if (loading) {
     return (
@@ -36,6 +38,7 @@ export function ProductGrid({
           key={listing.id}
           listing={listing}
           onFavorite={() => onFavorite(listing)}
+          onPress={onPress ? () => onPress(listing) : undefined}
           width={cardWidth}
         />
       ))}
