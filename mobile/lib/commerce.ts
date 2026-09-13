@@ -41,26 +41,94 @@ export async function addToCartRemote(listingId: string) {
   const client = getMobileSupabaseClient()
   const { data, error } = await client.rpc("add_to_cart", { p_listing_id: listingId })
   if (error) throw error
-  const row = Array.isArray(data) ? data[0] : data
-  const listing = (row as { listing_id?: unknown } | null)?.listing_id
-  const quantity = Number((row as { quantity?: unknown } | null)?.quantity)
-  return {
-    listingId: typeof listing === "string" ? listing : listingId,
-    quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
+  return mapCartLine(Array.isArray(data) ? data[0] : data) ?? {
+    id: "",
+    listingId,
+    quantity: 1,
   }
 }
 
-export async function getMyCartLines(): Promise<{ listingId: string; quantity: number }[]> {
+export type CartLine = {
+  id: string
+  listingId: string
+  quantity: number
+  listingStatus?: string
+  listingIsDemo?: boolean
+  availableQuantity?: number
+  isAvailable?: boolean
+}
+
+function mapCartLine(row: unknown): CartLine | null {
+  if (!row || typeof row !== "object" || Array.isArray(row)) return null
+  const record = row as {
+    id?: unknown
+    listing_id?: unknown
+    quantity?: unknown
+    listing_status?: unknown
+    listing_is_demo?: unknown
+    available_quantity?: unknown
+    is_available?: unknown
+  }
+  const listingId = typeof record.listing_id === "string" ? record.listing_id : null
+  const quantity = Number(record.quantity)
+  if (!listingId || !Number.isInteger(quantity) || quantity < 1) return null
+  const availableRaw = record.available_quantity
+  const available =
+    typeof availableRaw === "number" && Number.isFinite(availableRaw)
+      ? availableRaw
+      : typeof availableRaw === "string" && Number.isFinite(Number(availableRaw))
+        ? Number(availableRaw)
+        : undefined
+  return {
+    id: typeof record.id === "string" ? record.id : listingId,
+    listingId,
+    quantity,
+    listingStatus: typeof record.listing_status === "string" ? record.listing_status : undefined,
+    listingIsDemo: record.listing_is_demo == null ? undefined : record.listing_is_demo === true,
+    availableQuantity: available,
+    isAvailable: record.is_available == null ? undefined : record.is_available === true,
+  }
+}
+
+export async function getMyCartLines(): Promise<CartLine[]> {
   const client = getMobileSupabaseClient()
   const { data, error } = await client.rpc("get_my_cart")
   if (error) throw error
   const rows = Array.isArray(data) ? data : []
   return rows.flatMap((row) => {
-    const listingId = (row as { listing_id?: unknown }).listing_id
-    const quantity = Number((row as { quantity?: unknown }).quantity)
-    if (typeof listingId !== "string") return []
-    return [{ listingId, quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1 }]
+    const item = mapCartLine(row)
+    return item ? [item] : []
   })
+}
+
+export async function updateCartQuantityRemote(listingId: string, quantity: number): Promise<CartLine> {
+  const client = getMobileSupabaseClient()
+  const { data, error } = await client.rpc("update_cart_quantity", {
+    p_listing_id: listingId,
+    p_quantity: quantity,
+  })
+  if (error) throw error
+  const item = mapCartLine(Array.isArray(data) ? data[0] : data)
+  if (!item) throw new Error("Unable to update cart.")
+  return item
+}
+
+export async function removeFromCartRemote(listingId: string) {
+  const client = getMobileSupabaseClient()
+  const { data, error } = await client.rpc("remove_from_cart", { p_listing_id: listingId })
+  if (error) throw error
+  const row = data && typeof data === "object" && !Array.isArray(data) ? (data as { listing_id?: unknown; removed?: unknown }) : null
+  return {
+    listingId: typeof row?.listing_id === "string" ? row.listing_id : listingId,
+    removed: row?.removed === true,
+  }
+}
+
+export async function clearCartRemote() {
+  const client = getMobileSupabaseClient()
+  const { data, error } = await client.rpc("clear_cart")
+  if (error) throw error
+  return typeof data === "number" ? data : Number(data) || 0
 }
 
 export async function startConversationRemote(listingId: string): Promise<string> {

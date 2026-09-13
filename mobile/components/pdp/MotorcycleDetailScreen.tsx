@@ -156,7 +156,7 @@ export function MotorcycleDetailScreen() {
         if (!hasListing(target.id)) {
           await addListingToCart(target.id)
         }
-        router.push("/cart")
+        router.push({ pathname: "/cart", params: { listingId: target.id } })
       } catch (caught) {
         setActionError(cartErrorMessage(caught))
       } finally {

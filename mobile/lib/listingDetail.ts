@@ -280,9 +280,12 @@ export async function fetchListingPreviews(ids: string[]) {
   const { data, error } = await client.from("listings").select(RELATED_SELECT).in("id", ids)
   if (error) throw error
   const rows = (Array.isArray(data) ? data : []) as ListingRow[]
+  const sellerIds = [...new Set(rows.map((row) => row.seller_id))]
+  const cards = await fetchSellerListingCards(sellerIds)
+  const sellerName = new Map(cards.map((card) => [card.id, card.business_name?.trim() || "Motodo Seller"] as const))
   const map = new Map<string, HomeListing>()
   for (const row of rows) {
-    map.set(row.id, mapHomeListing(row, client, "Motodo Seller"))
+    map.set(row.id, mapHomeListing(row, client, sellerName.get(row.seller_id) || "Motodo Seller"))
   }
   return map
 }
