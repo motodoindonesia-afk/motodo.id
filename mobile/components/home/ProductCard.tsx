@@ -13,16 +13,15 @@ export function ProductCard({
   compact = false,
 }: {
   listing: HomeListing
-  width: number
+  width?: number
   favorited: boolean
   onFavorite: () => void
   onPress?: () => void
   compact?: boolean
 }) {
-  const imageHeight = compact ? 96 : Math.round(width * 0.92)
   return (
-    <Pressable disabled={!onPress} onPress={onPress} style={[styles.card, { width }]}>
-      <View style={[styles.imageWrap, { height: imageHeight }]}>
+    <Pressable disabled={!onPress} onPress={onPress} style={[styles.card, width ? { width } : styles.cardFill]}>
+      <View style={[styles.imageWrap, compact && styles.imageCompact]}>
         {listing.image ? (
           <Image resizeMode="cover" source={{ uri: listing.image }} style={styles.image} />
         ) : (
@@ -30,17 +29,22 @@ export function ProductCard({
         )}
         <Pressable
           accessibilityLabel="Favorite"
-          hitSlop={10}
+          hitSlop={8}
           onPress={(event) => {
             event.stopPropagation?.()
             onFavorite()
           }}
           style={styles.heart}
         >
-          <Ionicons color={favorited ? colors.brand : colors.navy} name={favorited ? "heart" : "heart-outline"} size={16} />
+          <Ionicons color={favorited ? colors.brand : colors.navy} name={favorited ? "heart" : "heart-outline"} size={15} />
         </Pressable>
       </View>
       <View style={styles.body}>
+        {listing.brand ? (
+          <Text numberOfLines={1} style={styles.brand}>
+            {listing.brand}
+          </Text>
+        ) : null}
         <Text numberOfLines={2} style={styles.name}>
           {listing.name}
         </Text>
@@ -58,13 +62,20 @@ export function ProductCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
-    borderColor: colors.line,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 10,
     overflow: "hidden",
   },
+  cardFill: {
+    width: "100%",
+  },
   imageWrap: {
+    aspectRatio: 1,
     backgroundColor: colors.brandSoft,
+    width: "100%",
+  },
+  imageCompact: {
+    aspectRatio: undefined,
+    height: 96,
   },
   image: {
     height: "100%",
@@ -77,32 +88,40 @@ const styles = StyleSheet.create({
   heart: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.92)",
-    borderRadius: 14,
-    height: 28,
+    borderRadius: 12,
+    height: 26,
     justifyContent: "center",
     position: "absolute",
-    right: 8,
-    top: 8,
-    width: 28,
+    right: 6,
+    top: 6,
+    width: 26,
   },
   body: {
-    gap: 3,
-    padding: 8,
+    gap: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+  },
+  brand: {
+    color: colors.navyMuted,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.2,
+    textTransform: "uppercase",
   },
   name: {
     color: colors.navy,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
-    lineHeight: 17,
-    minHeight: 34,
+    lineHeight: 16,
   },
   price: {
     color: colors.ink,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "800",
+    marginTop: 1,
   },
   meta: {
     color: colors.navyMuted,
-    fontSize: 11,
+    fontSize: 10,
   },
 })

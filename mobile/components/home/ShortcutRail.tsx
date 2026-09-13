@@ -24,7 +24,7 @@ export function ShortcutRail({
         return (
           <Pressable key={item.id} onPress={() => onPress(item.id)} style={styles.item}>
             <View style={[styles.icon, active && styles.iconActive]}>
-              <Ionicons color={active ? colors.white : colors.brand} name={item.icon} size={20} />
+              <Ionicons color={active ? colors.white : colors.brand} name={item.icon} size={18} />
             </View>
             <Text numberOfLines={2} style={styles.label}>
               {item.label}
@@ -38,30 +38,32 @@ export function ShortcutRail({
 
 const styles = StyleSheet.create({
   row: {
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    paddingTop: 8,
   },
   item: {
     alignItems: "center",
-    width: 64,
+    width: 56,
   },
   icon: {
     alignItems: "center",
     backgroundColor: colors.brandSoft,
-    borderRadius: 12,
-    height: 44,
+    borderRadius: 10,
+    height: 36,
     justifyContent: "center",
-    width: 44,
+    width: 36,
   },
   iconActive: {
     backgroundColor: colors.brand,
   },
   label: {
     color: colors.navy,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
-    marginTop: 6,
+    lineHeight: 13,
+    marginTop: 4,
     textAlign: "center",
   },
 })

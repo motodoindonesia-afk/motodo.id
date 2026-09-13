@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native"
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { useRouter } from "expo-router"
 import { isListingEligibleForFavorite } from "../../../src/lib/platform/commerce"
 import { useAuth } from "../../features/auth/AuthContext"
@@ -11,11 +11,8 @@ import { isMobileSupabaseConfigured } from "../../lib/env"
 import { fetchHomeMarketplace } from "../../lib/homeMarketplace"
 import { colors } from "../../lib/theme"
 import type { HomeGarage, HomeListing } from "../../types/marketplace"
-import { ChipRail } from "./ChipRail"
 import { GarageRail } from "./GarageRail"
 import { HomeHeader } from "./HomeHeader"
-import { HomeHero } from "./HomeHero"
-import { ListingRail } from "./ListingRail"
 import { ProductGrid } from "./ProductGrid"
 import { SectionHeader } from "./SectionHeader"
 import { ShortcutRail, type HomeShortcut } from "./ShortcutRail"
@@ -30,12 +27,8 @@ const SHORTCUTS: HomeShortcut[] = [
   { id: "Brat Cafe", label: "Bratstyle", icon: "cafe-outline" },
 ]
 
-const RAIL_COUNT = 8
-const GRID_COUNT = 12
-
 export function HomeScreen() {
   const router = useRouter()
-  const { width } = useWindowDimensions()
   const { session } = useAuth()
   const { isFavorited, toggleListingFavorite } = useFavorites()
   const { itemCount } = useCart()
@@ -81,11 +74,13 @@ export function HomeScreen() {
       return
     }
     let cancelled = false
-    void getInboxUnreadCount(session.user.id).then((count) => {
-      if (!cancelled) setMessageCount(count)
-    }).catch(() => {
-      if (!cancelled) setMessageCount(0)
-    })
+    void getInboxUnreadCount(session.user.id)
+      .then((count) => {
+        if (!cancelled) setMessageCount(count)
+      })
+      .catch(() => {
+        if (!cancelled) setMessageCount(0)
+      })
     return () => {
       cancelled = true
     }
@@ -96,39 +91,15 @@ export function HomeScreen() {
     return listings.filter((item) => item.category === filter || item.brand === filter)
   }, [filter, listings])
 
-  const gap = 10
-  const pad = 16
-  const cardWidth = Math.floor((width - pad * 2 - gap) / 2)
-
-  const brands = useMemo(() => {
-    const seen = new Set<string>()
-    return listings.flatMap((item) => {
-      const brand = item.brand.trim()
-      if (!brand || seen.has(brand)) return []
-      seen.add(brand)
-      return [{ id: brand, label: brand }]
-    })
-  }, [listings])
-
-  const stylesRail = [
-    { id: "Chopper", label: "Chopper" },
-    { id: "Bobber", label: "Bobber" },
-    { id: "Brat Cafe", label: "Brat Cafe" },
-  ]
-
-  function goExplore() {
-    router.push("/(tabs)/explore")
-  }
-
   function onShortcut(id: string) {
     if (id === "garages") {
       setFilter("all")
-      scrollRef.current?.scrollTo({ y: Math.max(0, garageY.current - 12), animated: true })
+      scrollRef.current?.scrollTo({ y: Math.max(0, garageY.current - 8), animated: true })
       return
     }
     setFilter(id)
-    if (id !== "all" && id !== "new") {
-      scrollRef.current?.scrollTo({ y: Math.max(0, recY.current - 12), animated: true })
+    if (id !== "all") {
+      scrollRef.current?.scrollTo({ y: Math.max(0, recY.current - 8), animated: true })
     }
   }
 
@@ -152,18 +123,13 @@ export function HomeScreen() {
 
   return (
     <View style={styles.screen}>
-      <HomeHeader cartCount={itemCount} messageCount={messageCount} onSearch={goExplore} />
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <HomeHeader
+        cartCount={itemCount}
+        messageCount={messageCount}
+        onSearch={() => router.push({ pathname: "/coming-soon", params: { title: "Cari" } })}
+      />
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ShortcutRail activeId={filter} items={SHORTCUTS} onPress={onShortcut} />
-        <HomeHero
-          listing={listings[0] ?? null}
-          onExplore={() => scrollRef.current?.scrollTo({ y: Math.max(0, recY.current - 12), animated: true })}
-          onGarages={() => scrollRef.current?.scrollTo({ y: Math.max(0, garageY.current - 12), animated: true })}
-        />
 
         {error ? (
           <View style={styles.banner}>
@@ -174,31 +140,12 @@ export function HomeScreen() {
           </View>
         ) : null}
 
-        <SectionHeader onSeeAll={goExplore} title="Flash Sale" />
-        <Text style={styles.note}>Pilihan terbaru dari katalog Motodo. Bukan diskon kampanye.</Text>
-        { !loading && !error && filtered.length === 0 ? (
-          <Text style={styles.empty}>Belum ada motor untuk ditampilkan.</Text>
-        ) : (
-          <ListingRail
-            favorited={isFavorited}
-            listings={filtered.slice(0, RAIL_COUNT)}
-            loading={loading}
-            onFavorite={(listing) => void onFavorite(listing)}
-            onPress={openListing}
-          />
-        )}
-
-        <SectionHeader onSeeAll={goExplore} title="Pilihan Motodo" />
-        <ListingRail
-          favorited={isFavorited}
-          listings={filtered.slice(0, RAIL_COUNT)}
-          loading={loading}
-          onFavorite={(listing) => void onFavorite(listing)}
-          onPress={openListing}
-        />
-
-        <View onLayout={(event) => { garageY.current = event.nativeEvent.layout.y }}>
-          <SectionHeader onSeeAll={goExplore} title="Garage Pilihan" />
+        <View
+          onLayout={(event) => {
+            garageY.current = event.nativeEvent.layout.y
+          }}
+        >
+          <SectionHeader title="Garage Pilihan" />
         </View>
         {!loading && garages.length === 0 && !error ? (
           <Text style={styles.empty}>Belum ada garage untuk ditampilkan.</Text>
@@ -210,28 +157,24 @@ export function HomeScreen() {
           />
         )}
 
-        <View onLayout={(event) => { recY.current = event.nativeEvent.layout.y }}>
+        <View
+          onLayout={(event) => {
+            recY.current = event.nativeEvent.layout.y
+          }}
+        >
           <SectionHeader title="Rekomendasi Untuk Kamu" />
         </View>
-        <ProductGrid
-          cardWidth={cardWidth}
-          favorited={isFavorited}
-          gap={gap}
-          listings={filtered.slice(0, GRID_COUNT)}
-          loading={loading}
-          onFavorite={(listing) => void onFavorite(listing)}
-          onPress={openListing}
-        />
-
-        {brands.length > 0 ? (
-          <>
-            <SectionHeader title="Jelajah Berdasarkan Brand" />
-            <ChipRail activeId={filter} items={brands} onPress={onShortcut} />
-          </>
-        ) : null}
-
-        <SectionHeader title="Jelajah Berdasarkan Gaya" />
-        <ChipRail activeId={filter} items={stylesRail} onPress={onShortcut} />
+        {!loading && !error && filtered.length === 0 ? (
+          <Text style={styles.empty}>Belum ada motor untuk ditampilkan.</Text>
+        ) : (
+          <ProductGrid
+            favorited={isFavorited}
+            listings={filtered}
+            loading={loading}
+            onFavorite={(listing) => void onFavorite(listing)}
+            onPress={openListing}
+          />
+        )}
       </ScrollView>
     </View>
   )
@@ -243,19 +186,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 16,
-  },
-  note: {
-    color: colors.navyMuted,
-    fontSize: 12,
-    marginBottom: 8,
-    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   empty: {
     color: colors.navyMuted,
     fontSize: 13,
     paddingBottom: 16,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   banner: {
     alignItems: "center",
@@ -265,7 +202,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 8,
     marginBottom: 12,
-    marginHorizontal: 16,
+    marginHorizontal: 12,
     padding: 12,
   },
   bannerText: {

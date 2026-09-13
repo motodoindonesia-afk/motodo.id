@@ -17,7 +17,7 @@ export function GarageRail({
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {Array.from({ length: 3 }).map((_, index) => (
-          <SkeletonBox height={148} key={index} radius={12} width={220} />
+          <SkeletonBox height={124} key={index} radius={10} width={168} />
         ))}
       </ScrollView>
     )
@@ -49,30 +49,29 @@ export function GarageRail({
 
 const styles = StyleSheet.create({
   row: {
-    gap: 10,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
+    gap: 8,
+    paddingBottom: 10,
+    paddingHorizontal: 12,
   },
   card: {
     backgroundColor: colors.white,
-    borderColor: colors.line,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 10,
     overflow: "hidden",
-    width: 220,
+    width: 168,
   },
   cover: {
     backgroundColor: colors.brandSoft,
-    height: 96,
+    height: 80,
     width: "100%",
   },
   coverFallback: {
     backgroundColor: colors.navy,
-    height: 96,
+    height: 80,
   },
   body: {
-    gap: 4,
-    padding: 10,
+    gap: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   nameRow: {
     alignItems: "center",

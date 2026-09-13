@@ -1,11 +1,8 @@
 import { Ionicons } from "@expo/vector-icons"
-import Constants from "expo-constants"
 import { useRouter } from "expo-router"
 import { Pressable, StyleSheet, Text, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { colors } from "../../lib/theme"
-
-const expoGoPad = Constants.executionEnvironment === "storeClient" ? 40 : 0
 
 export function HomeHeader({
   cartCount,
@@ -21,7 +18,7 @@ export function HomeHeader({
 
   return (
     <View style={[styles.wrap, { paddingTop: Math.max(insets.top, 8) }]}>
-      <View style={[styles.row, { paddingRight: expoGoPad }]}>
+      <View style={styles.row}>
         <Text style={styles.logo}>MOTODO</Text>
         <View style={styles.actions}>
           <HeaderIcon
@@ -39,7 +36,7 @@ export function HomeHeader({
         </View>
       </View>
       <Pressable onPress={onSearch} style={styles.search}>
-        <Ionicons color={colors.navyMuted} name="search" size={18} />
+        <Ionicons color={colors.navyMuted} name="search" size={16} />
         <Text numberOfLines={1} style={styles.placeholder}>
           Cari motor, brand, atau gaya...
         </Text>
@@ -60,7 +57,7 @@ function HeaderIcon({
   onPress: () => void
 }) {
   return (
-    <Pressable accessibilityLabel={label} hitSlop={8} onPress={onPress} style={styles.iconBtn}>
+    <Pressable accessibilityLabel={label} onPress={onPress} style={styles.iconBtn}>
       <Ionicons color={colors.navy} name={name} size={22} />
       {count > 0 ? (
         <View style={styles.badge}>
@@ -76,31 +73,35 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderBottomColor: colors.line,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingBottom: 10,
-    paddingHorizontal: 16,
+    paddingBottom: 8,
+    paddingHorizontal: 12,
   },
   row: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 8,
-    minHeight: 32,
+    minHeight: 44,
+    width: "100%",
   },
   logo: {
     color: colors.brand,
+    flexShrink: 0,
     fontSize: 18,
     fontWeight: "800",
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
   },
   actions: {
+    alignItems: "center",
     flexDirection: "row",
-    gap: 4,
+    gap: 2,
+    marginRight: -10,
   },
   iconBtn: {
-    height: 36,
+    alignItems: "center",
+    height: 44,
     justifyContent: "center",
-    paddingHorizontal: 6,
-    width: 36,
+    width: 44,
   },
   badge: {
     backgroundColor: colors.brand,
@@ -108,8 +109,8 @@ const styles = StyleSheet.create({
     minWidth: 16,
     paddingHorizontal: 4,
     position: "absolute",
-    right: 0,
-    top: 0,
+    right: 6,
+    top: 4,
   },
   badgeText: {
     color: colors.white,
@@ -121,16 +122,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.page,
     borderColor: colors.line,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
     flexDirection: "row",
     gap: 8,
-    minHeight: 40,
-    paddingHorizontal: 12,
+    minHeight: 36,
+    paddingHorizontal: 10,
   },
   placeholder: {
     color: colors.navyMuted,
     flex: 1,
-    fontSize: 14,
+    fontSize: 13,
   },
 })
