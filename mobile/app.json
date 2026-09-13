@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Motodo",
+    "slug": "motodo",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "motodo",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#ffffff",
+    "primaryColor": "#2f6fed",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "id.motodo.app"
+    },
+    "android": {
+      "package": "id.motodo.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b1f3a",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

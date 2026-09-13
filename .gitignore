@@ -26,6 +26,10 @@ dist-ssr
 # Supabase CLI cache
 supabase/.temp/
 
+# Expo
+.expo/
+mobile/.expo/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json
