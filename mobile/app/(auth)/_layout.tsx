@@ -21,6 +21,11 @@ function redirectAfterAuth(next?: string, buyNow?: string): Href {
     }
   }
   if (next === "/cart") return "/cart"
+  if (next?.startsWith("/checkout/")) {
+    const listingId = next.replace("/checkout/", "").split("/")[0]
+    if (listingId) return { pathname: "/checkout/[listingId]", params: { listingId } }
+  }
+  if (next === "/(tabs)/orders" || next === "/orders") return "/(tabs)/orders"
   if (next?.startsWith("/sellers/")) {
     const sellerId = next.replace("/sellers/", "").split("/")[0]
     if (sellerId) return { pathname: "/sellers/[sellerId]", params: { sellerId } }

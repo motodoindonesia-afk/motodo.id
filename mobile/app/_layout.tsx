@@ -24,6 +24,7 @@ export default function RootLayout() {
           <Stack.Screen name="motorcycles/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
           <Stack.Screen name="cart" options={{ headerShown: false }} />
           <Stack.Screen name="checkout/[listingId]" options={{ headerShown: false }} />
+          <Stack.Screen name="order-confirmation/[orderRef]" options={{ headerShown: false }} />
           <Stack.Screen name="sellers/[sellerId]" options={{ headerShown: true, title: "Toko Seller", headerBackTitle: "Back" }} />
           <Stack.Screen name="messages/[id]" options={{ headerShown: true, title: "Chat", headerBackTitle: "Back" }} />
         </Stack>
